@@ -15,10 +15,13 @@ interface TradingChartProps {
   indicators: Indicators | null;
   zones: Zone[];
   trendline?: AITrendline | null;
+  trendlineResistance?: AITrendline | null;
   signals?: { time: number; type: 'buy' | 'sell' }[];
   enabledIndicators: string[];
   height?: number;
   label?: string;
+  scanning?: boolean;
+  scanLabel?: string;
 }
 
 const TradingChart: React.FC<TradingChartProps> = ({
