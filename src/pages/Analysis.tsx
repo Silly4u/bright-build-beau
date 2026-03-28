@@ -169,7 +169,7 @@ const Analysis: React.FC = () => {
       if (autoRef.current) clearInterval(autoRef.current);
     }
     return () => { if (autoRef.current) clearInterval(autoRef.current); };
-  }, [autoSignal, activeTimeframe]);
+  }, [autoSignal, btcTimeframe]);
 
   const formatPrice = (p: number, isGold = false) =>
     isGold ? `$${p.toFixed(2)}` : `$${p.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
