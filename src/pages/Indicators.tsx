@@ -11,6 +11,7 @@ import { useAlphaNet } from '@/hooks/useAlphaNet';
 import AlphaNetDashboard from '@/components/indicators/AlphaNetDashboard';
 import { useMatrixIndicator } from '@/hooks/useMatrixIndicator';
 import { useEngineIndicator } from '@/hooks/useEngineIndicator';
+import { useTpSlIndicator } from '@/hooks/useTpSlIndicator';
 
 const PAIRS = [
   { symbol: 'BTC/USDT', label: 'BTC', color: '#F7931A' },
@@ -32,6 +33,7 @@ const DEFAULT_INDICATORS: IndicatorConfig[] = [
   { id: 'alphanet', label: 'AlphaNet AI', enabled: true, color: '#7C3AED', category: 'AI' },
   { id: 'matrix', label: 'Matrix NWE', enabled: true, color: '#00BCD4', category: 'Envelope' },
   { id: 'engine', label: 'MS Engine', enabled: true, color: '#FF9800', category: 'Structure' },
+  { id: 'tp_sl', label: 'TP/SL Zones', enabled: true, color: '#E91E63', category: 'Risk' },
 ];
 
 const Indicators: React.FC = () => {
@@ -52,6 +54,8 @@ const Indicators: React.FC = () => {
   const matrixData = useMatrixIndicator(marketData.candles, matrixEnabled && !marketData.loading);
   const engineEnabled = indicators.find(i => i.id === 'engine')?.enabled ?? false;
   const engineData = useEngineIndicator(marketData.candles, engineEnabled && !marketData.loading);
+  const tpSlEnabled = indicators.find(i => i.id === 'tp_sl')?.enabled ?? false;
+  const tpSlData = useTpSlIndicator(marketData.candles, tpSlEnabled && !marketData.loading);
 
   const toggleIndicator = (id: string) => {
     setIndicators(prev => prev.map(ind => ind.id === id ? { ...ind, enabled: !ind.enabled } : ind));
@@ -212,6 +216,7 @@ const Indicators: React.FC = () => {
                   alphaNetData={alphaNet.data}
                   matrixData={matrixData}
                   engineData={engineData}
+                  tpSlData={tpSlData}
                 />
               )}
             </div>

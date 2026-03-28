@@ -9,6 +9,7 @@ import type { SmcAnalysis } from '@/hooks/useSmcAnalysis';
 import type { AlphaNetData } from '@/hooks/useAlphaNet';
 import type { MatrixData } from '@/hooks/useMatrixIndicator';
 import type { EngineData } from '@/hooks/useEngineIndicator';
+import type { TpSlData } from '@/hooks/useTpSlIndicator';
 
 export interface AITrendline {
   start: { time: number; price: number };
@@ -35,10 +36,11 @@ interface TradingChartProps {
   alphaNetData?: AlphaNetData | null;
   matrixData?: MatrixData | null;
   engineData?: EngineData | null;
+  tpSlData?: TpSlData | null;
 }
 
 const TradingChart: React.FC<TradingChartProps> = ({
-  candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height = 380, label, scanning, scanLabel, timeframe, onTimeframeChange, smcAnalysis, alphaNetData, matrixData, engineData,
+  candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height = 380, label, scanning, scanLabel, timeframe, onTimeframeChange, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData,
 }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const rsiContainerRef = useRef<HTMLDivElement>(null);
@@ -684,6 +686,85 @@ const TradingChart: React.FC<TradingChartProps> = ({
       });
     }
 
+    // ── TP/SL Zones ──
+    if (tpSlData && enabledIndicators.includes('tp_sl')) {
+      const setSafeData = (series: any, t1: number, v1: number, t2: number, v2: number) => {
+        if (t1 === t2) { series.setData([{ time: t1 as any, value: v2 }]); return; }
+        if (t1 < t2) { series.setData([{ time: t1 as any, value: v1 }, { time: t2 as any, value: v2 }]); return; }
+        series.setData([{ time: t2 as any, value: v2 }, { time: t1 as any, value: v1 }]);
+      };
+
+      // Show last few completed trades + active trade
+      const recentTrades = tpSlData.trades.slice(-6);
+      recentTrades.forEach(trade => {
+        const entryT = Math.floor(trade.entryTime / 1000);
+        const endIdx = trade.exitIndex ?? candles.length - 1;
+        const endT = Math.floor(candles[endIdx].time / 1000);
+        const isLong = trade.type === 'long';
+
+        // Entry price line
+        candleSeries.createPriceLine({
+          price: trade.entryPrice,
+          color: isLong ? '#26a69a' : '#ef5350',
+          lineWidth: 2, lineStyle: 0, axisLabelVisible: trade.result === 'open',
+          title: isLong ? '▲ LONG' : '▼ SHORT',
+        } as any);
+
+        // TP line (green dashed)
+        const tpLine = chart.addSeries(LineSeries, {
+          color: 'rgba(76,175,80,0.7)', lineWidth: 1, lineStyle: 2,
+          priceLineVisible: false, lastValueVisible: false, title: 'TP',
+        });
+        setSafeData(tpLine, entryT, trade.tpPrice, endT, trade.tpPrice);
+
+        // SL line (red dashed)
+        const slLine = chart.addSeries(LineSeries, {
+          color: 'rgba(244,67,54,0.7)', lineWidth: 1, lineStyle: 2,
+          priceLineVisible: false, lastValueVisible: false, title: 'SL',
+        });
+        setSafeData(slLine, entryT, trade.slPrice, endT, trade.slPrice);
+
+        // TP fill zone (green)
+        const tpFill = chart.addSeries(AreaSeries, {
+          topColor: isLong ? 'rgba(76,175,80,0.08)' : 'rgba(76,175,80,0.08)',
+          bottomColor: isLong ? 'rgba(76,175,80,0.08)' : 'rgba(76,175,80,0.08)',
+          lineColor: 'transparent', lineWidth: 1 as 1,
+          priceLineVisible: false, lastValueVisible: false,
+        });
+        const tpMid = (trade.entryPrice + trade.tpPrice) / 2;
+        const tpFillData = candles
+          .filter(c => { const t = Math.floor(c.time / 1000); return t >= entryT && t <= endT; })
+          .map(c => ({ time: Math.floor(c.time / 1000) as any, value: tpMid }));
+        if (tpFillData.length > 0) tpFill.setData(tpFillData);
+
+        // SL fill zone (red)
+        const slFill = chart.addSeries(AreaSeries, {
+          topColor: 'rgba(244,67,54,0.08)',
+          bottomColor: 'rgba(244,67,54,0.08)',
+          lineColor: 'transparent', lineWidth: 1 as 1,
+          priceLineVisible: false, lastValueVisible: false,
+        });
+        const slMid = (trade.entryPrice + trade.slPrice) / 2;
+        const slFillData = candles
+          .filter(c => { const t = Math.floor(c.time / 1000); return t >= entryT && t <= endT; })
+          .map(c => ({ time: Math.floor(c.time / 1000) as any, value: slMid }));
+        if (slFillData.length > 0) slFill.setData(slFillData);
+
+        // Result marker
+        if (trade.result !== 'open' && trade.exitIndex !== undefined) {
+          const resultColor = trade.result === 'TP' ? '#4CAF50' : '#9E9E9E';
+          candleSeries.createPriceLine({
+            price: trade.result === 'TP' ? trade.tpPrice : trade.slPrice,
+            color: resultColor,
+            lineWidth: 1, lineStyle: 0, axisLabelVisible: false,
+            title: trade.result === 'TP'
+              ? (isLong ? '✓ Long TP' : '✓ Short TP')
+              : (isLong ? '✗ Long SL' : '✗ Short SL'),
+          } as any);
+        }
+      });
+    }
+
     // ── Crosshair data (OHLC legend) ──
     chart.subscribeCrosshairMove((param) => {
       if (!param || !param.time) {
@@ -800,7 +881,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
       chartRef.current = null;
       rsiChartRef.current = null;
     };
-  }, [candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height, smcAnalysis, alphaNetData, matrixData, engineData]);
+  }, [candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData]);
 
   const lastCandle = candles[candles.length - 1];
   const isUp = crosshairData ? crosshairData.change >= 0 : (lastCandle ? lastCandle.close >= lastCandle.open : true);
