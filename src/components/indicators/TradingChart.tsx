@@ -218,6 +218,32 @@ const TradingChart: React.FC<TradingChartProps> = ({
     if (enabledIndicators.includes('liq_hunter') && candles.length > 20) {
       const { zones: liqZones, grabs, trades } = computeLiquidityZones(candles, 10, 4, 'Wick');
 
+      const setSafeLineData = (
+        series: any,
+        t1: number,
+        v1: number,
+        t2: number,
+        v2: number,
+      ) => {
+        if (t1 === t2) {
+          series.setData([{ time: t1 as any, value: v2 }]);
+          return;
+        }
+
+        if (t1 < t2) {
+          series.setData([
+            { time: t1 as any, value: v1 },
+            { time: t2 as any, value: v2 },
+          ]);
+          return;
+        }
+
+        series.setData([
+          { time: t2 as any, value: v2 },
+          { time: t1 as any, value: v1 },
+        ]);
+      };
+
       // Target liquidity zones
       liqZones.forEach(zone => {
         const color = zone.type === 'high'
@@ -234,11 +260,10 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
         const startIdx = Math.max(0, Math.min(zone.startIndex, candles.length - 1));
         const endIdx = Math.max(0, Math.min(zone.endIndex, candles.length - 1));
+        const startTime = Math.floor(candles[startIdx].time / 1000);
+        const endTime = Math.floor(candles[endIdx].time / 1000);
 
-        line.setData([
-          { time: (candles[startIdx].time / 1000) as any, value: zone.price },
-          { time: (candles[endIdx].time / 1000) as any, value: zone.price },
-        ]);
+        setSafeLineData(line, startTime, zone.price, endTime, zone.price);
       });
 
       // Liquidity grabs
@@ -255,9 +280,9 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
       // Entries + TP/SL projections
       trades.forEach(trade => {
-        const entryTime = (candles[trade.entryIndex].time / 1000) as any;
+        const entryTime = Math.floor(candles[trade.entryIndex].time / 1000);
         const endIdx = trade.exitIndex ?? candles.length - 1;
-        const endTime = (candles[endIdx].time / 1000) as any;
+        const endTime = Math.floor(candles[endIdx].time / 1000);
         const isLong = trade.type === 'Long';
 
         candleSeries.createPriceLine({
@@ -277,40 +302,13 @@ const TradingChart: React.FC<TradingChartProps> = ({
             priceLineVisible: false,
             lastValueVisible: false,
           });
-          series.setData([
-            { time: entryTime, value: price },
-            { time: endTime, value: price },
-          ]);
+          setSafeLineData(series, entryTime, price, endTime, price);
         };
 
         addProjectionLine(trade.tp1, 'rgba(38,166,154,0.62)');
         addProjectionLine(trade.tp2, 'rgba(38,166,154,0.62)');
         addProjectionLine(trade.tp3, 'rgba(38,166,154,0.62)');
         addProjectionLine(trade.slTarget, 'rgba(239,83,80,0.62)');
-
-        const tpConnector = chart.addSeries(LineSeries, {
-          color: 'rgba(38,166,154,0.3)',
-          lineWidth: 1,
-          lineStyle: 2,
-          priceLineVisible: false,
-          lastValueVisible: false,
-        });
-        tpConnector.setData([
-          { time: entryTime, value: trade.entryPrice },
-          { time: entryTime, value: trade.tp3 },
-        ]);
-
-        const slConnector = chart.addSeries(LineSeries, {
-          color: 'rgba(239,83,80,0.3)',
-          lineWidth: 1,
-          lineStyle: 2,
-          priceLineVisible: false,
-          lastValueVisible: false,
-        });
-        slConnector.setData([
-          { time: entryTime, value: trade.entryPrice },
-          { time: entryTime, value: trade.slTarget },
-        ]);
 
         if (trade.result && trade.exitPrice !== undefined) {
           candleSeries.createPriceLine({
