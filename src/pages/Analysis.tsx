@@ -286,42 +286,27 @@ const Analysis: React.FC = () => {
 
               {/* ── BTC Column ── */}
               <div className="space-y-2">
-                <div className="glass-card rounded-xl overflow-hidden">
-                  {btcData.loading ? (
-                    <div className="flex items-center justify-center h-[340px]">
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                        <span className="text-xs text-muted-foreground font-mono">Loading BTC/USDT...</span>
-                      </div>
+                {btcData.loading ? (
+                  <div className="flex items-center justify-center h-[420px] bg-[#0d1117] rounded-xl">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      <span className="text-xs text-muted-foreground font-mono">Loading BTC/USDT...</span>
                     </div>
-                  ) : btcData.error ? (
-                    <div className="flex items-center justify-center h-[340px]">
-                      <span className="text-destructive text-sm">⚠️ {btcData.error}</span>
-                    </div>
-                  ) : (
-                    <TradingChart
-                      candles={btcData.candles}
-                      indicators={btcData.indicators}
-                      zones={btcData.zones}
-                      enabledIndicators={ENABLED_INDICATORS}
-                      height={320}
-                      label="₿ BTC/USDT"
-                    />
-                  )}
-                  <div className="border-t border-foreground/5">
-                    <div className="flex gap-0.5 px-3 py-1 border-b border-foreground/5">
-                      {(['rsi', 'volume', 'macd'] as const).map(tab => (
-                        <button key={tab} onClick={() => setSubTabBTC(tab)}
-                          className={`px-2 py-0.5 rounded text-[9px] font-mono uppercase font-bold ${
-                            subTabBTC === tab ? 'bg-foreground/5 text-foreground' : 'text-muted-foreground/40'
-                          }`}>{tab}</button>
-                      ))}
-                    </div>
-                    {!btcData.loading && btcData.candles.length > 0 && (
-                      <SubIndicators candles={btcData.candles} indicators={btcData.indicators} activeTab={subTabBTC} />
-                    )}
                   </div>
-                </div>
+                ) : btcData.error ? (
+                  <div className="flex items-center justify-center h-[420px] bg-[#0d1117] rounded-xl">
+                    <span className="text-destructive text-sm">⚠️ {btcData.error}</span>
+                  </div>
+                ) : (
+                  <TradingChart
+                    candles={btcData.candles}
+                    indicators={btcData.indicators}
+                    zones={btcData.zones}
+                    enabledIndicators={ENABLED_INDICATORS}
+                    height={300}
+                    label="₿ BTC/USDT · H4 · Binance"
+                  />
+                )}
                 <AIActionCard ai={btcAI} symbol="₿ BTC/USDT" />
                 <a href="https://www.okx.com/join/UNCLETRADER" target="_blank" rel="noopener noreferrer"
                   className="glass-card rounded-xl p-3 flex items-center gap-3 hover:border-primary/30 transition-all group border border-foreground/5">
