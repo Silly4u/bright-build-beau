@@ -6,6 +6,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import Services from "./pages/Services.tsx";
 import Contact from "./pages/Contact.tsx";
+import News from "./pages/News.tsx";
+import Analysis from "./pages/Analysis.tsx";
+import Indicators from "./pages/Indicators.tsx";
+import EconomicCalendar from "./pages/EconomicCalendar.tsx";
+import Dictionary from "./pages/Dictionary.tsx";
+import DictionaryDetail from "./pages/DictionaryDetail.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -20,6 +26,12 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/homepage" element={<Index />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/tin-tuc" element={<News />} />
+          <Route path="/phan-tich" element={<Analysis />} />
+          <Route path="/indicators" element={<Indicators />} />
+          <Route path="/lich-kinh-te" element={<EconomicCalendar />} />
+          <Route path="/tu-dien" element={<Dictionary />} />
+          <Route path="/tu-dien/:slug" element={<DictionaryDetail />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
