@@ -197,7 +197,7 @@ const Indicators: React.FC = () => {
                   indicators={marketData.indicators}
                   zones={marketData.zones}
                   enabledIndicators={enabledIds}
-                  height={380}
+                  height={520}
                   smcAnalysis={smcResult.analysis}
                 />
               )}
