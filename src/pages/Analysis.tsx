@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TradingChart from '@/components/indicators/TradingChart';
-import SubIndicators from '@/components/indicators/SubIndicators';
+// SubIndicators removed — RSI & Volume now built into TradingChart
 import SignalFeed from '@/components/indicators/SignalFeed';
 import { useMarketData, useSignals } from '@/hooks/useMarketData';
 import { useSmartSignals } from '@/hooks/useSmartSignal';
