@@ -457,6 +457,52 @@ const TradingChart: React.FC<TradingChartProps> = ({
       });
     }
 
+    // ── AlphaNet AI SuperTrend Line ──
+    if (alphaNetData && enabledIndicators.includes('alphanet') && alphaNetData.supertrend_line.length > 0) {
+      const bullPoints: { time: any; value: number }[] = [];
+      const bearPoints: { time: any; value: number }[] = [];
+
+      alphaNetData.supertrend_line.forEach(pt => {
+        const t = (pt.time / 1000) as any;
+        if (pt.trend === 1) {
+          bullPoints.push({ time: t, value: pt.value });
+          bearPoints.push({ time: t, value: NaN as any });
+        } else {
+          bearPoints.push({ time: t, value: pt.value });
+          bullPoints.push({ time: t, value: NaN as any });
+        }
+      });
+
+      // Bullish SuperTrend (green)
+      const bullST = chart.addSeries(LineSeries, {
+        color: '#26a69a', lineWidth: 2, priceLineVisible: false,
+        lastValueVisible: false, title: 'AI ST ▲',
+      });
+      const validBull = bullPoints.filter(p => !isNaN(p.value));
+      if (validBull.length > 0) bullST.setData(validBull);
+
+      // Bearish SuperTrend (red)
+      const bearST = chart.addSeries(LineSeries, {
+        color: '#ef5350', lineWidth: 2, priceLineVisible: false,
+        lastValueVisible: false, title: 'AI ST ▼',
+      });
+      const validBear = bearPoints.filter(p => !isNaN(p.value));
+      if (validBear.length > 0) bearST.setData(validBear);
+
+      // Signal marker
+      if (alphaNetData.signal === 'BUY' || alphaNetData.signal === 'SELL') {
+        const lastCandle = candles[candles.length - 1];
+        if (lastCandle) {
+          candleSeries.createPriceLine({
+            price: lastCandle.close,
+            color: alphaNetData.signal === 'BUY' ? '#26a69a' : '#ef5350',
+            lineWidth: 2, lineStyle: 0, axisLabelVisible: true,
+            title: alphaNetData.signal === 'BUY' ? '▲ AI BUY' : '▼ AI SELL',
+          } as any);
+        }
+      }
+    }
+
     // ── Crosshair data (OHLC legend) ──
     chart.subscribeCrosshairMove((param) => {
       if (!param || !param.time) {
