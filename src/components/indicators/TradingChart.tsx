@@ -5,6 +5,7 @@ import {
 } from 'lightweight-charts';
 import type { Candle, Indicators, Zone } from '@/hooks/useMarketData';
 import { computeLiquidityZones } from '@/lib/liquidityHunter';
+import type { SmcAnalysis } from '@/hooks/useSmcAnalysis';
 
 export interface AITrendline {
   start: { time: number; price: number };
