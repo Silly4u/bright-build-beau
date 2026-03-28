@@ -12,8 +12,9 @@ export interface TermDetail {
   term: string;
   english: string;
   category: string;
+  illustration?: string;
   basic: { definition: string; example: string; howToApply: string; commonMistakes: string };
-  advanced: { definition: string; example: string; howToApply: string; commonMistakes: string };
+  advanced: { definition: string; example: string; howToApply: string; commonMistakes: string; proTips?: string[]; keyTakeaways?: string[] };
 }
 
 export const CATEGORIES = [
