@@ -31,6 +31,7 @@ const DEFAULT_INDICATORS: IndicatorConfig[] = [
   { id: 'liq_hunter', label: 'Liquidity Hunter', enabled: true, color: '#FF6B6B', category: 'Liquidity' },
   { id: 'alphanet', label: 'AlphaNet AI', enabled: true, color: '#7C3AED', category: 'AI' },
   { id: 'matrix', label: 'Matrix NWE', enabled: true, color: '#00BCD4', category: 'Envelope' },
+  { id: 'engine', label: 'MS Engine', enabled: true, color: '#FF9800', category: 'Structure' },
 ];
 
 const Indicators: React.FC = () => {
