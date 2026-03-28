@@ -216,6 +216,7 @@ const Indicators: React.FC = () => {
                   alphaNetData={alphaNet.data}
                   matrixData={matrixData}
                   engineData={engineData}
+                  tpSlData={tpSlData}
                 />
               )}
             </div>
