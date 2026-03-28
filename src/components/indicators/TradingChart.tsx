@@ -103,16 +103,18 @@ const TradingChart: React.FC<TradingChartProps> = ({ candles, indicators, zones,
       } as any);
     });
 
-    // Signal markers
+    // Signal markers via price lines (v5 doesn't have setMarkers on typed series)
     if (signals && signals.length > 0) {
-      const markers = signals.map(s => ({
-        time: (s.time / 1000) as any,
-        position: s.type === 'buy' ? 'belowBar' as const : 'aboveBar' as const,
-        color: s.type === 'buy' ? '#10B981' : '#EF4444',
-        shape: s.type === 'buy' ? 'arrowUp' as const : 'arrowDown' as const,
-        text: s.type === 'buy' ? '🟢' : '🔴',
-      }));
-      candleSeries.setMarkers(markers);
+      signals.forEach(s => {
+        candleSeries.createPriceLine({
+          price: candles.find(c => c.time === s.time)?.close ?? 0,
+          color: s.type === 'buy' ? '#10B981' : '#EF4444',
+          lineWidth: 1,
+          lineStyle: 0,
+          axisLabelVisible: false,
+          title: s.type === 'buy' ? '🟢' : '🔴',
+        } as any);
+      });
     }
 
     chart.timeScale().fitContent();
