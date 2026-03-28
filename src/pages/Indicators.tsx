@@ -7,6 +7,8 @@ import IndicatorPanel, { IndicatorConfig } from '@/components/indicators/Indicat
 import SignalFeed from '@/components/indicators/SignalFeed';
 import { useMarketData, useSignals } from '@/hooks/useMarketData';
 import { useSmcAnalysis } from '@/hooks/useSmcAnalysis';
+import { useAlphaNet } from '@/hooks/useAlphaNet';
+import AlphaNetDashboard from '@/components/indicators/AlphaNetDashboard';
 
 const PAIRS = [
   { symbol: 'BTC/USDT', label: 'BTC', color: '#F7931A' },
