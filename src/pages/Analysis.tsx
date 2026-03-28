@@ -148,7 +148,7 @@ const Analysis: React.FC = () => {
     } catch (e: any) {
       setLogs(prev => [`[${now}] ❌ Failed: ${e.message}`, ...prev].slice(0, 15));
     } finally { setSendingSignal(null); }
-  }, [activeTimeframe]);
+  }, [btcTimeframe, goldTimeframe]);
 
   // Auto-signal
   useEffect(() => {
