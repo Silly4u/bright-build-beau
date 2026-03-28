@@ -50,6 +50,8 @@ const Indicators: React.FC = () => {
   const alphaNet = useAlphaNet(marketData.candles, alphaNetEnabled && !marketData.loading && marketData.candles.length >= 30);
   const matrixEnabled = indicators.find(i => i.id === 'matrix')?.enabled ?? false;
   const matrixData = useMatrixIndicator(marketData.candles, matrixEnabled && !marketData.loading);
+  const engineEnabled = indicators.find(i => i.id === 'engine')?.enabled ?? false;
+  const engineData = useEngineIndicator(marketData.candles, engineEnabled && !marketData.loading);
 
   const toggleIndicator = (id: string) => {
     setIndicators(prev => prev.map(ind => ind.id === id ? { ...ind, enabled: !ind.enabled } : ind));
