@@ -27,6 +27,7 @@ const TIMEFRAMES = ['M15', 'H1', 'H4', 'D1'];
 
 const DEFAULT_INDICATORS: IndicatorConfig[] = [
   { id: 'liq_hunter', label: 'Liquidity Hunter', enabled: true, color: '#FF6B6B', category: 'Liquidity' },
+  { id: 'alphanet', label: 'AlphaNet AI', enabled: true, color: '#7C3AED', category: 'AI' },
 ];
 
 const Indicators: React.FC = () => {
@@ -41,7 +42,8 @@ const Indicators: React.FC = () => {
   const { signals, loading: signalsLoading } = useSignals();
   const liqHunterEnabled = indicators.find(i => i.id === 'liq_hunter')?.enabled ?? false;
   const smcResult = useSmcAnalysis(marketData.candles, activePair, activeTimeframe, liqHunterEnabled && !marketData.loading);
-  const alphaNet = useAlphaNet(marketData.candles, !marketData.loading && marketData.candles.length >= 30);
+  const alphaNetEnabled = indicators.find(i => i.id === 'alphanet')?.enabled ?? false;
+  const alphaNet = useAlphaNet(marketData.candles, alphaNetEnabled && !marketData.loading && marketData.candles.length >= 30);
 
   const toggleIndicator = (id: string) => {
     setIndicators(prev => prev.map(ind => ind.id === id ? { ...ind, enabled: !ind.enabled } : ind));
@@ -155,9 +157,11 @@ const Indicators: React.FC = () => {
             <IndicatorPanel indicators={indicators} onToggle={toggleIndicator} />
             
             {/* AlphaNet AI Dashboard */}
-            <div className="mt-3">
-              <AlphaNetDashboard data={alphaNet.data} loading={alphaNet.loading} error={alphaNet.error} />
-            </div>
+            {alphaNetEnabled && (
+              <div className="mt-3">
+                <AlphaNetDashboard data={alphaNet.data} loading={alphaNet.loading} error={alphaNet.error} />
+              </div>
+            )}
           </div>
 
           {/* ── CENTER: Chart Area ── */}
