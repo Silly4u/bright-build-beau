@@ -248,6 +248,50 @@ const Indicators: React.FC = () => {
             {logs.length === 0 && <span>Chờ dữ liệu...</span>}
           </div>
         </div>
+
+        {/* AI SMC Action Points */}
+        {smcResult.analysis && smcResult.analysis.action_points.length > 0 && (
+          <div className="mt-2 bg-[#0d1526] border border-white/5 rounded-lg px-4 py-3">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-[10px] font-bold text-muted-foreground/40 tracking-widest">🤖 AI PHÂN TÍCH SMC</span>
+              {smcResult.analysis.trade_signal.has_signal && (
+                <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
+                  smcResult.analysis.trade_signal.type === 'Long'
+                    ? 'text-emerald-400 bg-emerald-400/10'
+                    : 'text-red-400 bg-red-400/10'
+                }`}>
+                  {smcResult.analysis.trade_signal.type === 'Long' ? '▲ LONG' : '▼ SHORT'}
+                </span>
+              )}
+              {smcResult.loading && (
+                <span className="text-[10px] text-cyan-400/70 font-mono animate-pulse">Đang phân tích...</span>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {smcResult.analysis.action_points.map((point, i) => (
+                <div key={i} className="flex items-start gap-2 text-[11px] font-mono text-muted-foreground/80">
+                  <span className="text-cyan-400 shrink-0">{i + 1}.</span>
+                  <span>{point}</span>
+                </div>
+              ))}
+            </div>
+            {smcResult.analysis.trade_signal.has_signal && smcResult.analysis.trade_signal.entry_price && (
+              <div className="flex items-center gap-4 mt-2 pt-2 border-t border-white/5 text-[10px] font-mono">
+                <span className="text-muted-foreground/50">Entry: <span className="text-foreground">${smcResult.analysis.trade_signal.entry_price?.toLocaleString()}</span></span>
+                <span className="text-emerald-400/70">TP1: ${smcResult.analysis.trade_signal.TP1?.toLocaleString()}</span>
+                <span className="text-emerald-400/70">TP2: ${smcResult.analysis.trade_signal.TP2?.toLocaleString()}</span>
+                <span className="text-emerald-400/70">TP3: ${smcResult.analysis.trade_signal.TP3?.toLocaleString()}</span>
+                <span className="text-red-400/70">SL: ${smcResult.analysis.trade_signal.SL?.toLocaleString()}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {smcResult.error && (
+          <div className="mt-2 bg-red-500/5 border border-red-500/20 rounded-lg px-4 py-2 text-[10px] font-mono text-red-400/70">
+            ⚠️ AI Error: {smcResult.error}
+          </div>
+        )}
       </div>
 
       <Footer />
