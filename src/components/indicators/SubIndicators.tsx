@@ -16,7 +16,7 @@ const SubIndicators: React.FC<SubIndicatorsProps> = ({ candles, indicators, acti
     if (!containerRef.current || candles.length === 0 || !indicators) return;
 
     if (chartRef.current) {
-      chartRef.current.remove();
+      try { chartRef.current.remove(); } catch { /* already disposed */ }
       chartRef.current = null;
     }
 
@@ -84,7 +84,11 @@ const SubIndicators: React.FC<SubIndicatorsProps> = ({ candles, indicators, acti
       if (containerRef.current) chart.applyOptions({ width: containerRef.current.clientWidth });
     };
     window.addEventListener('resize', handleResize);
-    return () => { window.removeEventListener('resize', handleResize); chart.remove(); };
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      try { chart.remove(); } catch { /* already disposed */ }
+      chartRef.current = null;
+    };
   }, [candles, indicators, activeTab]);
 
   return <div ref={containerRef} className="w-full" />;
