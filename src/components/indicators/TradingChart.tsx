@@ -76,7 +76,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
     // ── Bollinger Bands ──
     if (indicators && enabledIndicators.includes('bb_squeeze')) {
-      const addBBLine = (values: number[], color: string, lw = 1) => {
+      const addBBLine = (values: number[], color: string, lw: 1 | 2 | 3 | 4 = 1) => {
         const s = chart.addSeries(LineSeries, {
           color, lineWidth: lw, lineStyle: 2,
           priceLineVisible: false, lastValueVisible: false,
