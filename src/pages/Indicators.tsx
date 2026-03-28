@@ -11,6 +11,7 @@ import { useAlphaNet } from '@/hooks/useAlphaNet';
 import AlphaNetDashboard from '@/components/indicators/AlphaNetDashboard';
 import { useMatrixIndicator } from '@/hooks/useMatrixIndicator';
 import { useEngineIndicator } from '@/hooks/useEngineIndicator';
+import { useTpSlIndicator } from '@/hooks/useTpSlIndicator';
 
 const PAIRS = [
   { symbol: 'BTC/USDT', label: 'BTC', color: '#F7931A' },
