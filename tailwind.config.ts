@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       colors: {
-        border: "hsl(var(--border))",
+        border: "hsl(var(--border) / <alpha-value>)",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
@@ -47,6 +47,23 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Custom UNCLETRADER colors
+        navy: {
+          DEFAULT: "#0A0F1E",
+          mid: "#111827",
+          light: "#1A2744",
+        },
+        cyan: {
+          brand: "#00D4FF",
+          dim: "#00A8CC",
+        },
+        violet: {
+          brand: "#7C3AED",
+          light: "#A855F7",
+        },
+        gold: {
+          brand: "#F59E0B",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -58,27 +75,35 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      fontFamily: {
+        display: ['Fraunces', 'serif'],
+        body: ['Manrope', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
+      backgroundImage: {
+        'gradient-cyber': 'linear-gradient(135deg, #00D4FF 0%, #7C3AED 100%)',
+        'gradient-gold': 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)',
+        'gradient-dark': 'linear-gradient(180deg, #0A0F1E 0%, #111827 100%)',
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        'cyan-glow': '0 0 30px rgba(0, 212, 255, 0.3)',
+        'cyan-glow-lg': '0 0 60px rgba(0, 212, 255, 0.4)',
+        'violet-glow': '0 0 30px rgba(124, 58, 237, 0.3)',
+        'card-glow': '0 20px 60px rgba(0, 0, 0, 0.4)',
+      },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
