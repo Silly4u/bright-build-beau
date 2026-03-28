@@ -16,7 +16,7 @@ const SubIndicators: React.FC<SubIndicatorsProps> = ({ candles, indicators, acti
     if (!containerRef.current || candles.length === 0 || !indicators) return;
 
     if (chartRef.current) {
-      chartRef.current.remove();
+      try { chartRef.current.remove(); } catch { /* already disposed */ }
       chartRef.current = null;
     }
 
