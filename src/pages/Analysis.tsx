@@ -122,7 +122,7 @@ const Analysis: React.FC = () => {
     }, msUntilNext);
 
     return () => clearTimeout(timeout);
-  }, [activeTimeframe, triggerScan]);
+  }, [btcTimeframe, goldTimeframe, triggerScan]);
 
   // Screenshot
   const handleScreenshot = useCallback(async () => {
