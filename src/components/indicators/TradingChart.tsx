@@ -280,46 +280,51 @@ const TradingChart: React.FC<TradingChartProps> = ({
         } as any);
       });
 
-      // Entries + TP/SL projections
+      // Entries + TP/SL projections with labels
       trades.forEach(trade => {
         const entryTime = Math.floor(candles[trade.entryIndex].time / 1000);
         const endIdx = trade.exitIndex ?? candles.length - 1;
         const endTime = Math.floor(candles[endIdx].time / 1000);
         const isLong = trade.type === 'Long';
 
+        // Entry label
         candleSeries.createPriceLine({
           price: trade.entryPrice,
           color: isLong ? '#26a69a' : '#ef5350',
-          lineWidth: 1,
+          lineWidth: 2,
           lineStyle: 0,
           axisLabelVisible: true,
           title: isLong ? '▲ Buy' : '▼ Sell',
         } as any);
 
-        const addProjectionLine = (price: number, color: string) => {
+        // TP/SL dashed lines with label at the end
+        const addLabeledLine = (price: number, label: string, color: string) => {
           const series = chart.addSeries(LineSeries, {
             color,
             lineWidth: 1,
             lineStyle: 2,
             priceLineVisible: false,
             lastValueVisible: false,
+            title: label,
           });
           setSafeLineData(series, entryTime, price, endTime, price);
         };
 
-        addProjectionLine(trade.tp1, 'rgba(38,166,154,0.62)');
-        addProjectionLine(trade.tp2, 'rgba(38,166,154,0.62)');
-        addProjectionLine(trade.tp3, 'rgba(38,166,154,0.62)');
-        addProjectionLine(trade.slTarget, 'rgba(239,83,80,0.62)');
+        addLabeledLine(trade.tp1, 'TP1', 'rgba(38,166,154,0.7)');
+        addLabeledLine(trade.tp2, 'TP2', 'rgba(38,166,154,0.7)');
+        addLabeledLine(trade.tp3, 'TP3', 'rgba(38,166,154,0.7)');
+        addLabeledLine(trade.slTarget, 'SL', 'rgba(239,83,80,0.7)');
 
+        // Result marker at exit
         if (trade.result && trade.exitPrice !== undefined) {
+          const resultColor = trade.result === 'SL' ? '#ef5350' : '#26a69a';
           candleSeries.createPriceLine({
             price: trade.exitPrice,
-            color: trade.result === 'SL' ? '#ef5350' : '#26a69a',
-            lineWidth: 1,
+            color: resultColor,
+            lineWidth: 2,
             lineStyle: 0,
             axisLabelVisible: true,
-            title: trade.result,
+            title: `✓ ${trade.result}`,
           } as any);
         }
       });

@@ -276,18 +276,17 @@ export function computeLiquidityZones(
       let result: TradeEntry['result'] | undefined;
       let exitPrice: number | undefined;
 
-      if (ts.hitTP3) {
-        result = 'TP3';
-        exitPrice = ts.tp3;
-      } else if (ts.hitTP2 && ((isLong && c.low <= ts.tp1) || (!isLong && c.high >= ts.tp1))) {
+      // Close trade when hitting SL or TP2 (not waiting for TP3)
+      if (ts.hitTP2) {
         result = 'TP2';
         exitPrice = ts.tp2;
-      } else if (ts.hitTP1 && ((isLong && c.low <= ts.entryPrice) || (!isLong && c.high >= ts.entryPrice))) {
-        result = 'TP1';
-        exitPrice = ts.tp1;
       } else if (!ts.hitTP1 && ((isLong && c.low <= ts.slTarget) || (!isLong && c.high >= ts.slTarget))) {
         result = 'SL';
         exitPrice = ts.slTarget;
+      } else if (ts.hitTP1 && ((isLong && c.low <= ts.entryPrice) || (!isLong && c.high >= ts.entryPrice))) {
+        // Trailing: if hit TP1 but price returns to entry → close at TP1
+        result = 'TP1';
+        exitPrice = ts.tp1;
       }
 
       if (result) {
