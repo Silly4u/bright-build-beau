@@ -43,6 +43,8 @@ const Analysis: React.FC = () => {
   const btcSignals = useSmartSignals(btcData.candles, btcData.indicators, btcData.zones, 'BTC/USDT', btcData.loading);
   const goldSignals = useSmartSignals(goldData.candles, goldData.indicators, goldData.zones, 'XAU/USDT', goldData.loading);
   const dxy = useDXY();
+  const btcTpSl = useTpSlIndicator(btcData.candles, !btcData.loading);
+  const goldTpSl = useTpSlIndicator(goldData.candles, !goldData.loading);
 
   // Merge signals for sidebar
   const allSignals = [...btcSignals, ...goldSignals]
