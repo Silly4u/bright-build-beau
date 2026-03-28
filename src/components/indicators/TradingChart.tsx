@@ -7,6 +7,7 @@ import type { Candle, Indicators, Zone } from '@/hooks/useMarketData';
 import { computeLiquidityZones } from '@/lib/liquidityHunter';
 import type { SmcAnalysis } from '@/hooks/useSmcAnalysis';
 import type { AlphaNetData } from '@/hooks/useAlphaNet';
+import type { MatrixData } from '@/hooks/useMatrixIndicator';
 
 export interface AITrendline {
   start: { time: number; price: number };
