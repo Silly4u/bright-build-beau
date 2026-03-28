@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TradingChart from '@/components/indicators/TradingChart';
-// SubIndicators removed — RSI & Volume now built into TradingChart
 import SignalFeed from '@/components/indicators/SignalFeed';
 import { useMarketData, useSignals } from '@/hooks/useMarketData';
 import { useSmartSignals } from '@/hooks/useSmartSignal';
 import { useDXY } from '@/hooks/useDXY';
 import { supabase } from '@/integrations/supabase/client';
 import html2canvas from 'html2canvas';
+import { computeDualTrendlines } from '@/lib/computeTrendline';
 
 const TIMEFRAMES = ['M5', 'M15', 'M30', 'H1', 'H4', 'D1', 'W1'];
 
@@ -78,6 +78,10 @@ const Analysis: React.FC = () => {
   const btcAI = getAIPoints(btcData, 'BTC');
   const goldAI = getAIPoints(goldData, 'XAU');
 
+  // ── Compute trendlines from candle data ──
+  const btcTrendlines = useMemo(() => computeDualTrendlines(btcData.candles), [btcData.candles]);
+  const goldTrendlines = useMemo(() => computeDualTrendlines(goldData.candles), [goldData.candles]);
+
   // Scan animation
   const triggerScan = useCallback(() => {
     setScanning(true);
@@ -86,17 +90,39 @@ const Analysis: React.FC = () => {
     setLogs(prev => [`[${now}] 🔄 Gemini AI scanning ${activeTimeframe}...`, ...prev].slice(0, 15));
     setTimeout(() => {
       setScanLabel('✅ Phân tích hoàn tất — Trendline & Zones đã cập nhật');
-      setLogs(prev => [`[${now}] ✅ AI scan complete — zones updated`, ...prev].slice(0, 15));
+      setLogs(prev => [`[${now}] ✅ AI scan complete — trendlines & zones updated`, ...prev].slice(0, 15));
     }, 2500);
     setTimeout(() => { setScanning(false); setScanLabel(''); }, 4000);
   }, [activeTimeframe]);
 
-  // Auto-refresh scan every H4 (simulate)
+  // Trigger scan on data load & timeframe change
   useEffect(() => {
     if (!btcData.loading && btcData.candles.length > 0) {
       triggerScan();
     }
-  }, [activeTimeframe]); // trigger on timeframe change
+  }, [activeTimeframe, btcData.loading]);
+
+  // ── Auto H4 scan timer: trigger every 4 hours ──
+  useEffect(() => {
+    if (activeTimeframe !== 'H4') return;
+    const now = new Date();
+    const nextH4 = new Date(now);
+    // Round up to next 4-hour mark
+    const h = nextH4.getUTCHours();
+    const nextH = Math.ceil((h + 1) / 4) * 4;
+    nextH4.setUTCHours(nextH, 0, 10, 0); // 10s after candle close
+    if (nextH4 <= now) nextH4.setUTCHours(nextH4.getUTCHours() + 4);
+    const msUntilNext = nextH4.getTime() - now.getTime();
+
+    const timeout = setTimeout(() => {
+      triggerScan();
+      // Then repeat every 4 hours
+      const interval = setInterval(triggerScan, 4 * 60 * 60 * 1000);
+      return () => clearInterval(interval);
+    }, msUntilNext);
+
+    return () => clearTimeout(timeout);
+  }, [activeTimeframe, triggerScan]);
 
   // Screenshot
   const handleScreenshot = useCallback(async () => {
@@ -266,15 +292,7 @@ const Analysis: React.FC = () => {
         </div>
       </div>
 
-      {/* ── SCAN OVERLAY ── */}
-      {scanning && (
-        <div className="px-2 lg:px-4 pt-2">
-          <div className="relative overflow-hidden rounded-lg bg-primary/5 border border-primary/20 px-4 py-2.5">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent animate-scan-sweep" />
-            <span className="relative text-xs font-mono text-primary font-bold">{scanLabel}</span>
-          </div>
-        </div>
-      )}
+      {/* Scan overlay moved inside TradingChart */}
 
       {/* ── MAIN LAYOUT ── */}
       <div ref={dashboardRef} className="px-2 lg:px-4 py-2">
@@ -302,9 +320,13 @@ const Analysis: React.FC = () => {
                     candles={btcData.candles}
                     indicators={btcData.indicators}
                     zones={btcData.zones}
+                    trendline={btcTrendlines.support}
+                    trendlineResistance={btcTrendlines.resistance}
                     enabledIndicators={ENABLED_INDICATORS}
                     height={300}
-                    label="₿ BTC/USDT · H4 · Binance"
+                    label={`₿ BTC/USDT · ${activeTimeframe} · Binance`}
+                    scanning={scanning}
+                    scanLabel={scanLabel}
                   />
                 )}
                 <AIActionCard ai={btcAI} symbol="₿ BTC/USDT" />
@@ -337,9 +359,13 @@ const Analysis: React.FC = () => {
                     candles={goldData.candles}
                     indicators={goldData.indicators}
                     zones={goldData.zones}
+                    trendline={goldTrendlines.support}
+                    trendlineResistance={goldTrendlines.resistance}
                     enabledIndicators={ENABLED_INDICATORS}
                     height={300}
-                    label="🥇 XAU/USD (Gold) · H4"
+                    label={`🥇 XAU/USD (Gold) · ${activeTimeframe}`}
+                    scanning={scanning}
+                    scanLabel={scanLabel}
                   />
                 )}
                 <AIActionCard ai={goldAI} symbol="🥇 XAU/USD" isGold />

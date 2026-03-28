@@ -15,14 +15,17 @@ interface TradingChartProps {
   indicators: Indicators | null;
   zones: Zone[];
   trendline?: AITrendline | null;
+  trendlineResistance?: AITrendline | null;
   signals?: { time: number; type: 'buy' | 'sell' }[];
   enabledIndicators: string[];
   height?: number;
   label?: string;
+  scanning?: boolean;
+  scanLabel?: string;
 }
 
 const TradingChart: React.FC<TradingChartProps> = ({
-  candles, indicators, zones, trendline, signals, enabledIndicators, height = 380, label,
+  candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height = 380, label, scanning, scanLabel,
 }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const rsiContainerRef = useRef<HTMLDivElement>(null);
@@ -182,15 +185,27 @@ const TradingChart: React.FC<TradingChartProps> = ({
       fillSeries.setData(candles.map(c => ({ time: (c.time / 1000) as any, value: mid })));
     });
 
-    // ── AI Trendline ──
+    // ── AI Trendlines (Support = green dashed, Resistance = red dashed) ──
     if (trendline) {
       const trendSeries = chart.addSeries(LineSeries, {
-        color: '#ffa726', lineWidth: 2, lineStyle: 2,
+        color: '#26a69a', lineWidth: 2, lineStyle: 2,
         priceLineVisible: false, lastValueVisible: false,
+        title: 'Trend ▲',
       });
       trendSeries.setData([
         { time: (trendline.start.time / 1000) as any, value: trendline.start.price },
         { time: (trendline.end.time / 1000) as any, value: trendline.end.price },
+      ]);
+    }
+    if (trendlineResistance) {
+      const resSeries = chart.addSeries(LineSeries, {
+        color: '#ef5350', lineWidth: 2, lineStyle: 2,
+        priceLineVisible: false, lastValueVisible: false,
+        title: 'Trend ▼',
+      });
+      resSeries.setData([
+        { time: (trendlineResistance.start.time / 1000) as any, value: trendlineResistance.start.price },
+        { time: (trendlineResistance.end.time / 1000) as any, value: trendlineResistance.end.price },
       ]);
     }
 
@@ -325,7 +340,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
       chartRef.current = null;
       rsiChartRef.current = null;
     };
-  }, [candles, indicators, zones, trendline, signals, enabledIndicators, height]);
+  }, [candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height]);
 
   const lastCandle = candles[candles.length - 1];
   const isUp = crosshairData ? crosshairData.change >= 0 : (lastCandle ? lastCandle.close >= lastCandle.open : true);
@@ -363,6 +378,19 @@ const TradingChart: React.FC<TradingChartProps> = ({
           <span className="text-[10px] font-mono text-[#42a5f5]">MA 9</span>
         )}
       </div>
+
+      {/* ── Scan Sweep Overlay ── */}
+      {scanning && (
+        <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/8 to-transparent animate-scan-sweep" />
+          <div className="relative bg-background/90 backdrop-blur-sm border border-primary/30 rounded-lg px-4 py-2.5 shadow-lg shadow-primary/10">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <span className="text-xs font-mono text-primary font-bold">{scanLabel || '🔍 Gemini AI đang phân tích...'}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Main Chart (Candles + Volume + MA) ── */}
       <div ref={chartContainerRef} className="w-full" style={{ minHeight: height }} />
