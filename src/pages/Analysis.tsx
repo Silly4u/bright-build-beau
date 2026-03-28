@@ -348,7 +348,7 @@ const Analysis: React.FC = () => {
                     trendlineResistance={goldTrendlines.resistance}
                     enabledIndicators={ENABLED_INDICATORS}
                     height={300}
-                    label={`🥇 XAU/USD (Gold) · ${activeTimeframe}`}
+                    label={`🥇 XAU/USD (Gold) · ${goldTimeframe}`}
                     scanning={scanning}
                     scanLabel={scanLabel}
                   />
