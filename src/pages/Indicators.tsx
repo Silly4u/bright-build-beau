@@ -6,6 +6,7 @@ import SubIndicators from '@/components/indicators/SubIndicators';
 import IndicatorPanel, { IndicatorConfig } from '@/components/indicators/IndicatorPanel';
 import SignalFeed from '@/components/indicators/SignalFeed';
 import { useMarketData, useSignals } from '@/hooks/useMarketData';
+import { useSmcAnalysis } from '@/hooks/useSmcAnalysis';
 
 const PAIRS = [
   { symbol: 'BTC/USDT', label: 'BTC', color: '#F7931A' },
