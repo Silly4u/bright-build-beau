@@ -29,20 +29,54 @@ const BINANCE_SYMBOL_MAP: Record<string, string> = {
 
 // ─── BINANCE KLINES ───
 async function fetchCandles(symbol: string, interval: string, limit = 100): Promise<Candle[]> {
-  const cleaned = symbol.replace("/", "");
-  const binanceSymbol = BINANCE_SYMBOL_MAP[cleaned] || BINANCE_SYMBOL_MAP[symbol] || cleaned;
-  const url = `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${interval}&limit=${limit}`;
+  const cleaned = String(symbol || "").replace("/", "").toUpperCase();
+  const binanceSymbol = BINANCE_SYMBOL_MAP[cleaned] || BINANCE_SYMBOL_MAP[symbol] || cleaned || "BTCUSDT";
+  const allowedIntervals = new Set(["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d", "3d", "1w", "1M"]);
+  const safeInterval = allowedIntervals.has(interval) ? interval : "4h";
+  const safeLimit = Number.isFinite(Number(limit)) ? Math.min(Math.max(Number(limit), 20), 1000) : 100;
+
+  const url = `https://api.binance.com/api/v3/klines?symbol=${binanceSymbol}&interval=${safeInterval}&limit=${safeLimit}`;
   const res = await fetch(url);
+  const bodyText = await res.text();
+
   if (!res.ok) {
-    console.error(`Binance error for ${binanceSymbol}: ${res.status}`);
-    // Fallback: generate synthetic gold data from BTC if gold pair fails
+    console.error(`Binance error for ${binanceSymbol}: ${res.status} | ${bodyText.slice(0, 180)}`);
+
+    // Gold fallback
     if (cleaned.includes("XAU") || cleaned.includes("PAXG")) {
       console.log("Falling back to synthetic gold data from BTCUSDT");
-      return fetchSyntheticGold(interval, limit);
+      return fetchSyntheticGold(safeInterval, safeLimit);
     }
-    throw new Error(`Binance API error: ${res.status} for ${binanceSymbol}`);
+
+    // Generic fallback for unknown symbols to avoid hard 500 in UI
+    if (binanceSymbol !== "BTCUSDT") {
+      console.warn(`Falling back to BTCUSDT for unsupported symbol: ${binanceSymbol}`);
+      return fetchCandles("BTCUSDT", safeInterval, safeLimit);
+    }
+
+    throw new Error(`Binance API error: ${res.status}`);
   }
-  const data = await res.json();
+
+  let data: any;
+  try {
+    data = JSON.parse(bodyText);
+  } catch {
+    if (cleaned.includes("XAU") || cleaned.includes("PAXG")) {
+      return fetchSyntheticGold(safeInterval, safeLimit);
+    }
+    throw new Error("Binance response parse error");
+  }
+
+  if (!Array.isArray(data) || data.length === 0) {
+    if (cleaned.includes("XAU") || cleaned.includes("PAXG")) {
+      return fetchSyntheticGold(safeInterval, safeLimit);
+    }
+    if (binanceSymbol !== "BTCUSDT") {
+      return fetchCandles("BTCUSDT", safeInterval, safeLimit);
+    }
+    throw new Error("Binance returned empty kline data");
+  }
+
   return data.map((k: any[]) => ({
     time: k[0],
     open: parseFloat(k[1]),
@@ -443,59 +477,64 @@ serve(async (req) => {
     const results = [];
 
     for (const sym of symbols) {
-      const candles = await fetchCandles(sym, interval, limit);
-      const closes = candles.map(c => c.close);
-      const volumes = candles.map(c => c.volume);
-      const rsi = calcRSI(closes);
-      const volAvg = calcVolumeAvg(volumes);
-      const zones = await getAIZones(candles, sym);
+      try {
+        const candles = await fetchCandles(sym, interval, limit);
+        const closes = candles.map(c => c.close);
+        const volumes = candles.map(c => c.volume);
+        const rsi = calcRSI(closes);
+        const volAvg = calcVolumeAvg(volumes);
+        const zones = await getAIZones(candles, sym);
 
-      const conditions = checkAllConditions(candles, zones.zones);
-      const n = candles.length - 1;
-      const currRSI = rsi[n] || 50;
-      const currVolRatio = !isNaN(volAvg[n]) && volAvg[n] > 0 ? candles[n].volume / volAvg[n] : 1;
-      const strength = getStrength(conditions);
+        const conditions = checkAllConditions(candles, zones.zones);
+        const n = candles.length - 1;
+        const currRSI = rsi[n] || 50;
+        const currVolRatio = !isNaN(volAvg[n]) && volAvg[n] > 0 ? candles[n].volume / volAvg[n] : 1;
+        const strength = getStrength(conditions);
 
-      if (shouldSendSignal(conditions)) {
-        const candleTime = new Date(candles[n].time).toISOString();
-        const antiSpamKey = `${sym}_${candles[n].time}`;
+        if (shouldSendSignal(conditions)) {
+          const candleTime = new Date(candles[n].time).toISOString();
 
-        // Check anti-spam
-        const { data: existing } = await supabase
-          .from("signals")
-          .select("id")
-          .eq("symbol", sym)
-          .eq("candle_time", candleTime)
-          .eq("timeframe", timeframe)
-          .maybeSingle();
+          // Check anti-spam
+          const { data: existing } = await supabase
+            .from("signals")
+            .select("id")
+            .eq("symbol", sym)
+            .eq("candle_time", candleTime)
+            .eq("timeframe", timeframe)
+            .maybeSingle();
 
-        if (!existing) {
-          const triggeredNames = conditions.filter(c => c.triggered).map(c => c.name);
+          if (!existing) {
+            const triggeredNames = conditions.filter(c => c.triggered).map(c => c.name);
 
-          // Save to DB
-          await supabase.from("signals").insert({
-            symbol: sym,
-            timeframe,
-            conditions: triggeredNames,
-            strength,
-            price: candles[n].close,
-            rsi: currRSI,
-            vol_ratio: currVolRatio,
-            candle_time: candleTime,
-          });
+            // Save to DB
+            await supabase.from("signals").insert({
+              symbol: sym,
+              timeframe,
+              conditions: triggeredNames,
+              strength,
+              price: candles[n].close,
+              rsi: currRSI,
+              vol_ratio: currVolRatio,
+              candle_time: candleTime,
+            });
 
-          // Send Telegram
-          if (telegramChatId) {
-            const msg = formatTelegramMessage(sym, timeframe, conditions, candles[n].close, currRSI, currVolRatio, strength);
-            await sendTelegram(telegramChatId, msg);
+            // Send Telegram
+            if (telegramChatId) {
+              const msg = formatTelegramMessage(sym, timeframe, conditions, candles[n].close, currRSI, currVolRatio, strength);
+              await sendTelegram(telegramChatId, msg);
+            }
+
+            results.push({ symbol: sym, strength, conditions: triggeredNames, price: candles[n].close });
+          } else {
+            results.push({ symbol: sym, status: "already_sent", candleTime });
           }
-
-          results.push({ symbol: sym, strength, conditions: triggeredNames, price: candles[n].close });
         } else {
-          results.push({ symbol: sym, status: "already_sent", candleTime });
+          results.push({ symbol: sym, status: "no_signal", triggeredCount: conditions.filter(c => c.triggered).length });
         }
-      } else {
-        results.push({ symbol: sym, status: "no_signal", triggeredCount: conditions.filter(c => c.triggered).length });
+      } catch (symError) {
+        const errorMsg = symError instanceof Error ? symError.message : "Unknown symbol error";
+        console.error(`Scan failed for ${sym}:`, errorMsg);
+        results.push({ symbol: sym, status: "error", error: errorMsg });
       }
     }
 
