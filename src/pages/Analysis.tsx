@@ -328,9 +328,13 @@ const Analysis: React.FC = () => {
                     candles={btcData.candles}
                     indicators={btcData.indicators}
                     zones={btcData.zones}
+                    trendline={btcTrendlines.support}
+                    trendlineResistance={btcTrendlines.resistance}
                     enabledIndicators={ENABLED_INDICATORS}
                     height={300}
-                    label="₿ BTC/USDT · H4 · Binance"
+                    label={`₿ BTC/USDT · ${activeTimeframe} · Binance`}
+                    scanning={scanning}
+                    scanLabel={scanLabel}
                   />
                 )}
                 <AIActionCard ai={btcAI} symbol="₿ BTC/USDT" />
