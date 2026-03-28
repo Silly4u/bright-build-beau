@@ -316,23 +316,23 @@ const TradingChart: React.FC<TradingChartProps> = ({
           title: isLong ? '▲ Buy' : '▼ Sell',
         } as any);
 
-        // TP/SL dashed lines with labels
-        const addLabeledLine = (price: number, label: string, color: string) => {
-          const series = chart.addSeries(LineSeries, {
-            color,
-            lineWidth: 1,
-            lineStyle: 2,
-            priceLineVisible: false,
-            lastValueVisible: false,
-            title: label,
-          });
-          setSafeLineData(series, entryTime, price, endTime, price);
-        };
-
-        addLabeledLine(trade.tp1, 'TP1', 'rgba(38,166,154,0.7)');
-        addLabeledLine(trade.tp2, 'TP2', 'rgba(38,166,154,0.7)');
-        addLabeledLine(trade.tp3, 'TP3', 'rgba(38,166,154,0.7)');
-        addLabeledLine(trade.slTarget, 'SL', 'rgba(239,83,80,0.7)');
+        // TP/SL as price axis labels
+        candleSeries.createPriceLine({
+          price: trade.tp1, color: '#26a69a', lineWidth: 1, lineStyle: 2,
+          axisLabelVisible: true, title: 'TP1',
+        } as any);
+        candleSeries.createPriceLine({
+          price: trade.tp2, color: '#26a69a', lineWidth: 1, lineStyle: 2,
+          axisLabelVisible: true, title: 'TP2',
+        } as any);
+        candleSeries.createPriceLine({
+          price: trade.tp3, color: '#26a69a', lineWidth: 1, lineStyle: 2,
+          axisLabelVisible: true, title: 'TP3',
+        } as any);
+        candleSeries.createPriceLine({
+          price: trade.slTarget, color: '#ef5350', lineWidth: 1, lineStyle: 2,
+          axisLabelVisible: true, title: 'SL',
+        } as any);
 
         // Result marker at exit
         if (trade.result && trade.exitPrice !== undefined) {
