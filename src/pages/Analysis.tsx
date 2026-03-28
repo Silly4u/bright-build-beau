@@ -130,7 +130,7 @@ const Analysis: React.FC = () => {
     try {
       const canvas = await html2canvas(dashboardRef.current, { backgroundColor: '#0a0f1e', scale: 2, useCORS: true });
       const link = document.createElement('a');
-      link.download = `analysis_${activeTimeframe}_${Date.now()}.png`;
+      link.download = `analysis_${btcTimeframe}_${Date.now()}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     } catch (e) { console.error('Screenshot failed:', e); }
