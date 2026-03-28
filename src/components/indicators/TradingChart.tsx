@@ -272,7 +272,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
     if (indicators) {
       const rsiSeries = rsiChart.addSeries(LineSeries, {
         color: '#ab47bc',
-        lineWidth: 1.5,
+        lineWidth: 2,
         priceLineVisible: true,
         lastValueVisible: true,
         title: 'RSI 14',
