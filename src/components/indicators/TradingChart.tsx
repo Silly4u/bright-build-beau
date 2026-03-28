@@ -240,20 +240,19 @@ const TradingChart: React.FC<TradingChartProps> = ({
         ]);
       });
 
-      // Mark liquidity grabs with markers on the candle series
-      const markers = grabs.map(grab => ({
-        time: (candles[grab.index].time / 1000) as any,
-        position: grab.type === 'bull_grab' ? 'belowBar' as const : 'aboveBar' as const,
-        color: grab.type === 'bull_grab' ? '#26a69a' : '#ef5350',
-        shape: grab.type === 'bull_grab' ? 'arrowUp' as const : 'arrowDown' as const,
-        text: grab.type === 'bull_grab' ? 'LQ ▲' : 'LQ ▼',
-      }));
-
-      if (markers.length > 0) {
-        // Sort markers by time (required by lightweight-charts)
-        markers.sort((a, b) => (a.time as number) - (b.time as number));
-        candleSeries.setMarkers(markers);
-      }
+      // Mark liquidity grabs with price lines on candle series
+      grabs.forEach(grab => {
+        const color = grab.type === 'bull_grab' ? '#26a69a' : '#ef5350';
+        const label = grab.type === 'bull_grab' ? '▲ LQ Grab' : '▼ LQ Grab';
+        candleSeries.createPriceLine({
+          price: grab.price,
+          color,
+          lineWidth: 1,
+          lineStyle: 0,
+          axisLabelVisible: true,
+          title: label,
+        } as any);
+      });
     }
 
     // ── Signal arrows ──
