@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Candle } from '@/hooks/useMarketData';
 
@@ -91,20 +91,7 @@ export function useSmcAnalysis(
   const [analysis, setAnalysis] = useState<SmcAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (!blockedUntil) return;
-
-    const remaining = blockedUntil - Date.now();
-    if (remaining <= 0) {
-      setBlockedUntil(null);
-      return;
-    }
-
-    const timer = window.setTimeout(() => setBlockedUntil(null), remaining);
-    return () => window.clearTimeout(timer);
-  }, [blockedUntil]);
+  const blockedUntilRef = useRef<number>(0);
 
   useEffect(() => {
     if (!enabled || candles.length < 20) {
@@ -114,7 +101,7 @@ export function useSmcAnalysis(
       return;
     }
 
-    if (blockedUntil && blockedUntil > Date.now()) {
+    if (blockedUntilRef.current > Date.now()) {
       setAnalysis(null);
       setError(CREDITS_ERROR_MESSAGE);
       setLoading(false);
@@ -149,7 +136,7 @@ export function useSmcAnalysis(
         if (resp.error) {
           const normalized = normalizeInvokeError(resp.error, resp.data);
           if (normalized.isCredits) {
-            setBlockedUntil(Date.now() + CREDITS_COOLDOWN_MS);
+            blockedUntilRef.current = Date.now() + CREDITS_COOLDOWN_MS;
           }
           throw new Error(normalized.message);
         }
@@ -163,7 +150,7 @@ export function useSmcAnalysis(
         if ('error' in result && (result as any).error) {
           const normalized = normalizeInvokeError(null, result);
           if (normalized.isCredits) {
-            setBlockedUntil(Date.now() + CREDITS_COOLDOWN_MS);
+            blockedUntilRef.current = Date.now() + CREDITS_COOLDOWN_MS;
           }
           throw new Error(normalized.message);
         }
@@ -174,12 +161,11 @@ export function useSmcAnalysis(
         }
 
         setAnalysis(result as SmcAnalysis);
-        setBlockedUntil(null);
       } catch (e) {
         if (!cancelled) {
           const message = e instanceof Error ? e.message : 'Unknown error';
           if (isCreditsError(undefined, message)) {
-            setBlockedUntil(Date.now() + CREDITS_COOLDOWN_MS);
+            blockedUntilRef.current = Date.now() + CREDITS_COOLDOWN_MS;
           }
           setError(message);
           setAnalysis(null);
@@ -192,7 +178,7 @@ export function useSmcAnalysis(
     fetchAnalysis();
 
     return () => { cancelled = true; };
-  }, [candles.length, symbol, timeframe, enabled, blockedUntil]);
+  }, [candles.length, symbol, timeframe, enabled]);
 
   return { analysis, loading, error };
 }
