@@ -240,21 +240,6 @@ const Analysis: React.FC = () => {
             <span className="px-2.5 py-1 rounded font-mono font-bold text-yellow-400 bg-yellow-500/10 border border-yellow-500/20">🥇 XAU/USD</span>
           </div>
 
-          <div className="w-px h-5 bg-foreground/10" />
-
-          {/* Timeframes */}
-          <div className="flex gap-0.5">
-            {TIMEFRAMES.map(tf => (
-              <button key={tf} onClick={() => setActiveTimeframe(tf)}
-                className={`px-2 py-1.5 rounded font-mono transition-all ${
-                  activeTimeframe === tf
-                    ? 'bg-secondary/20 text-secondary border border-secondary/30'
-                    : 'text-muted-foreground/60 hover:text-foreground'
-                }`}>
-                {tf}
-              </button>
-            ))}
-          </div>
 
           <div className="w-px h-5 bg-foreground/10" />
 
