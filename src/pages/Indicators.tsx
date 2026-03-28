@@ -33,6 +33,7 @@ const DEFAULT_INDICATORS: IndicatorConfig[] = [
   { id: 'sup_bounce', label: 'Sup Bounce', enabled: true, color: '#F97316', category: 'S/R' },
   { id: 'ema_cross', label: 'EMA Cross', enabled: false, color: '#EC4899', category: 'Trend' },
   { id: 'macd_cross', label: 'MACD Cross', enabled: true, color: '#06B6D4', category: 'Trend' },
+  { id: 'liq_hunter', label: 'Liquidity Hunter', enabled: true, color: '#FF6B6B', category: 'Liquidity' },
 ];
 
 const Indicators: React.FC = () => {
