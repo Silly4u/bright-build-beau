@@ -124,7 +124,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
         topColor: isSupport ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
         bottomColor: isSupport ? 'rgba(16,185,129,0.02)' : 'rgba(239,68,68,0.02)',
         lineColor: 'transparent',
-        lineWidth: 0,
+        lineWidth: 1 as 1,
         priceLineVisible: false,
         lastValueVisible: false,
       });
