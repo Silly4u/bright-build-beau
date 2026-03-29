@@ -44,6 +44,7 @@ interface TradingChartProps {
   buySellData?: BuySellData | null;
   oscillatorData?: OscillatorMatrixData | null;
   proEmaData?: ProEmaData | null;
+  srData?: SupportResistanceResult | null;
 }
 
 const TradingChart: React.FC<TradingChartProps> = ({
