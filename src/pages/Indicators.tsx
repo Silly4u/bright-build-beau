@@ -58,6 +58,8 @@ const Indicators: React.FC = () => {
   const engineData = useEngineIndicator(marketData.candles, engineEnabled && !marketData.loading);
   const tpSlEnabled = indicators.find(i => i.id === 'tp_sl')?.enabled ?? false;
   const tpSlData = useTpSlIndicator(marketData.candles, tpSlEnabled && !marketData.loading);
+  const buySellEnabled = indicators.find(i => i.id === 'buy_sell')?.enabled ?? false;
+  const buySellData = useBuySellSignal(marketData.candles, buySellEnabled && !marketData.loading);
 
   const toggleIndicator = (id: string) => {
     setIndicators(prev => prev.map(ind => ind.id === id ? { ...ind, enabled: !ind.enabled } : ind));
