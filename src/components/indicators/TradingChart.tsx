@@ -870,11 +870,8 @@ const TradingChart: React.FC<TradingChartProps> = ({
         }
       });
 
-      // Apply all TP/SL markers to candle series
-      if (tpSlMarkers.length > 0) {
-        tpSlMarkers.sort((a, b) => (a.time as number) - (b.time as number));
-        createSeriesMarkers(candleSeries, tpSlMarkers);
-      }
+      // Push TP/SL markers to shared allMarkers
+      tpSlMarkers.forEach(m => allMarkers.push(m));
     }
 
     // ── Buy/Sell Signal (Wavy Tunnel + Supertrend) ──
