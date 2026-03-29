@@ -541,77 +541,12 @@ const TradingChart: React.FC<TradingChartProps> = ({
       });
     }
 
-    // ── AlphaNet AI: RZ Bands (multi-layer gradient like TradingView) ──
+    // ── AlphaNet AI: SuperTrend + other overlays (RZ bands already rendered before candles) ──
     if (alphaNetData && enabledIndicators.includes('alphanet')) {
       const toChartPt = (p: { time: number; value: number }) => ({
         time: (p.time / 1000) as any,
         value: p.value,
       });
-
-      const BG = '#0d1117'; // chart background for masking
-
-      // ── Bear Zone (upper): up1 → up5 → up9 mask ──
-      if (alphaNetData.rz_up1?.length > 0) {
-        // Layer 1: up1 — outer bear color, fills from up1 downward
-        const sUp1 = chart.addSeries(AreaSeries, {
-          topColor: 'rgba(86,32,45,0.80)', bottomColor: 'rgba(86,32,45,0.80)',
-          lineColor: 'transparent', lineWidth: 1 as 1,
-          priceLineVisible: false, lastValueVisible: false,
-        });
-        sUp1.setData(alphaNetData.rz_up1.map(toChartPt));
-
-        // Layer 2: up5 — inner bear color, covers outer below up5
-        const sUp5 = chart.addSeries(AreaSeries, {
-          topColor: 'rgba(63,29,41,0.60)', bottomColor: 'rgba(63,29,41,0.60)',
-          lineColor: 'transparent', lineWidth: 1 as 1,
-          priceLineVisible: false, lastValueVisible: false,
-        });
-        sUp5.setData(alphaNetData.rz_up5.map(toChartPt));
-
-        // Layer 3: up9 — MASK with chart background, erases everything below up9
-        const sUp9Mask = chart.addSeries(AreaSeries, {
-          topColor: BG, bottomColor: BG,
-          lineColor: 'transparent', lineWidth: 1 as 1,
-          priceLineVisible: false, lastValueVisible: false,
-        });
-        sUp9Mask.setData(alphaNetData.rz_up9.map(toChartPt));
-      }
-
-      // ── Bull Zone (lower): lo9 → lo5 → lo1 mask ──
-      if (alphaNetData.rz_lo1?.length > 0) {
-        // Layer 1: lo9 (highest of lower) — inner bull color, fills from lo9 down
-        const sLo9 = chart.addSeries(AreaSeries, {
-          topColor: 'rgba(17,49,53,0.60)', bottomColor: 'rgba(17,49,53,0.60)',
-          lineColor: 'transparent', lineWidth: 1 as 1,
-          priceLineVisible: false, lastValueVisible: false,
-        });
-        sLo9.setData(alphaNetData.rz_lo9.map(toChartPt));
-
-        // Layer 2: lo5 — outer bull color, covers inner below lo5
-        const sLo5 = chart.addSeries(AreaSeries, {
-          topColor: 'rgba(15,62,63,0.80)', bottomColor: 'rgba(15,62,63,0.80)',
-          lineColor: 'transparent', lineWidth: 1 as 1,
-          priceLineVisible: false, lastValueVisible: false,
-        });
-        sLo5.setData(alphaNetData.rz_lo5.map(toChartPt));
-
-        // Layer 3: lo1 — MASK with chart background, erases everything below lo1
-        const sLo1Mask = chart.addSeries(AreaSeries, {
-          topColor: BG, bottomColor: BG,
-          lineColor: 'transparent', lineWidth: 1 as 1,
-          priceLineVisible: false, lastValueVisible: false,
-        });
-        sLo1Mask.setData(alphaNetData.rz_lo1.map(toChartPt));
-      }
-
-      // Mean line (dashed gray)
-      if (alphaNetData.rz_mean?.length > 0) {
-        const meanSeries = chart.addSeries(LineSeries, {
-          color: 'rgba(255,255,255,0.15)', lineWidth: 1, lineStyle: 2,
-          priceLineVisible: false, lastValueVisible: false,
-        });
-        meanSeries.setData(alphaNetData.rz_mean.map(toChartPt));
-      }
 
       // SuperTrend line — split into bull/bear, deduplicated
       if (alphaNetData.supertrend_line?.length > 0) {
