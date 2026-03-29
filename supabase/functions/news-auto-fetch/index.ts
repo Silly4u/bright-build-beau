@@ -31,7 +31,8 @@ async function fetchCryptoCompareNews(): Promise<any[]> {
     const res = await fetch("https://min-api.cryptocompare.com/data/v2/news/?lang=EN&sortOrder=popular");
     if (!res.ok) return [];
     const data = await res.json();
-    return data.Data || [];
+    const articles = data.Data || data.data || [];
+    return Array.isArray(articles) ? articles : [];
   } catch (e) {
     console.error("CryptoCompare fetch error:", e);
     return [];
