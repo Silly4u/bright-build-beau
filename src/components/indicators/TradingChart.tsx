@@ -1031,68 +1031,80 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
     // ── Pro Support/Resistance (S/R Channels + StochRSI signals) ──
     if (srData && enabledIndicators.includes('support_resistance')) {
-      const setSafeData = (series: any, t1: number, v1: number, t2: number, v2: number) => {
-        if (t1 === t2) { series.setData([{ time: t1 as any, value: v2 }]); return; }
-        if (t1 < t2) { series.setData([{ time: t1 as any, value: v1 }, { time: t2 as any, value: v2 }]); return; }
-        series.setData([{ time: t2 as any, value: v2 }, { time: t1 as any, value: v1 }]);
-      };
+      const firstT = Math.floor(candles[0].time / 1000);
+      const lastT = Math.floor(candles[candles.length - 1].time / 1000);
+      // Extend far both directions for "extend.both" effect
+      const farLeft = firstT - (lastT - firstT) * 5;
+      const farRight = lastT + (lastT - firstT) * 5;
 
-      const startT = Math.floor(candles[0].time / 1000);
-      const endT = Math.floor(candles[candles.length - 1].time / 1000);
-
-      // S/R Channel boxes
+      // S/R Channel boxes using RectanglePrimitive (matches Pine box.new extend=extend.both)
       srData.channels.forEach(ch => {
-        const fillColor = ch.type === 'resistance' ? 'rgba(239,83,80,0.08)' :
-                          ch.type === 'support' ? 'rgba(0,230,118,0.08)' : 'rgba(158,158,158,0.06)';
-        const lineColor = ch.type === 'resistance' ? 'rgba(239,83,80,0.4)' :
-                          ch.type === 'support' ? 'rgba(0,230,118,0.4)' : 'rgba(158,158,158,0.3)';
+        const fillColor = ch.type === 'resistance' ? 'rgba(239,83,80,0.12)' :
+                          ch.type === 'support' ? 'rgba(0,230,118,0.12)' : 'rgba(158,158,158,0.08)';
+        const borderColor = ch.type === 'resistance' ? 'rgba(239,83,80,0.5)' :
+                            ch.type === 'support' ? 'rgba(0,230,118,0.5)' : 'rgba(158,158,158,0.3)';
 
-        // Top line
-        const topL = chart.addSeries(LineSeries, {
-          color: lineColor, lineWidth: 1, lineStyle: 0,
-          priceLineVisible: false, lastValueVisible: false,
-        });
-        setSafeData(topL, startT, ch.top, endT, ch.top);
-
-        // Bottom line
-        const botL = chart.addSeries(LineSeries, {
-          color: lineColor, lineWidth: 1, lineStyle: 0,
-          priceLineVisible: false, lastValueVisible: false,
-        });
-        setSafeData(botL, startT, ch.bottom, endT, ch.bottom);
-
-        // Fill
-        const fill = chart.addSeries(AreaSeries, {
-          topColor: fillColor, bottomColor: fillColor,
-          lineColor: 'transparent', lineWidth: 1 as 1,
-          priceLineVisible: false, lastValueVisible: false,
-        });
-        const mid = (ch.top + ch.bottom) / 2;
-        const fillData = candles.map(c => ({ time: Math.floor(c.time / 1000) as any, value: mid }));
-        if (fillData.length > 0) fill.setData(fillData);
+        candleSeries.attachPrimitive(new RectanglePrimitive({
+          p1: { time: farLeft, price: ch.top },
+          p2: { time: farRight, price: ch.bottom },
+          fillColor, borderColor, borderWidth: 1,
+        }));
       });
 
-      // Buy/Sell signal markers
-      srData.signals.slice(-20).forEach(sig => {
+      // Bar coloring based on StochRSI K value (matching Pine barcolor)
+      // K > 70 = red bg, K < 30 = green bg, 50-70 = orange, 30-50 = blue
+      const barColors: { time: any; color: string }[] = [];
+      srData.stochRsi.forEach(pt => {
+        const t = Math.floor(pt.time / 1000) as any;
+        if (pt.k > 70) barColors.push({ time: t, color: 'rgba(239,83,80,0.7)' });
+        else if (pt.k < 30) barColors.push({ time: t, color: 'rgba(0,230,118,0.7)' });
+        else if (pt.k >= 50) barColors.push({ time: t, color: 'rgba(255,152,0,0.6)' });
+        else barColors.push({ time: t, color: 'rgba(33,150,243,0.6)' });
+      });
+
+      // BUY/SELL signal markers (matching Pine plotshape labelup/labeldown)
+      const srMarkers: any[] = [];
+      srData.signals.slice(-30).forEach(sig => {
         if (sig.index < 0 || sig.index >= candles.length) return;
-        candleSeries.createPriceLine({
-          price: sig.price,
-          color: sig.type === 'BUY' ? '#00E676' : '#FF1744',
-          lineWidth: 1, lineStyle: 0, axisLabelVisible: false,
-          title: sig.type === 'BUY' ? '▲ SR Buy' : '▼ SR Sell',
-        } as any);
+        const t = Math.floor(candles[sig.index].time / 1000) as any;
+        srMarkers.push({
+          time: t,
+          position: sig.type === 'BUY' ? 'belowBar' : 'aboveBar',
+          color: sig.type === 'BUY' ? '#00E676' : '#EF5350',
+          shape: sig.type === 'BUY' ? 'arrowUp' : 'arrowDown',
+          text: sig.type,
+          size: 1,
+        });
       });
 
-      // Broken S/R markers (last 5)
-      srData.broken.slice(-5).forEach(b => {
+      // Broken S/R markers (triangles, last 10)
+      srData.broken.slice(-10).forEach(b => {
         if (b.index < 0 || b.index >= candles.length) return;
-        candleSeries.createPriceLine({
-          price: b.price,
-          color: b.type === 'resistance_broken' ? '#00E676' : '#FF1744',
-          lineWidth: 1, lineStyle: 2, axisLabelVisible: false,
-          title: b.type === 'resistance_broken' ? '▲ R Break' : '▼ S Break',
-        } as any);
+        const t = Math.floor(candles[b.index].time / 1000) as any;
+        srMarkers.push({
+          time: t,
+          position: b.type === 'resistance_broken' ? 'belowBar' : 'aboveBar',
+          color: b.type === 'resistance_broken' ? '#00E676' : '#EF5350',
+          shape: b.type === 'resistance_broken' ? 'arrowUp' : 'arrowDown',
+          text: b.type === 'resistance_broken' ? 'R▲' : 'S▼',
+          size: 0,
+        });
       });
+
+      if (srMarkers.length > 0) {
+        srMarkers.sort((a: any, b: any) => a.time - b.time);
+        createSeriesMarkers(candleSeries, srMarkers);
+      }
+
+      // K/D info box as price lines on the right edge
+      if (srData.lastK > 0) {
+        candleSeries.createPriceLine({
+          price: candles[candles.length - 1].close,
+          color: 'transparent', lineWidth: 0, lineStyle: 2,
+          axisLabelVisible: false,
+          title: `K: ${srData.lastK.toFixed(2)}  D: ${srData.lastD.toFixed(2)}`,
+        } as any);
+      }
     }
 
     // ── Wyckoff (Accumulation/Distribution boxes + events + BUY/SELL) ──
