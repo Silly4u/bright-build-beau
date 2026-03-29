@@ -388,6 +388,7 @@ const Indicators: React.FC = () => {
                   buySellData={buySellData}
                   oscillatorData={oscillatorData}
                   proEmaData={proEmaData}
+                  srData={srData}
                 />
               )}
             </div>
