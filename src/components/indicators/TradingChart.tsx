@@ -108,6 +108,9 @@ const TradingChart: React.FC<TradingChartProps> = ({
     });
     chartRef.current = chart;
 
+    // Shared markers array — all indicators push markers here, applied once at the end
+    const allMarkers: any[] = [];
+
     // ── AlphaNet AI: RZ Bands FIRST (so candles draw on top) ──
     if (alphaNetData && enabledIndicators.includes('alphanet')) {
       const toChartPtRZ = (p: { time: number; value: number }) => ({
@@ -594,16 +597,14 @@ const TradingChart: React.FC<TradingChartProps> = ({
         }
       }
 
-      // Signal markers as candle markers (like TradingView label boxes)
+      // Signal markers — collect into shared array (applied at the end)
       if (alphaNetData.signal_points?.length > 0) {
-        const markers: any[] = [];
         alphaNetData.signal_points.forEach(sp => {
           const stars = '★'.repeat(Math.min(sp.strength, 4));
           const isBuy = sp.type === 'BUY';
-          // Find matching candle
           const candle = candles.find(c => c.time === sp.time);
           if (!candle) return;
-          markers.push({
+          allMarkers.push({
             time: (sp.time / 1000) as any,
             position: isBuy ? 'belowBar' : 'aboveBar',
             color: isBuy ? '#26a69a' : '#ef5350',
@@ -611,13 +612,6 @@ const TradingChart: React.FC<TradingChartProps> = ({
             text: `AI ${sp.strength}${stars}`,
           });
         });
-        if (markers.length > 0) {
-          markers.sort((a: any, b: any) => {
-            if (typeof a.time === 'number' && typeof b.time === 'number') return a.time - b.time;
-            return 0;
-          });
-          createSeriesMarkers(candleSeries, markers);
-        }
       }
     }
 
@@ -639,24 +633,19 @@ const TradingChart: React.FC<TradingChartProps> = ({
       const lowerData = matrixData.lower.map(p => ({ time: (p.time / 1000) as any, value: p.value }));
       if (lowerData.length > 0) lowerSeries.setData(lowerData);
 
-      // Buy/Sell + ▲▼ cross markers on candlestick series
+      // Buy/Sell + ▲▼ cross markers — push to shared allMarkers
       if (matrixData.signals.length > 0) {
-        const markers = matrixData.signals.map(sig => {
+        matrixData.signals.forEach(sig => {
           if (sig.type === 'sell') {
-            return { time: (sig.time / 1000) as any, position: 'aboveBar' as const, color: '#ef5350', shape: 'arrowDown' as const, text: 'Sell' };
+            allMarkers.push({ time: (sig.time / 1000) as any, position: 'aboveBar' as const, color: '#ef5350', shape: 'arrowDown' as const, text: 'Sell' });
           } else if (sig.type === 'buy') {
-            return { time: (sig.time / 1000) as any, position: 'belowBar' as const, color: '#26a69a', shape: 'arrowUp' as const, text: 'Buy' };
+            allMarkers.push({ time: (sig.time / 1000) as any, position: 'belowBar' as const, color: '#26a69a', shape: 'arrowUp' as const, text: 'Buy' });
           } else if (sig.type === 'crossDown') {
-            // ▼ price crossed above upper band
-            return { time: (sig.time / 1000) as any, position: 'aboveBar' as const, color: '#ef5350', shape: 'arrowDown' as const, text: '▼' };
+            allMarkers.push({ time: (sig.time / 1000) as any, position: 'aboveBar' as const, color: '#ef5350', shape: 'arrowDown' as const, text: '▼' });
           } else {
-            // ▲ price crossed below lower band
-            return { time: (sig.time / 1000) as any, position: 'belowBar' as const, color: '#26a69a', shape: 'arrowUp' as const, text: '▲' };
+            allMarkers.push({ time: (sig.time / 1000) as any, position: 'belowBar' as const, color: '#26a69a', shape: 'arrowUp' as const, text: '▲' });
           }
         });
-
-        markers.sort((a, b) => (a.time as number) - (b.time as number));
-        createSeriesMarkers(candleSeries, markers);
       }
     }
 
@@ -881,11 +870,8 @@ const TradingChart: React.FC<TradingChartProps> = ({
         }
       });
 
-      // Apply all TP/SL markers to candle series
-      if (tpSlMarkers.length > 0) {
-        tpSlMarkers.sort((a, b) => (a.time as number) - (b.time as number));
-        createSeriesMarkers(candleSeries, tpSlMarkers);
-      }
+      // Push TP/SL markers to shared allMarkers
+      tpSlMarkers.forEach(m => allMarkers.push(m));
     }
 
     // ── Buy/Sell Signal (Wavy Tunnel + Supertrend) ──
@@ -1225,7 +1211,19 @@ const TradingChart: React.FC<TradingChartProps> = ({
       }
     });
 
-    // Show last ~120 bars by default (like TradingView), avoid big empty gaps
+    // Apply all collected markers to candle series (one call to avoid overwriting)
+    if (allMarkers.length > 0) {
+      // Deduplicate: keep only one marker per timestamp (prevent stacking)
+      const seen = new Map<number, any>();
+      allMarkers.forEach(m => {
+        const key = m.time as number;
+        if (!seen.has(key)) seen.set(key, m);
+      });
+      const dedupedMarkers = Array.from(seen.values());
+      dedupedMarkers.sort((a, b) => (a.time as number) - (b.time as number));
+      createSeriesMarkers(candleSeries, dedupedMarkers);
+    }
+
     // Always fit all candle data so there are no empty gaps
     chart.timeScale().fitContent();
 
