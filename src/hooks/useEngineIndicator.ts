@@ -11,32 +11,32 @@ export interface SwingPoint {
   type: 'high' | 'low';
 }
 
+/**
+ * A drawn structure line (BOS or CHoCH).
+ * Matches drawms_smc in Pine: x1, x2, y, txt, css, style
+ */
 export interface StructureBreak {
-  /** bar index where the line starts (the swing point) */
-  startIndex: number;
-  startTime: number;
-  /** bar index where the break was confirmed */
-  endIndex: number;
-  endTime: number;
-  price: number;
-  type: 'BOS' | 'CHoCH';
+  x1Time: number;      // start time of horizontal line
+  x2Time: number;      // end time of horizontal line
+  price: number;       // y level
+  label: string;       // 'BOS' | 'CHoCH' | 'x'
   direction: 'bull' | 'bear';
-  /** Was this a sweep (x) — wick through but close back? */
-  isSweep: boolean;
+  /** line style: 'solid' | 'dashed' | 'dotted' */
+  lineStyle: 'solid' | 'dashed' | 'dotted';
 }
 
 export interface OrderBlock {
   top: number;
   bottom: number;
   avg: number;
-  startTime: number;
-  endTime: number;
-  startIndex: number;
-  endIndex: number;
+  startTime: number;   // loc (xloc.bar_time)
   bull: boolean;
   mitigated: boolean;
-  mitigatedTime?: number;
+  mitigatedTime?: number;   // bbloc
   volume: number;
+  /** buy/sell activity tracking */
+  blPosTime: number;   // xlocbl
+  brPosTime: number;   // xlocbr
 }
 
 export interface FairValueGap {
@@ -46,6 +46,7 @@ export interface FairValueGap {
   index: number;
   bull: boolean;
   mitigated: boolean;
+  mitigatedTime?: number;
 }
 
 export interface TrendZone {
@@ -62,7 +63,7 @@ export interface EngineData {
   orderBlocks: OrderBlock[];
   fvgs: FairValueGap[];
   trendZones: TrendZone[];
-  trend: number; // 1 = bull, -1 = bear
+  trend: number;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -72,18 +73,25 @@ function computeATR(candles: Candle[], period: number, endIdx?: number): number 
   const end = endIdx ?? candles.length - 1;
   const start = Math.max(1, end - period + 1);
   if (start > end) return 0;
-  let sum = 0;
-  let count = 0;
+  let sum = 0, count = 0;
   for (let i = start; i <= end; i++) {
     const tr = Math.max(
       candles[i].high - candles[i].low,
       Math.abs(candles[i].high - candles[i - 1].close),
       Math.abs(candles[i].low - candles[i - 1].close),
     );
-    sum += tr;
-    count++;
+    sum += tr; count++;
   }
   return count > 0 ? sum / count : 0;
+}
+
+/** ATR(200) at bar i, cached for performance */
+function buildATR200(candles: Candle[]): Float64Array {
+  const out = new Float64Array(candles.length);
+  for (let i = 0; i < candles.length; i++) {
+    out[i] = computeATR(candles, 200, i);
+  }
+  return out;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -92,8 +100,7 @@ function computeATR(candles: Candle[], period: number, endIdx?: number): number 
 function detectPivots(candles: Candle[], strength: number): SwingPoint[] {
   const pivots: SwingPoint[] = [];
   for (let i = strength; i < candles.length - strength; i++) {
-    let isHigh = true;
-    let isLow = true;
+    let isHigh = true, isLow = true;
     for (let j = 1; j <= strength; j++) {
       if (candles[i].high <= candles[i - j].high || candles[i].high <= candles[i + j].high) isHigh = false;
       if (candles[i].low >= candles[i - j].low || candles[i].low >= candles[i + j].low) isLow = false;
@@ -106,29 +113,78 @@ function detectPivots(candles: Candle[], strength: number): SwingPoint[] {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Market Structure Detection — SMC style (BOS / CHoCH / Sweep)
-// Closely follows the Pine Script "structure_smc" state machine
+// find_smc: find highest/lowest bar between current bar and a
+// reference index. Mirrors the Pine find_smc method.
 // ═══════════════════════════════════════════════════════════════
-interface MSState {
-  trend: number;     // 1=bull, -1=bear, 0=init
-  bosLevel: number | null;    // Break of Structure level being watched
-  chochLevel: number | null;  // Change of Character level
-  bosStartIdx: number;
-  chochStartIdx: number;
-  main: number;      // current swing extreme
-  mainIdx: number;
-  stage: number;     // 0=init, 1=first, 2=running
+function findExtreme(
+  candles: Candle[],
+  currentIdx: number,
+  refIdx: number,
+  useMax: boolean,
+  useSweepRef: boolean,
+  sweepRefIdx: number,
+  useOB: boolean,
+): number {
+  const from = useSweepRef ? sweepRefIdx : refIdx;
+  const rangeEnd = currentIdx;
+  const rangeStart = Math.max(0, Math.min(from, rangeEnd));
+
+  let bestIdx = rangeStart;
+  if (useMax) {
+    for (let k = rangeStart; k <= rangeEnd; k++) {
+      if (candles[k].high > candles[bestIdx].high) bestIdx = k;
+    }
+    // useob: check if the previous bar is even higher
+    if (useOB && bestIdx > 0 && candles[bestIdx - 1].high > candles[bestIdx].high) {
+      bestIdx = bestIdx - 1;
+    }
+  } else {
+    for (let k = rangeStart; k <= rangeEnd; k++) {
+      if (candles[k].low < candles[bestIdx].low) bestIdx = k;
+    }
+    if (useOB && bestIdx > 0 && candles[bestIdx - 1].low < candles[bestIdx].low) {
+      bestIdx = bestIdx - 1;
+    }
+  }
+  return bestIdx;
 }
 
-function detectMarketStructure(
-  candles: Candle[],
-  pivots: SwingPoint[],
-  pivotLen: number,
-): { structures: StructureBreak[]; trend: number } {
-  const structures: StructureBreak[] = [];
-  if (candles.length < 30) return { structures, trend: 0 };
+// ═══════════════════════════════════════════════════════════════
+// Market Structure Engine — faithful translation of structure_smc
+// ═══════════════════════════════════════════════════════════════
+const MS_LEN = 5;
+const OB_LEN = 5;
+const OB_MODE: 'Length' | 'Full' = 'Length';
+const OB_MITI: 'Close' | 'Wick' | 'Avg' = 'Close';
+const OB_LAST = 5;
 
-  // Build pivot lookup maps for "Adjusted Points" mode
+interface OBInternal {
+  bull: boolean;
+  top: number;
+  btm: number;
+  avg: number;
+  locTime: number;
+  locIdx: number;
+  volume: number;
+  dir: number;    // 1 = bullish candle, -1 = bearish
+  move: number;
+  blPOS: number;
+  brPOS: number;
+  isbb: boolean;
+  bblocTime: number;
+}
+
+function runStructureEngine(candles: Candle[], pivots: SwingPoint[]): {
+  structures: StructureBreak[];
+  orderBlocks: OrderBlock[];
+  trend: number;
+} {
+  if (candles.length < 30) return { structures: [], orderBlocks: [], trend: 0 };
+
+  const atr200 = buildATR200(candles);
+  const atrSmc = (idx: number) => atr200[idx] / (5 / OB_LEN);
+
+  // Pivot tracking for Adjusted Points
   const pivotHighAt = new Map<number, number>();
   const pivotLowAt = new Map<number, number>();
   for (const p of pivots) {
@@ -136,47 +192,100 @@ function detectMarketStructure(
     else pivotLowAt.set(p.index, p.price);
   }
 
-  // Track recent pivots for adjusted points
+  // Recent pivot high/low arrays (like php_smc / plp_smc)
   let recentPH: { idx: number; price: number } | null = null;
   let recentPL: { idx: number; price: number } | null = null;
 
-  const st: MSState = {
-    trend: 0, bosLevel: null, chochLevel: null,
-    bosStartIdx: 0, chochStartIdx: 0,
-    main: 0, mainIdx: 0, stage: 0,
-  };
+  // Structure state (structure_smc type)
+  let trend = 0;
+  let bosLevel: number | null = null;
+  let chochLevel: number | null = null;
+  let loc = 0;     // location of structure point
+  let temp = 0;    // temp tracking
+  let start = 0;   // 0=init, 1=first, 2=running
+  let main = 0;    // current swing extreme
+  let xloc = 0;    // sweep ref location
 
-  // Helpers for finding extremes between two bar indices
-  const findHighest = (from: number, to: number) => {
-    let best = from;
-    for (let k = from; k <= to; k++) {
-      if (candles[k].high > candles[best].high) best = k;
-    }
-    return best;
-  };
-  const findLowest = (from: number, to: number) => {
-    let best = from;
-    for (let k = from; k <= to; k++) {
-      if (candles[k].low < candles[best].low) best = k;
-    }
-    return best;
-  };
+  // Drawing arrays (like bldw_smc / brdw_smc)
+  const bullLines: StructureBreak[] = [];
+  const bearLines: StructureBreak[] = [];
 
-  // Detect crossup / crossdn (two consecutive bullish/bearish candles momentum)
+  // Order block arrays
+  const bullOBs: OBInternal[] = [];
+  const bearOBs: OBInternal[] = [];
+
+  // crossup / crossdn detection
   let up = candles[0].high;
   let dn = candles[0].low;
 
+  const createOB = (bull: boolean, idx: number) => {
+    const c = candles[idx];
+    const a = atrSmc(idx);
+    let top: number, btm: number;
+
+    if (bull) {
+      // Bull OB: top = min(low + atr, high), btm = low
+      top = OB_MODE === 'Length'
+        ? (c.low + a > c.high ? c.high : c.low + a)
+        : c.high;
+      btm = c.low;
+      bullOBs.unshift({
+        bull: true, top, btm, avg: (top + btm) / 2,
+        locTime: c.time, locIdx: idx,
+        volume: c.volume,
+        dir: c.close > c.open ? 1 : -1,
+        move: 1, blPOS: 1, brPOS: 1,
+        isbb: false, bblocTime: 0,
+      });
+    } else {
+      // Bear OB: top = high, btm = max(high - atr, low)
+      top = c.high;
+      btm = OB_MODE === 'Length'
+        ? (c.high - a < c.low ? c.low : c.high - a)
+        : c.low;
+      bearOBs.unshift({
+        bull: false, top, btm, avg: (top + btm) / 2,
+        locTime: c.time, locIdx: idx,
+        volume: c.volume,
+        dir: c.close > c.open ? 1 : -1,
+        move: 1, blPOS: 1, brPOS: 1,
+        isbb: false, bblocTime: 0,
+      });
+    }
+  };
+
+  const pushBullLine = (x1T: number, x2T: number, price: number, label: string, style: 'solid' | 'dashed' | 'dotted') => {
+    bullLines.push({ x1Time: x1T, x2Time: x2T, price, label, direction: 'bull', lineStyle: style });
+  };
+  const pushBearLine = (x1T: number, x2T: number, price: number, label: string, style: 'solid' | 'dashed' | 'dotted') => {
+    bearLines.push({ x1Time: x1T, x2Time: x2T, price, label, direction: 'bear', lineStyle: style });
+  };
+
+  const updateLastBull = (x2T: number, price?: number, label?: string, style?: 'solid' | 'dashed' | 'dotted') => {
+    if (bullLines.length === 0) return;
+    const last = bullLines[bullLines.length - 1];
+    last.x2Time = x2T;
+    if (price !== undefined) last.price = price;
+    if (label !== undefined) last.label = label;
+    if (style !== undefined) last.lineStyle = style;
+  };
+  const updateLastBear = (x2T: number, price?: number, label?: string, style?: 'solid' | 'dashed' | 'dotted') => {
+    if (bearLines.length === 0) return;
+    const last = bearLines[bearLines.length - 1];
+    last.x2Time = x2T;
+    if (price !== undefined) last.price = price;
+    if (label !== undefined) last.label = label;
+    if (style !== undefined) last.lineStyle = style;
+  };
+
   for (let i = 1; i < candles.length; i++) {
     const c = candles[i];
+    const prev = candles[i - 1];
     let crossup = false;
     let crossdn = false;
 
-    if (c.high > up) {
-      up = c.high; dn = c.low; crossup = true;
-    }
-    if (c.low < dn) {
-      up = c.high; dn = c.low; crossdn = true;
-    }
+    if (c.high > up) { up = c.high; dn = c.low; crossup = true; }
+    if (c.low < dn) { up = c.high; dn = c.low; crossdn = true; }
 
     // Update pivot tracking
     if (pivotHighAt.has(i)) {
@@ -187,415 +296,425 @@ function detectMarketStructure(
       const p = pivotLowAt.get(i)!;
       if (!recentPL || p < recentPL.price) recentPL = { idx: i, price: p };
     }
-    // Reset pivots when price exceeds them
     if (recentPH && c.high > recentPH.price) recentPH = null;
     if (recentPL && c.low < recentPL.price) recentPL = null;
 
-    // Stage 0: initialization
-    if (st.stage === 0) {
-      st.stage = 1;
-      st.chochLevel = c.high;
-      st.chochStartIdx = i;
-      st.bosLevel = null;
-      st.bosStartIdx = i;
-      st.main = c.low;
-      st.mainIdx = i;
-      st.trend = 0;
+    // OB find helpers: find extreme between xloc and current bar
+    const idbull = findExtreme(candles, i, loc, false, false, xloc, true);
+    const idbear = findExtreme(candles, i, loc, true, false, xloc, true);
+
+    // ── Stage 0: Init ──
+    if (start === 0) {
+      start = 1;
+      chochLevel = c.high;   // bos field in Pine init
+      bosLevel = c.low;       // choch field in Pine init
+      loc = i;
+      temp = i;
+      main = c.high; // Actually not used meaningfully in stage 1
+      xloc = i;
+      pushBullLine(c.time, c.time, c.high, 'CHoCH', 'dashed');
+      pushBearLine(c.time, c.time, c.low, 'CHoCH', 'dashed');
       continue;
     }
 
-    // Stage 1: waiting for first directional break
-    if (st.stage === 1) {
-      // Track extremes
-      if (c.high > (st.chochLevel ?? -Infinity)) {
-        st.chochLevel = c.high;
-        st.chochStartIdx = i;
+    // ── Stage 1: First — waiting for initial CHoCH ──
+    if (start === 1) {
+      // Sweep checks first (like Pine switch order)
+      // Bearish sweep on choch (low)
+      if (c.low <= bosLevel! && c.close >= bosLevel!) {
+        // Sweep on bear side
+        updateLastBear(c.time, undefined, 'x', 'dotted');
+        bosLevel = c.low;
+        xloc = i;
+        pushBearLine(c.time, c.time, c.low, 'CHoCH', 'dashed');
       }
-      if (c.low < st.main) {
-        st.main = c.low;
-        st.mainIdx = i;
+      // Bullish sweep on bos (high)
+      else if (c.high >= chochLevel! && c.close <= chochLevel!) {
+        updateLastBull(c.time, undefined, 'x', 'dotted');
+        chochLevel = c.high;
+        xloc = i;
+        pushBullLine(c.time, c.time, c.high, 'CHoCH', 'dashed');
       }
-
-      // Check bearish CHoCH
-      if (st.main !== null && c.close <= st.main) {
-        st.trend = -1;
-        st.stage = 2;
-        const startIdx = st.mainIdx;
-        structures.push({
-          startIndex: startIdx, startTime: candles[startIdx].time,
-          endIndex: i, endTime: c.time,
-          price: st.main, type: 'CHoCH', direction: 'bear', isSweep: false,
-        });
-        // Setup for bear trend
-        const hIdx = findHighest(st.mainIdx, i);
-        st.chochLevel = candles[hIdx].high;
-        st.chochStartIdx = hIdx;
-        st.bosLevel = null;
-        st.main = c.low;
-        st.mainIdx = i;
-        continue;
+      // Bearish CHoCH confirm
+      else if (bosLevel !== null && c.close <= bosLevel) {
+        trend = -1;
+        createOB(true, idbull);
+        updateLastBear(c.time, undefined, undefined, 'solid');
+        chochLevel = chochLevel; // stays
+        bosLevel = null;
+        start = 2;
+        loc = i;
+        main = c.low;
+        temp = i;
+        xloc = i;
       }
-
-      // Check bullish CHoCH
-      if (st.chochLevel !== null && c.close >= st.chochLevel) {
-        st.trend = 1;
-        st.stage = 2;
-        const startIdx = st.chochStartIdx;
-        structures.push({
-          startIndex: startIdx, startTime: candles[startIdx].time,
-          endIndex: i, endTime: c.time,
-          price: st.chochLevel, type: 'CHoCH', direction: 'bull', isSweep: false,
-        });
-        // Setup for bull trend
-        const lIdx = findLowest(st.chochStartIdx, i);
-        st.chochLevel = candles[lIdx].low;
-        st.chochStartIdx = lIdx;
-        st.bosLevel = null;
-        st.main = c.high;
-        st.mainIdx = i;
-        continue;
+      // Bullish CHoCH confirm
+      else if (chochLevel !== null && c.close >= chochLevel) {
+        trend = 1;
+        createOB(false, idbear);
+        updateLastBull(c.time, undefined, undefined, 'solid');
+        bosLevel = bosLevel; // stays (becomes choch in new trend)
+        chochLevel = null;
+        start = 2;
+        loc = i;
+        main = c.high;
+        temp = i;
+        xloc = i;
       }
       continue;
     }
 
-    // Stage 2: running — proper BOS/CHoCH/Sweep detection
-    if (st.trend === -1) {
-      // Bear trend: tracking lows for BOS, highs for CHoCH
-      if (c.low < st.main) {
-        st.main = c.low;
-        st.mainIdx = i;
-      }
+    // ── Stage 2: Running ──
+    if (trend === -1) {
+      // Bear trend
+      if (c.low <= main) { main = c.low; temp = i; }
 
-      // Create BOS level when we get momentum confirmation
-      if (st.bosLevel === null) {
-        if (crossup && c.close > c.open && (i > 0 && candles[i - 1].close > candles[i - 1].open)) {
-          st.bosLevel = st.main;
-          st.bosStartIdx = st.mainIdx;
+      // Adjusted Points: update CHoCH with better pivot
+      if (i % (MS_LEN * 2) === 0 && bosLevel !== null && recentPH && recentPH.price < (chochLevel ?? Infinity)) {
+        chochLevel = recentPH.price;
+        loc = recentPH.idx;
+        xloc = recentPH.idx;
+        temp = recentPH.idx;
+        updateLastBull(c.time, recentPH.price);
+        if (bullLines.length > 0) {
+          bullLines[bullLines.length - 1].x1Time = candles[recentPH.idx].time;
         }
       }
 
-      // Adjusted Points: update CHoCH with better pivot
-      if (st.bosLevel !== null && recentPH && recentPH.price < (st.chochLevel ?? Infinity)) {
-        st.chochLevel = recentPH.price;
-        st.chochStartIdx = recentPH.idx;
+      // Create BOS level on momentum
+      if (bosLevel === null) {
+        if (crossup && c.close > c.open && prev.close > prev.open) {
+          bosLevel = main;
+          loc = temp;
+          xloc = loc;
+          pushBearLine(candles[temp].time, c.time, candles[temp].low, 'BOS', 'dashed');
+        }
       }
 
-      // Check sweep on BOS (wick through but close back)
-      if (st.bosLevel !== null && c.low <= st.bosLevel && c.close >= st.bosLevel) {
-        structures.push({
-          startIndex: st.bosStartIdx, startTime: candles[st.bosStartIdx].time,
-          endIndex: i, endTime: c.time,
-          price: st.bosLevel, type: 'BOS', direction: 'bear', isSweep: true,
-        });
-        st.bosLevel = c.low;
-        st.bosStartIdx = i;
-        continue;
+      // Extend lines
+      if (bosLevel !== null) updateLastBear(c.time);
+      if (bullLines.length > 0) updateLastBull(c.time);
+
+      // Check BOS sweep
+      if (bosLevel !== null && c.low <= bosLevel && c.close >= bosLevel) {
+        updateLastBear(c.time, undefined, 'x', 'dotted');
+        bosLevel = c.low;
+        xloc = i;
+        pushBearLine(c.time, c.time, c.low, 'BOS', 'dashed');
+      }
+      // Check BOS confirm
+      else if (bosLevel !== null && c.close <= bosLevel) {
+        createOB(false, idbear);
+        const hIdx = findExtreme(candles, i, loc, true, false, xloc, false);
+        updateLastBear(c.time, undefined, undefined, 'solid');
+        xloc = i;
+        bosLevel = null;
+        chochLevel = candles[hIdx].high;
+        loc = hIdx;
+        // Update bull CHoCH line
+        if (bullLines.length > 0) {
+          const last = bullLines[bullLines.length - 1];
+          last.x1Time = candles[hIdx].time;
+          last.x2Time = c.time;
+          last.price = candles[hIdx].high;
+        }
       }
 
-      // Check BOS confirm (close below)
-      if (st.bosLevel !== null && c.close <= st.bosLevel) {
-        structures.push({
-          startIndex: st.bosStartIdx, startTime: candles[st.bosStartIdx].time,
-          endIndex: i, endTime: c.time,
-          price: st.bosLevel, type: 'BOS', direction: 'bear', isSweep: false,
-        });
-        // Find new CHoCH level (highest between bosStart and now)
-        const hIdx = findHighest(st.bosStartIdx, i);
-        st.chochLevel = candles[hIdx].high;
-        st.chochStartIdx = hIdx;
-        st.bosLevel = null;
-        st.main = c.low;
-        st.mainIdx = i;
-        continue;
+      // Check CHoCH sweep
+      if (chochLevel !== null && c.high >= chochLevel && c.close <= chochLevel) {
+        updateLastBull(c.time, undefined, 'x', 'dotted');
+        chochLevel = c.high;
+        xloc = i;
+        pushBullLine(c.time, c.time, c.high, 'CHoCH', 'dashed');
       }
+      // Check CHoCH confirm (trend change to bull)
+      else if (chochLevel !== null && c.close >= chochLevel) {
+        createOB(true, idbull);
+        const lIdx = findExtreme(candles, i, loc, false, false, xloc, false);
 
-      // Check sweep on CHoCH
-      if (st.chochLevel !== null && c.high >= st.chochLevel && c.close <= st.chochLevel) {
-        structures.push({
-          startIndex: st.chochStartIdx, startTime: candles[st.chochStartIdx].time,
-          endIndex: i, endTime: c.time,
-          price: st.chochLevel, type: 'CHoCH', direction: 'bull', isSweep: true,
-        });
-        st.chochLevel = c.high;
-        st.chochStartIdx = i;
-        continue;
-      }
+        // Set new CHoCH for bear side
+        if (bosLevel === null) {
+          chochLevel = candles[lIdx].low;
+          pushBearLine(c.time, c.time, candles[lIdx].low, 'BOS', 'dashed');
+          if (bearLines.length > 0) {
+            bearLines[bearLines.length - 1].x1Time = candles[temp].time;
+          }
+        } else {
+          chochLevel = bosLevel;
+        }
 
-      // Check CHoCH confirm (close above — trend change to bull)
-      if (st.chochLevel !== null && c.close >= st.chochLevel) {
-        structures.push({
-          startIndex: st.chochStartIdx, startTime: candles[st.chochStartIdx].time,
-          endIndex: i, endTime: c.time,
-          price: st.chochLevel, type: 'CHoCH', direction: 'bull', isSweep: false,
-        });
-        st.trend = 1;
-        // Find new CHoCH level for bull (lowest between chochStart and now)
-        const lIdx = st.bosLevel !== null
-          ? findLowest(st.bosStartIdx, i)
-          : findLowest(st.mainIdx, i);
-        st.chochLevel = candles[lIdx].low;
-        st.chochStartIdx = lIdx;
-        st.bosLevel = null;
-        st.main = c.high;
-        st.mainIdx = i;
-        continue;
+        bosLevel = null;
+        main = c.high;
+        trend = 1;
+        loc = i;
+        xloc = i;
+        temp = i;
+
+        updateLastBull(c.time, undefined, 'CHoCH', 'solid');
+        if (bearLines.length > 0) {
+          const last = bearLines[bearLines.length - 1];
+          last.x2Time = c.time;
+          last.price = chochLevel!;
+          last.label = 'CHoCH';
+        }
       }
     } else {
-      // Bull trend: tracking highs for BOS, lows for CHoCH
-      if (c.high > st.main) {
-        st.main = c.high;
-        st.mainIdx = i;
-      }
+      // Bull trend
+      if (c.high >= main) { main = c.high; temp = i; }
 
-      // Create BOS level
-      if (st.bosLevel === null) {
-        if (crossdn && c.close < c.open && (i > 0 && candles[i - 1].close < candles[i - 1].open)) {
-          st.bosLevel = st.main;
-          st.bosStartIdx = st.mainIdx;
+      // Create BOS level on momentum
+      if (bosLevel === null) {
+        if (crossdn && c.close < c.open && prev.close < prev.open) {
+          bosLevel = main;
+          loc = temp;
+          xloc = loc;
+          pushBullLine(candles[temp].time, c.time, candles[temp].high, 'BOS', 'dashed');
         }
       }
 
       // Adjusted Points: update CHoCH with better pivot
-      if (st.bosLevel !== null && recentPL && recentPL.price > (st.chochLevel ?? -Infinity)) {
-        st.chochLevel = recentPL.price;
-        st.chochStartIdx = recentPL.idx;
+      if (i % (MS_LEN * 2) === 0 && bosLevel !== null && recentPL && recentPL.price > (chochLevel ?? -Infinity)) {
+        chochLevel = recentPL.price;
+        loc = recentPL.idx;
+        xloc = recentPL.idx;
+        temp = recentPL.idx;
+        updateLastBear(c.time, recentPL.price);
+        if (bearLines.length > 0) {
+          bearLines[bearLines.length - 1].x1Time = candles[recentPL.idx].time;
+        }
       }
 
-      // Sweep on BOS
-      if (st.bosLevel !== null && c.high >= st.bosLevel && c.close <= st.bosLevel) {
-        structures.push({
-          startIndex: st.bosStartIdx, startTime: candles[st.bosStartIdx].time,
-          endIndex: i, endTime: c.time,
-          price: st.bosLevel, type: 'BOS', direction: 'bull', isSweep: true,
-        });
-        st.bosLevel = c.high;
-        st.bosStartIdx = i;
-        continue;
+      // Extend lines
+      if (bosLevel !== null) updateLastBull(c.time);
+      if (bearLines.length > 0) updateLastBear(c.time);
+
+      // Check BOS sweep
+      if (bosLevel !== null && c.high >= bosLevel && c.close <= bosLevel) {
+        updateLastBull(c.time, undefined, 'x', 'dotted');
+        bosLevel = c.high;
+        xloc = i;
+        pushBullLine(c.time, c.time, c.high, 'BOS', 'dashed');
+      }
+      // Check BOS confirm
+      else if (bosLevel !== null && c.close >= bosLevel) {
+        createOB(true, idbull);
+        const lIdx = findExtreme(candles, i, loc, false, false, xloc, false);
+        updateLastBull(c.time, undefined, undefined, 'solid');
+        xloc = i;
+        bosLevel = null;
+        chochLevel = candles[lIdx].low;
+        loc = lIdx;
+        if (bearLines.length > 0) {
+          const last = bearLines[bearLines.length - 1];
+          last.x1Time = candles[lIdx].time;
+          last.x2Time = c.time;
+          last.price = candles[lIdx].low;
+        }
       }
 
-      // BOS confirm
-      if (st.bosLevel !== null && c.close >= st.bosLevel) {
-        structures.push({
-          startIndex: st.bosStartIdx, startTime: candles[st.bosStartIdx].time,
-          endIndex: i, endTime: c.time,
-          price: st.bosLevel, type: 'BOS', direction: 'bull', isSweep: false,
-        });
-        const lIdx = findLowest(st.bosStartIdx, i);
-        st.chochLevel = candles[lIdx].low;
-        st.chochStartIdx = lIdx;
-        st.bosLevel = null;
-        st.main = c.high;
-        st.mainIdx = i;
-        continue;
+      // Check CHoCH sweep
+      if (chochLevel !== null && c.low <= chochLevel && c.close >= chochLevel) {
+        updateLastBear(c.time, undefined, 'x', 'dotted');
+        chochLevel = c.low;
+        xloc = i;
+        pushBearLine(c.time, c.time, c.low, 'CHoCH', 'dashed');
       }
+      // Check CHoCH confirm (trend change to bear)
+      else if (chochLevel !== null && c.close <= chochLevel) {
+        createOB(false, idbear);
+        const hIdx = findExtreme(candles, i, loc, true, false, xloc, false);
 
-      // Sweep on CHoCH
-      if (st.chochLevel !== null && c.low <= st.chochLevel && c.close >= st.chochLevel) {
-        structures.push({
-          startIndex: st.chochStartIdx, startTime: candles[st.chochStartIdx].time,
-          endIndex: i, endTime: c.time,
-          price: st.chochLevel, type: 'CHoCH', direction: 'bear', isSweep: true,
-        });
-        st.chochLevel = c.low;
-        st.chochStartIdx = i;
-        continue;
-      }
+        if (bosLevel === null) {
+          chochLevel = candles[hIdx].high;
+          pushBullLine(c.time, c.time, candles[hIdx].high, 'BOS', 'dashed');
+          if (bullLines.length > 0) {
+            bullLines[bullLines.length - 1].x1Time = candles[temp].time;
+          }
+        } else {
+          chochLevel = bosLevel;
+        }
 
-      // CHoCH confirm (trend change to bear)
-      if (st.chochLevel !== null && c.close <= st.chochLevel) {
-        structures.push({
-          startIndex: st.chochStartIdx, startTime: candles[st.chochStartIdx].time,
-          endIndex: i, endTime: c.time,
-          price: st.chochLevel, type: 'CHoCH', direction: 'bear', isSweep: false,
-        });
-        st.trend = -1;
-        const hIdx = st.bosLevel !== null
-          ? findHighest(st.bosStartIdx, i)
-          : findHighest(st.mainIdx, i);
-        st.chochLevel = candles[hIdx].high;
-        st.chochStartIdx = hIdx;
-        st.bosLevel = null;
-        st.main = c.low;
-        st.mainIdx = i;
-        continue;
+        bosLevel = null;
+        main = c.low;
+        trend = -1;
+        loc = i;
+        temp = i;
+        xloc = i;
+
+        updateLastBear(c.time, undefined, 'CHoCH', 'solid');
+        if (bullLines.length > 0) {
+          const last = bullLines[bullLines.length - 1];
+          last.x2Time = c.time;
+          last.price = chochLevel!;
+          last.label = 'CHoCH';
+        }
       }
     }
+
+    // ── OB Mitigation ──
+    const mitigateOBs = (obs: OBInternal[]) => {
+      for (let j = obs.length - 1; j >= 0; j--) {
+        const ob = obs[j];
+        if (!ob.isbb) {
+          if (ob.bull) {
+            const hit = OB_MITI === 'Close' ? Math.min(c.close, c.open) < ob.btm
+              : OB_MITI === 'Wick' ? c.low < ob.btm
+              : c.low < ob.avg;
+            if (hit) { ob.isbb = true; ob.bblocTime = c.time; }
+          } else {
+            const hit = OB_MITI === 'Close' ? Math.max(c.close, c.open) > ob.top
+              : OB_MITI === 'Wick' ? c.high > ob.top
+              : c.high > ob.avg;
+            if (hit) { ob.isbb = true; ob.bblocTime = c.time; }
+          }
+        } else {
+          // Breaker mitigation
+          if (ob.bull) {
+            if (OB_MITI === 'Close' ? Math.max(c.close, c.open) > ob.top : c.high > ob.top) {
+              obs.splice(j, 1);
+            }
+          } else {
+            if (OB_MITI === 'Close' ? Math.min(c.close, c.open) < ob.btm : c.low < ob.btm) {
+              obs.splice(j, 1);
+            }
+          }
+        }
+      }
+    };
+    mitigateOBs(bullOBs);
+    mitigateOBs(bearOBs);
+
+    // ── OB volume metrics tracking ──
+    const updateMetric = (ob: OBInternal) => {
+      if (ob.dir === 1) {
+        if (ob.move === 1) { ob.blPOS++; ob.move = 2; }
+        else if (ob.move === 2) { ob.blPOS++; ob.move = 3; }
+        else { ob.brPOS++; ob.move = 1; }
+      } else {
+        if (ob.move === 1) { ob.brPOS++; ob.move = 2; }
+        else if (ob.move === 2) { ob.brPOS++; ob.move = 3; }
+        else { ob.blPOS++; ob.move = 1; }
+      }
+    };
+    for (const ob of bullOBs) updateMetric(ob);
+    for (const ob of bearOBs) updateMetric(ob);
   }
 
-  return { structures, trend: st.trend };
+  // ── Remove overlap ──
+  const removeOverlap = (a: OBInternal[], b: OBInternal[]) => {
+    const overlaps = (s: OBInternal, cur: OBInternal) =>
+      (s.btm > cur.btm && s.btm < cur.top) ||
+      (s.top < cur.top && s.btm > cur.btm) ||
+      (s.top > cur.top && s.btm < cur.btm) ||
+      (s.top < cur.top && s.top > cur.btm);
+
+    if (a.length > 1) {
+      for (let j = a.length - 1; j >= 1; j--) {
+        if (overlaps(a[j], a[0])) a.splice(j, 1);
+      }
+    }
+    if (b.length > 1) {
+      for (let j = b.length - 1; j >= 1; j--) {
+        if (overlaps(b[j], b[0])) b.splice(j, 1);
+      }
+    }
+    if (a.length > 0 && b.length > 0) {
+      for (let j = a.length - 1; j >= 0; j--) {
+        if (overlaps(a[j], b[0])) a.splice(j, 1);
+      }
+    }
+    if (a.length > 0 && b.length > 0) {
+      for (let j = b.length - 1; j >= 0; j--) {
+        if (overlaps(b[j], a[0])) b.splice(j, 1);
+      }
+    }
+  };
+  removeOverlap(bullOBs, bearOBs);
+
+  // ── Build output ──
+  const lastTime = candles[candles.length - 1].time;
+  const barDuration = candles.length > 1 ? candles[1].time - candles[0].time : 60000;
+
+  const allOBs: OrderBlock[] = [...bullOBs, ...bearOBs]
+    .slice(0, OB_LAST)
+    .map(ob => ({
+      top: ob.top,
+      bottom: ob.btm,
+      avg: ob.avg,
+      startTime: ob.locTime,
+      bull: ob.bull,
+      mitigated: ob.isbb,
+      mitigatedTime: ob.isbb ? ob.bblocTime : undefined,
+      volume: ob.volume,
+      blPosTime: ob.locTime + barDuration * ob.blPOS,
+      brPosTime: ob.locTime + barDuration * ob.brPOS,
+    }));
+
+  // Merge bull + bear lines, keep last N
+  const allStructures = [...bullLines, ...bearLines]
+    .sort((a, b) => a.x1Time - b.x1Time);
+
+  return {
+    structures: allStructures,
+    orderBlocks: allOBs,
+    trend,
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Order Block Detection (ATR-based sizing like Pine Script)
+// FVG Detection (matches Pine dFVG_smc)
 // ═══════════════════════════════════════════════════════════════
-function detectOrderBlocks(
-  candles: Candle[],
-  structures: StructureBreak[],
-  obLen: number = 5,
-  mitigation: 'Close' | 'Wick' | 'Avg' = 'Close',
-): OrderBlock[] {
-  const obs: OrderBlock[] = [];
-  if (candles.length < 10) return obs;
+function detectFVGs(candles: Candle[]): FairValueGap[] {
+  const fvgs: FairValueGap[] = [];
+  for (let i = 2; i < candles.length; i++) {
+    const prev2 = candles[i - 2];
+    const mid = candles[i - 1];
+    const curr = candles[i];
 
-  const atrBase = computeATR(candles, 200);
-  const atrUnit = atrBase / (5 / obLen);
-
-  for (const s of structures) {
-    if (s.isSweep) continue; // No OB on sweeps
-    const idx = s.endIndex;
-    if (idx < 2 || idx >= candles.length) continue;
-
-    // Find the OB candle: highest/lowest between structure start and break
-    if (s.direction === 'bull') {
-      // Bull structure → bearish OB (supply became demand)
-      // Find the lowest low between startIndex and endIndex
-      let obIdx = s.startIndex;
-      for (let j = s.startIndex; j < s.endIndex; j++) {
-        if (candles[j].low < candles[obIdx].low) obIdx = j;
-      }
-      const obCandle = candles[obIdx];
-      const top = obLen > 1
-        ? Math.min(obCandle.low + atrUnit, obCandle.high)
-        : obCandle.high;
-      obs.push({
-        top,
-        bottom: obCandle.low,
-        avg: (top + obCandle.low) / 2,
-        startTime: obCandle.time,
-        endTime: candles[candles.length - 1].time,
-        startIndex: obIdx,
-        endIndex: candles.length - 1,
-        bull: true,
-        mitigated: false,
-        volume: obCandle.volume,
+    // Bullish FVG: curr.low > prev2.high AND mid candle confirmation
+    if (curr.low > prev2.high && mid.close > mid.open) {
+      fvgs.push({
+        top: curr.low, bottom: prev2.high,
+        time: candles[i - 2].time, // Pine uses time[3] relative = 3 bars back from detection
+        index: i - 1, bull: true, mitigated: false,
       });
-    } else {
-      // Bear structure → bullish OB (demand became supply)
-      let obIdx = s.startIndex;
-      for (let j = s.startIndex; j < s.endIndex; j++) {
-        if (candles[j].high > candles[obIdx].high) obIdx = j;
-      }
-      const obCandle = candles[obIdx];
-      const bottom = obLen > 1
-        ? Math.max(obCandle.high - atrUnit, obCandle.low)
-        : obCandle.low;
-      obs.push({
-        top: obCandle.high,
-        bottom,
-        avg: (obCandle.high + bottom) / 2,
-        startTime: obCandle.time,
-        endTime: candles[candles.length - 1].time,
-        startIndex: obIdx,
-        endIndex: candles.length - 1,
-        bull: false,
-        mitigated: false,
-        volume: obCandle.volume,
+    }
+    // Bearish FVG
+    if (prev2.low > curr.high && mid.close < mid.open) {
+      fvgs.push({
+        top: prev2.low, bottom: curr.high,
+        time: candles[i - 2].time,
+        index: i - 1, bull: false, mitigated: false,
       });
     }
   }
 
-  // Check mitigation
-  for (const ob of obs) {
-    for (let i = ob.startIndex + 1; i < candles.length; i++) {
+  // Mitigation
+  for (const fvg of fvgs) {
+    for (let i = fvg.index + 2; i < candles.length; i++) {
       const c = candles[i];
-      const mitiCheck = (bull: boolean) => {
-        if (bull) {
-          if (mitigation === 'Close') return Math.min(c.close, c.open) < ob.bottom;
-          if (mitigation === 'Wick') return c.low < ob.bottom;
-          return c.low < ob.avg;
-        } else {
-          if (mitigation === 'Close') return Math.max(c.close, c.open) > ob.top;
-          if (mitigation === 'Wick') return c.high > ob.top;
-          return c.high > ob.avg;
-        }
-      };
-      if (mitiCheck(ob.bull)) {
-        ob.mitigated = true;
-        ob.mitigatedTime = c.time;
-        ob.endTime = c.time;
-        ob.endIndex = i;
+      if (fvg.bull && Math.min(c.close, c.open) < fvg.bottom) {
+        fvg.mitigated = true;
+        fvg.mitigatedTime = c.time;
+        break;
+      }
+      if (!fvg.bull && Math.max(c.close, c.open) > fvg.top) {
+        fvg.mitigated = true;
+        fvg.mitigatedTime = c.time;
         break;
       }
     }
   }
 
-  // Remove overlapping OBs (keep most recent)
-  const removeOverlap = (blocks: OrderBlock[]) => {
-    for (let i = blocks.length - 1; i > 0; i--) {
-      const a = blocks[i];
-      const b = blocks[0]; // most recent
-      if (a === b) continue;
-      const overlaps =
-        (a.bottom > b.bottom && a.bottom < b.top) ||
-        (a.top < b.top && a.bottom > b.bottom) ||
-        (a.top > b.top && a.bottom < b.bottom) ||
-        (a.top < b.top && a.top > b.bottom);
-      if (overlaps) blocks.splice(i, 1);
-    }
-  };
+  // Remove overlapping FVGs
+  const bullFvgs = fvgs.filter(f => f.bull && !f.mitigated);
+  const bearFvgs = fvgs.filter(f => !f.bull && !f.mitigated);
 
-  const bullOBs = obs.filter(o => o.bull);
-  const bearOBs = obs.filter(o => !o.bull);
-  removeOverlap(bullOBs);
-  removeOverlap(bearOBs);
-
-  // Return last 5 active + last 3 mitigated
-  const active = [...bullOBs, ...bearOBs].filter(o => !o.mitigated).slice(-5);
-  const mitigated = [...bullOBs, ...bearOBs].filter(o => o.mitigated).slice(-3);
-  return [...active, ...mitigated];
+  return [...bullFvgs.slice(-5), ...bearFvgs.slice(-5)];
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Fair Value Gap Detection
-// ═══════════════════════════════════════════════════════════════
-function detectFVGs(candles: Candle[], mitigation: 'Close' | 'Wick' | 'Avg' = 'Close'): FairValueGap[] {
-  const fvgs: FairValueGap[] = [];
-  for (let i = 2; i < candles.length; i++) {
-    const prev2 = candles[i - 2];
-    const curr = candles[i];
-    const mid = candles[i - 1];
-
-    // Bullish FVG: current low > prev2 high AND mid candle bullish
-    if (curr.low > prev2.high && mid.close > mid.open) {
-      fvgs.push({
-        top: curr.low, bottom: prev2.high,
-        time: mid.time, index: i - 1,
-        bull: true, mitigated: false,
-      });
-    }
-    // Bearish FVG: prev2 low > current high AND mid candle bearish
-    if (prev2.low > curr.high && mid.close < mid.open) {
-      fvgs.push({
-        top: prev2.low, bottom: curr.high,
-        time: mid.time, index: i - 1,
-        bull: false, mitigated: false,
-      });
-    }
-  }
-
-  // Check mitigation
-  for (const fvg of fvgs) {
-    for (let i = fvg.index + 2; i < candles.length; i++) {
-      const c = candles[i];
-      if (fvg.bull) {
-        const hit = mitigation === 'Close' ? Math.min(c.close, c.open) < fvg.bottom
-          : mitigation === 'Wick' ? c.low < fvg.bottom
-          : c.low < (fvg.top + fvg.bottom) / 2;
-        if (hit) { fvg.mitigated = true; break; }
-      } else {
-        const hit = mitigation === 'Close' ? Math.max(c.close, c.open) > fvg.top
-          : mitigation === 'Wick' ? c.high > fvg.top
-          : c.high > (fvg.top + fvg.bottom) / 2;
-        if (hit) { fvg.mitigated = true; break; }
-      }
-    }
-  }
-
-  return fvgs.filter(f => !f.mitigated).slice(-5);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// Trendline Zones (support/resistance from pivot clusters)
+// Trendline Zones
 // ═══════════════════════════════════════════════════════════════
 function detectTrendZones(candles: Candle[], pivots: SwingPoint[]): TrendZone[] {
   const zones: TrendZone[] = [];
@@ -613,30 +732,18 @@ function detectTrendZones(candles: Candle[], pivots: SwingPoint[]): TrendZone[] 
     const used = new Set<number>();
     for (let i = 0; i < points.length; i++) {
       if (used.has(i)) continue;
-      let touches = 1;
-      let maxP = points[i].price;
-      let minP = points[i].price;
-      let earliest = points[i].time;
-
+      let touches = 1, maxP = points[i].price, minP = points[i].price, earliest = points[i].time;
       for (let j = i + 1; j < points.length; j++) {
         if (used.has(j)) continue;
         if (Math.abs(points[j].price - points[i].price) <= threshold) {
-          touches++;
-          maxP = Math.max(maxP, points[j].price);
+          touches++; maxP = Math.max(maxP, points[j].price);
           minP = Math.min(minP, points[j].price);
           earliest = Math.min(earliest, points[j].time);
           used.add(j);
         }
       }
-
-      if (touches >= 2) {
-        zones.push({
-          top: maxP + threshold * 0.2,
-          bottom: minP - threshold * 0.2,
-          startTime: earliest,
-          endTime: lastTime,
-          type,
-        });
+      if (touches >= 3) {
+        zones.push({ top: maxP + threshold * 0.2, bottom: minP - threshold * 0.2, startTime: earliest, endTime: lastTime, type });
       }
       used.add(i);
     }
@@ -662,11 +769,10 @@ export function useEngineIndicator(candles: Candle[], enabled: boolean): EngineD
   return useMemo(() => {
     if (!enabled || candles.length < 30) return null;
 
-    const pivotStrength = 5;
+    const pivotStrength = MS_LEN;
     const swings = detectPivots(candles, pivotStrength);
-    const { structures, trend } = detectMarketStructure(candles, swings, pivotStrength);
-    const orderBlocks = detectOrderBlocks(candles, structures, 5, 'Close');
-    const fvgs = detectFVGs(candles, 'Close');
+    const { structures, orderBlocks, trend } = runStructureEngine(candles, swings);
+    const fvgs = detectFVGs(candles);
     const trendZones = detectTrendZones(candles, swings);
 
     return { swings, structures, orderBlocks, fvgs, trendZones, trend };
