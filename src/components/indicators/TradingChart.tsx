@@ -11,6 +11,7 @@ import type { MatrixData } from '@/hooks/useMatrixIndicator';
 import type { EngineData } from '@/hooks/useEngineIndicator';
 import type { TpSlData } from '@/hooks/useTpSlIndicator';
 import type { BuySellData } from '@/hooks/useBuySellSignal';
+import type { OscillatorMatrixData } from '@/hooks/useOscillatorMatrix';
 
 export interface AITrendline {
   start: { time: number; price: number };
@@ -39,10 +40,11 @@ interface TradingChartProps {
   engineData?: EngineData | null;
   tpSlData?: TpSlData | null;
   buySellData?: BuySellData | null;
+  oscillatorData?: OscillatorMatrixData | null;
 }
 
 const TradingChart: React.FC<TradingChartProps> = ({
-  candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height = 380, label, scanning, scanLabel, timeframe, onTimeframeChange, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData,
+  candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height = 380, label, scanning, scanLabel, timeframe, onTimeframeChange, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, oscillatorData,
 }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const rsiContainerRef = useRef<HTMLDivElement>(null);
@@ -862,6 +864,31 @@ const TradingChart: React.FC<TradingChartProps> = ({
       });
     }
 
+    // ── Oscillator Matrix Buy/Sell + Reversal Signals on price chart ──
+    if (oscillatorData && enabledIndicators.includes('oscillator')) {
+      // Buy/Sell signals
+      oscillatorData.buySellSignals.forEach(sig => {
+        if (sig.index < 0 || sig.index >= candles.length) return;
+        candleSeries.createPriceLine({
+          price: sig.price,
+          color: sig.type === 'BUY' ? '#4CAF50' : '#F44336',
+          lineWidth: 1, lineStyle: 0, axisLabelVisible: false,
+          title: sig.type === 'BUY' ? '▲ OSC Buy' : '▼ OSC Sell',
+        } as any);
+      });
+
+      // Major reversal signals
+      oscillatorData.reversals.filter(r => r.type === 'majorBuy' || r.type === 'majorSell').slice(-5).forEach(rev => {
+        if (rev.index < 0 || rev.index >= candles.length) return;
+        candleSeries.createPriceLine({
+          price: rev.price,
+          color: rev.type === 'majorBuy' ? '#089981' : '#f23645',
+          lineWidth: 1, lineStyle: 0, axisLabelVisible: false,
+          title: rev.type === 'majorBuy' ? '▲ Rev' : '▼ Rev',
+        } as any);
+      });
+    }
+
     chart.subscribeCrosshairMove((param) => {
       if (!param || !param.time) {
         const last = candles[candles.length - 1];
@@ -977,7 +1004,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
       chartRef.current = null;
       rsiChartRef.current = null;
     };
-  }, [candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData]);
+  }, [candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, oscillatorData]);
 
   const lastCandle = candles[candles.length - 1];
   const isUp = crosshairData ? crosshairData.change >= 0 : (lastCandle ? lastCandle.close >= lastCandle.open : true);

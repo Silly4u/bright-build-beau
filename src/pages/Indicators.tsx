@@ -13,6 +13,7 @@ import { useMatrixIndicator } from '@/hooks/useMatrixIndicator';
 import { useEngineIndicator } from '@/hooks/useEngineIndicator';
 import { useTpSlIndicator } from '@/hooks/useTpSlIndicator';
 import { useBuySellSignal } from '@/hooks/useBuySellSignal';
+import { useOscillatorMatrix } from '@/hooks/useOscillatorMatrix';
 
 const PAIRS = [
   { symbol: 'BTC/USDT', label: 'BTC', color: '#F7931A' },
@@ -36,6 +37,7 @@ const DEFAULT_INDICATORS: IndicatorConfig[] = [
   { id: 'engine', label: 'MS Engine', enabled: true, color: '#FF9800', category: 'Structure' },
   { id: 'tp_sl', label: 'TP/SL Zones', enabled: true, color: '#E91E63', category: 'Risk' },
   { id: 'buy_sell', label: 'Buy/Sell Signal', enabled: false, color: '#4CAF50', category: 'Signal' },
+  { id: 'oscillator', label: 'Oscillator Matrix', enabled: false, color: '#FF5722', category: 'Oscillator' },
 ];
 
 const Indicators: React.FC = () => {
@@ -60,6 +62,8 @@ const Indicators: React.FC = () => {
   const tpSlData = useTpSlIndicator(marketData.candles, tpSlEnabled && !marketData.loading);
   const buySellEnabled = indicators.find(i => i.id === 'buy_sell')?.enabled ?? false;
   const buySellData = useBuySellSignal(marketData.candles, buySellEnabled && !marketData.loading);
+  const oscillatorEnabled = indicators.find(i => i.id === 'oscillator')?.enabled ?? false;
+  const oscillatorData = useOscillatorMatrix(marketData.candles, oscillatorEnabled && !marketData.loading);
 
   const toggleIndicator = (id: string) => {
     setIndicators(prev => prev.map(ind => ind.id === id ? { ...ind, enabled: !ind.enabled } : ind));
@@ -247,6 +251,54 @@ const Indicators: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Oscillator Matrix Dashboard */}
+            {oscillatorEnabled && oscillatorData && (
+              <div className="mt-3 border border-white/5 rounded-lg overflow-hidden">
+                <div className="bg-[#1B1F2B] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
+                  OSCILLATOR MATRIX
+                </div>
+                <div className="bg-[#0d1526] p-2 space-y-1.5">
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Hyper Wave</span>
+                    <span className={`font-bold ${oscillatorData.lastSig > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {oscillatorData.lastSig.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Signal</span>
+                    <span className={`font-bold ${oscillatorData.lastSgD > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {oscillatorData.lastSgD.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Money Flow</span>
+                    <span className={`font-bold ${oscillatorData.lastMfi > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {oscillatorData.lastMfi.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Confluence</span>
+                    <span className={`font-bold ${
+                      oscillatorData.confluence.bullish ? 'text-emerald-400' :
+                      oscillatorData.confluence.bearish ? 'text-red-400' : 'text-yellow-400'
+                    }`}>
+                      {oscillatorData.confluence.bullish ? 'BULLISH' :
+                       oscillatorData.confluence.bearish ? 'BEARISH' : 'NEUTRAL'}
+                      {' '}({oscillatorData.confluence.score > 0 ? '+' : ''}{oscillatorData.confluence.score})
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Reversals</span>
+                    <span className="text-foreground font-bold">{oscillatorData.reversals.length}</span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Signals</span>
+                    <span className="text-foreground font-bold">{oscillatorData.buySellSignals.length}</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── CENTER: Chart Area ── */}
@@ -291,6 +343,7 @@ const Indicators: React.FC = () => {
                   engineData={engineData}
                   tpSlData={tpSlData}
                   buySellData={buySellData}
+                  oscillatorData={oscillatorData}
                 />
               )}
             </div>
@@ -309,7 +362,7 @@ const Indicators: React.FC = () => {
                 ))}
               </div>
               {!marketData.loading && marketData.candles.length > 0 && (
-                <SubIndicators candles={marketData.candles} indicators={marketData.indicators} activeTab={subTab} />
+                <SubIndicators candles={marketData.candles} indicators={marketData.indicators} activeTab={subTab} oscillatorData={oscillatorData} />
               )}
             </div>
           </div>
