@@ -83,8 +83,8 @@ export function useMatrixIndicator(
     const startIdx = n - len;
     const conditions: { sell: boolean; buy: boolean }[] = new Array(len).fill(null).map(() => ({ sell: false, buy: false }));
 
-    crossPrice = null;
-    crossDirection = null;
+    let crossPrice: number | null = null;
+    let crossDirection: string | null = null;
 
     for (let k = 0; k < len; k++) {
       const ci = startIdx + k;
