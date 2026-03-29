@@ -1031,6 +1031,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
     // ── Pro Support/Resistance (S/R Channels + StochRSI signals) ──
     if (srData && enabledIndicators.includes('support_resistance')) {
+      console.log('[Pro S/R] channels:', srData.channels.length, 'signals:', srData.signals.length, 'broken:', srData.broken.length, 'stochRsi:', srData.stochRsi.length, 'channels detail:', JSON.stringify(srData.channels.slice(0, 3)));
       const firstT = Math.floor(candles[0].time / 1000);
       const lastT = Math.floor(candles[candles.length - 1].time / 1000);
       // Extend far both directions for "extend.both" effect
