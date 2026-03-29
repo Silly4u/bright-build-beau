@@ -207,6 +207,46 @@ const Indicators: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Buy/Sell Signal Dashboard */}
+            {buySellEnabled && buySellData && (
+              <div className="mt-3 border border-white/5 rounded-lg overflow-hidden">
+                <div className="bg-[#1B1F2B] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
+                  BUY/SELL SIGNAL
+                </div>
+                <div className="bg-[#0d1526] p-2 space-y-1.5">
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Trend</span>
+                    <span className={`font-bold ${buySellData.currentTrend === 'BULLISH' ? 'text-emerald-400' : buySellData.currentTrend === 'BEARISH' ? 'text-red-400' : 'text-yellow-400'}`}>
+                      {buySellData.currentTrend}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Zone</span>
+                    <span className={`font-bold ${
+                      buySellData.currentZone === 'green' ? 'text-emerald-400' :
+                      buySellData.currentZone === 'red' ? 'text-red-400' :
+                      buySellData.currentZone === 'blue' ? 'text-blue-400' :
+                      buySellData.currentZone === 'orange' ? 'text-orange-400' :
+                      buySellData.currentZone === 'yellow' ? 'text-yellow-400' :
+                      'text-cyan-400'
+                    }`}>
+                      {buySellData.currentZone.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Last Signal</span>
+                    <span className={`font-bold ${buySellData.currentSignal === 'BUY' ? 'text-emerald-400' : buySellData.currentSignal === 'SELL' ? 'text-red-400' : 'text-muted-foreground'}`}>
+                      {buySellData.currentSignal || '—'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Total Signals</span>
+                    <span className="text-foreground font-bold">{buySellData.signals.length}</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── CENTER: Chart Area ── */}
