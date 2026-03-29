@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TradingChart from '@/components/indicators/TradingChart';
@@ -17,6 +17,7 @@ import { useOscillatorMatrix } from '@/hooks/useOscillatorMatrix';
 import { useProEma } from '@/hooks/useProEma';
 import { useSupportResistance } from '@/hooks/useSupportResistance';
 import { useWyckoff } from '@/hooks/useWyckoff';
+import { computeDualTrendlines } from '@/lib/computeTrendline';
 
 const PAIRS = [
   { symbol: 'BTC/USDT', label: 'BTC', color: '#F7931A' },
@@ -77,11 +78,16 @@ const Indicators: React.FC = () => {
   const wyckoffEnabled = indicators.find(i => i.id === 'wyckoff')?.enabled ?? false;
   const wyckoffData = useWyckoff(marketData.candles, wyckoffEnabled && !marketData.loading);
 
+  const trendlines = useMemo(() => {
+    if (marketData.loading || marketData.candles.length < 30) return { support: null, resistance: null };
+    return computeDualTrendlines(marketData.candles);
+  }, [marketData.candles, marketData.loading]);
+
   const toggleIndicator = (id: string) => {
     setIndicators(prev => prev.map(ind => ind.id === id ? { ...ind, enabled: !ind.enabled } : ind));
   };
 
-  const enabledIds = indicators.filter(i => i.enabled).map(i => i.id);
+  const enabledIds = [...indicators.filter(i => i.enabled).map(i => i.id), 'breakout', 'breakdown'];
   const activePairInfo = PAIRS.find(p => p.symbol === activePair) || PAIRS[0];
 
   const lastCandle = marketData.candles[marketData.candles.length - 1];
@@ -460,6 +466,8 @@ const Indicators: React.FC = () => {
                   candles={marketData.candles}
                   indicators={marketData.indicators}
                   zones={marketData.zones}
+                  trendline={trendlines.support}
+                  trendlineResistance={trendlines.resistance}
                   enabledIndicators={enabledIds}
                   height={520}
                   smcAnalysis={smcResult.analysis}
