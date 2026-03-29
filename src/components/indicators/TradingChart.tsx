@@ -13,6 +13,7 @@ import type { TpSlData } from '@/hooks/useTpSlIndicator';
 import type { BuySellData } from '@/hooks/useBuySellSignal';
 import type { OscillatorMatrixData } from '@/hooks/useOscillatorMatrix';
 import type { ProEmaData } from '@/hooks/useProEma';
+import type { SupportResistanceResult } from '@/hooks/useSupportResistance';
 
 export interface AITrendline {
   start: { time: number; price: number };
@@ -43,10 +44,11 @@ interface TradingChartProps {
   buySellData?: BuySellData | null;
   oscillatorData?: OscillatorMatrixData | null;
   proEmaData?: ProEmaData | null;
+  srData?: SupportResistanceResult | null;
 }
 
 const TradingChart: React.FC<TradingChartProps> = ({
-  candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height = 380, label, scanning, scanLabel, timeframe, onTimeframeChange, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, oscillatorData, proEmaData,
+  candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height = 380, label, scanning, scanLabel, timeframe, onTimeframeChange, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, oscillatorData, proEmaData, srData,
 }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const rsiContainerRef = useRef<HTMLDivElement>(null);
@@ -940,6 +942,72 @@ const TradingChart: React.FC<TradingChartProps> = ({
       });
     }
 
+    // ── Pro Support/Resistance (S/R Channels + StochRSI signals) ──
+    if (srData && enabledIndicators.includes('support_resistance')) {
+      const setSafeData = (series: any, t1: number, v1: number, t2: number, v2: number) => {
+        if (t1 === t2) { series.setData([{ time: t1 as any, value: v2 }]); return; }
+        if (t1 < t2) { series.setData([{ time: t1 as any, value: v1 }, { time: t2 as any, value: v2 }]); return; }
+        series.setData([{ time: t2 as any, value: v2 }, { time: t1 as any, value: v1 }]);
+      };
+
+      const startT = Math.floor(candles[0].time / 1000);
+      const endT = Math.floor(candles[candles.length - 1].time / 1000);
+
+      // S/R Channel boxes
+      srData.channels.forEach(ch => {
+        const fillColor = ch.type === 'resistance' ? 'rgba(239,83,80,0.08)' :
+                          ch.type === 'support' ? 'rgba(0,230,118,0.08)' : 'rgba(158,158,158,0.06)';
+        const lineColor = ch.type === 'resistance' ? 'rgba(239,83,80,0.4)' :
+                          ch.type === 'support' ? 'rgba(0,230,118,0.4)' : 'rgba(158,158,158,0.3)';
+
+        // Top line
+        const topL = chart.addSeries(LineSeries, {
+          color: lineColor, lineWidth: 1, lineStyle: 0,
+          priceLineVisible: false, lastValueVisible: false,
+        });
+        setSafeData(topL, startT, ch.top, endT, ch.top);
+
+        // Bottom line
+        const botL = chart.addSeries(LineSeries, {
+          color: lineColor, lineWidth: 1, lineStyle: 0,
+          priceLineVisible: false, lastValueVisible: false,
+        });
+        setSafeData(botL, startT, ch.bottom, endT, ch.bottom);
+
+        // Fill
+        const fill = chart.addSeries(AreaSeries, {
+          topColor: fillColor, bottomColor: fillColor,
+          lineColor: 'transparent', lineWidth: 1 as 1,
+          priceLineVisible: false, lastValueVisible: false,
+        });
+        const mid = (ch.top + ch.bottom) / 2;
+        const fillData = candles.map(c => ({ time: Math.floor(c.time / 1000) as any, value: mid }));
+        if (fillData.length > 0) fill.setData(fillData);
+      });
+
+      // Buy/Sell signal markers
+      srData.signals.slice(-20).forEach(sig => {
+        if (sig.index < 0 || sig.index >= candles.length) return;
+        candleSeries.createPriceLine({
+          price: sig.price,
+          color: sig.type === 'BUY' ? '#00E676' : '#FF1744',
+          lineWidth: 1, lineStyle: 0, axisLabelVisible: false,
+          title: sig.type === 'BUY' ? '▲ SR Buy' : '▼ SR Sell',
+        } as any);
+      });
+
+      // Broken S/R markers (last 5)
+      srData.broken.slice(-5).forEach(b => {
+        if (b.index < 0 || b.index >= candles.length) return;
+        candleSeries.createPriceLine({
+          price: b.price,
+          color: b.type === 'resistance_broken' ? '#00E676' : '#FF1744',
+          lineWidth: 1, lineStyle: 2, axisLabelVisible: false,
+          title: b.type === 'resistance_broken' ? '▲ R Break' : '▼ S Break',
+        } as any);
+      });
+    }
+
     chart.subscribeCrosshairMove((param) => {
       if (!param || !param.time) {
         const last = candles[candles.length - 1];
@@ -1055,7 +1123,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
       chartRef.current = null;
       rsiChartRef.current = null;
     };
-  }, [candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, oscillatorData, proEmaData]);
+  }, [candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, oscillatorData, proEmaData, srData]);
 
   const lastCandle = candles[candles.length - 1];
   const isUp = crosshairData ? crosshairData.change >= 0 : (lastCandle ? lastCandle.close >= lastCandle.open : true);

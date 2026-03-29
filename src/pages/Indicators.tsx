@@ -15,6 +15,7 @@ import { useTpSlIndicator } from '@/hooks/useTpSlIndicator';
 import { useBuySellSignal } from '@/hooks/useBuySellSignal';
 import { useOscillatorMatrix } from '@/hooks/useOscillatorMatrix';
 import { useProEma } from '@/hooks/useProEma';
+import { useSupportResistance } from '@/hooks/useSupportResistance';
 
 const PAIRS = [
   { symbol: 'BTC/USDT', label: 'BTC', color: '#F7931A' },
@@ -40,6 +41,7 @@ const DEFAULT_INDICATORS: IndicatorConfig[] = [
   { id: 'buy_sell', label: 'Buy/Sell Signal', enabled: false, color: '#4CAF50', category: 'Signal' },
   { id: 'oscillator', label: 'Oscillator Matrix', enabled: false, color: '#FF5722', category: 'Oscillator' },
   { id: 'pro_ema', label: 'Pro EMA', enabled: false, color: '#FFA726', category: 'Trend' },
+  { id: 'support_resistance', label: 'Pro S/R', enabled: false, color: '#00E676', category: 'S/R' },
 ];
 
 const Indicators: React.FC = () => {
@@ -68,6 +70,8 @@ const Indicators: React.FC = () => {
   const oscillatorData = useOscillatorMatrix(marketData.candles, oscillatorEnabled && !marketData.loading);
   const proEmaEnabled = indicators.find(i => i.id === 'pro_ema')?.enabled ?? false;
   const proEmaData = useProEma(marketData.candles, proEmaEnabled && !marketData.loading);
+  const srEnabled = indicators.find(i => i.id === 'support_resistance')?.enabled ?? false;
+  const srData = useSupportResistance(marketData.candles, srEnabled && !marketData.loading);
 
   const toggleIndicator = (id: string) => {
     setIndicators(prev => prev.map(ind => ind.id === id ? { ...ind, enabled: !ind.enabled } : ind));
@@ -340,6 +344,41 @@ const Indicators: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Pro Support/Resistance Dashboard */}
+            {srEnabled && srData && (
+              <div className="mt-3 border border-white/5 rounded-lg overflow-hidden">
+                <div className="bg-[#1B1F2B] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
+                  PRO S/R
+                </div>
+                <div className="bg-[#0d1526] p-2 space-y-1.5">
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Stoch K</span>
+                    <span className={`font-bold ${srData.lastK < 30 ? 'text-emerald-400' : srData.lastK > 70 ? 'text-red-400' : 'text-yellow-400'}`}>
+                      {srData.lastK.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Stoch D</span>
+                    <span className={`font-bold ${srData.lastD < 30 ? 'text-emerald-400' : srData.lastD > 70 ? 'text-red-400' : 'text-yellow-400'}`}>
+                      {srData.lastD.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">S/R Zones</span>
+                    <span className="text-foreground font-bold">{srData.channels.length}</span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Signals</span>
+                    <span className="text-foreground font-bold">{srData.signals.length}</span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Broken</span>
+                    <span className="text-foreground font-bold">{srData.broken.length}</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           <div className="bg-[#0d1526] border border-white/5 rounded-lg overflow-hidden flex flex-col">
             {/* Chart header with pair info */}
@@ -384,6 +423,7 @@ const Indicators: React.FC = () => {
                   buySellData={buySellData}
                   oscillatorData={oscillatorData}
                   proEmaData={proEmaData}
+                  srData={srData}
                 />
               )}
             </div>
