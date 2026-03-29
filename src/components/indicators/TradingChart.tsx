@@ -481,62 +481,60 @@ const TradingChart: React.FC<TradingChartProps> = ({
         value: p.value,
       });
 
-      // Bear Zone (upper) — Pine: fill(up1↔up5) outer, fill(up5↔up9) inner
-      // Colors match Pine: #56202d (outer, 20% transp), #3f1d29 (inner, 60% transp)
+      const BG = '#0d1117'; // chart background for masking
+
+      // ── Bear Zone (upper): up1 → up5 → up9 mask ──
       if (alphaNetData.rz_up1?.length > 0) {
-        // up1 (outermost)
+        // Layer 1: up1 — outer bear color, fills from up1 downward
         const sUp1 = chart.addSeries(AreaSeries, {
-          topColor: 'rgba(86,32,45,0.80)',  // #56202d at 20% transparency
-          bottomColor: 'rgba(86,32,45,0.40)',
+          topColor: 'rgba(86,32,45,0.80)', bottomColor: 'rgba(86,32,45,0.80)',
           lineColor: 'transparent', lineWidth: 1 as 1,
           priceLineVisible: false, lastValueVisible: false,
         });
         sUp1.setData(alphaNetData.rz_up1.map(toChartPt));
 
-        // up5 (middle = upband2)
+        // Layer 2: up5 — inner bear color, covers outer below up5
         const sUp5 = chart.addSeries(AreaSeries, {
-          topColor: 'rgba(63,29,41,0.40)',  // #3f1d29 at 60% transparency
-          bottomColor: 'rgba(63,29,41,0.20)',
+          topColor: 'rgba(63,29,41,0.60)', bottomColor: 'rgba(63,29,41,0.60)',
           lineColor: 'transparent', lineWidth: 1 as 1,
           priceLineVisible: false, lastValueVisible: false,
         });
         sUp5.setData(alphaNetData.rz_up5.map(toChartPt));
 
-        // up9 (innermost) — just a line boundary
-        const sUp9 = chart.addSeries(LineSeries, {
-          color: 'rgba(239,83,80,0.15)', lineWidth: 1, lineStyle: 2,
+        // Layer 3: up9 — MASK with chart background, erases everything below up9
+        const sUp9Mask = chart.addSeries(AreaSeries, {
+          topColor: BG, bottomColor: BG,
+          lineColor: 'transparent', lineWidth: 1 as 1,
           priceLineVisible: false, lastValueVisible: false,
         });
-        sUp9.setData(alphaNetData.rz_up9.map(toChartPt));
+        sUp9Mask.setData(alphaNetData.rz_up9.map(toChartPt));
       }
 
-      // Bull Zone (lower) — Pine: fill(lo1↔lo5) outer, fill(lo5↔lo9) inner
-      // Colors match Pine: #0f3e3f (outer, 20% transp), #113135 (inner, 60% transp)
+      // ── Bull Zone (lower): lo9 → lo5 → lo1 mask ──
       if (alphaNetData.rz_lo1?.length > 0) {
-        // lo9 (innermost) — line boundary
-        const sLo9 = chart.addSeries(LineSeries, {
-          color: 'rgba(38,166,154,0.15)', lineWidth: 1, lineStyle: 2,
+        // Layer 1: lo9 (highest of lower) — inner bull color, fills from lo9 down
+        const sLo9 = chart.addSeries(AreaSeries, {
+          topColor: 'rgba(17,49,53,0.60)', bottomColor: 'rgba(17,49,53,0.60)',
+          lineColor: 'transparent', lineWidth: 1 as 1,
           priceLineVisible: false, lastValueVisible: false,
         });
         sLo9.setData(alphaNetData.rz_lo9.map(toChartPt));
 
-        // lo5 (middle = loband2) — area going down
+        // Layer 2: lo5 — outer bull color, covers inner below lo5
         const sLo5 = chart.addSeries(AreaSeries, {
-          topColor: 'rgba(17,49,53,0.20)',  // #113135 at 60% transparency
-          bottomColor: 'rgba(17,49,53,0.40)',
+          topColor: 'rgba(15,62,63,0.80)', bottomColor: 'rgba(15,62,63,0.80)',
           lineColor: 'transparent', lineWidth: 1 as 1,
           priceLineVisible: false, lastValueVisible: false,
         });
         sLo5.setData(alphaNetData.rz_lo5.map(toChartPt));
 
-        // lo1 (outermost)
-        const sLo1 = chart.addSeries(AreaSeries, {
-          topColor: 'rgba(15,62,63,0.40)',  // #0f3e3f at 20% transparency
-          bottomColor: 'rgba(15,62,63,0.80)',
+        // Layer 3: lo1 — MASK with chart background, erases everything below lo1
+        const sLo1Mask = chart.addSeries(AreaSeries, {
+          topColor: BG, bottomColor: BG,
           lineColor: 'transparent', lineWidth: 1 as 1,
           priceLineVisible: false, lastValueVisible: false,
         });
-        sLo1.setData(alphaNetData.rz_lo1.map(toChartPt));
+        sLo1Mask.setData(alphaNetData.rz_lo1.map(toChartPt));
       }
 
       // Mean line (dashed gray)
