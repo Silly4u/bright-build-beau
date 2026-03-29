@@ -12,6 +12,7 @@ import AlphaNetDashboard from '@/components/indicators/AlphaNetDashboard';
 import { useMatrixIndicator } from '@/hooks/useMatrixIndicator';
 import { useEngineIndicator } from '@/hooks/useEngineIndicator';
 import { useTpSlIndicator } from '@/hooks/useTpSlIndicator';
+import { useBuySellSignal } from '@/hooks/useBuySellSignal';
 
 const PAIRS = [
   { symbol: 'BTC/USDT', label: 'BTC', color: '#F7931A' },
@@ -34,6 +35,7 @@ const DEFAULT_INDICATORS: IndicatorConfig[] = [
   { id: 'matrix', label: 'Matrix NWE', enabled: true, color: '#00BCD4', category: 'Envelope' },
   { id: 'engine', label: 'MS Engine', enabled: true, color: '#FF9800', category: 'Structure' },
   { id: 'tp_sl', label: 'TP/SL Zones', enabled: true, color: '#E91E63', category: 'Risk' },
+  { id: 'buy_sell', label: 'Buy/Sell Signal', enabled: false, color: '#4CAF50', category: 'Signal' },
 ];
 
 const Indicators: React.FC = () => {
@@ -56,6 +58,8 @@ const Indicators: React.FC = () => {
   const engineData = useEngineIndicator(marketData.candles, engineEnabled && !marketData.loading);
   const tpSlEnabled = indicators.find(i => i.id === 'tp_sl')?.enabled ?? false;
   const tpSlData = useTpSlIndicator(marketData.candles, tpSlEnabled && !marketData.loading);
+  const buySellEnabled = indicators.find(i => i.id === 'buy_sell')?.enabled ?? false;
+  const buySellData = useBuySellSignal(marketData.candles, buySellEnabled && !marketData.loading);
 
   const toggleIndicator = (id: string) => {
     setIndicators(prev => prev.map(ind => ind.id === id ? { ...ind, enabled: !ind.enabled } : ind));
@@ -203,6 +207,46 @@ const Indicators: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Buy/Sell Signal Dashboard */}
+            {buySellEnabled && buySellData && (
+              <div className="mt-3 border border-white/5 rounded-lg overflow-hidden">
+                <div className="bg-[#1B1F2B] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
+                  BUY/SELL SIGNAL
+                </div>
+                <div className="bg-[#0d1526] p-2 space-y-1.5">
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Trend</span>
+                    <span className={`font-bold ${buySellData.currentTrend === 'BULLISH' ? 'text-emerald-400' : buySellData.currentTrend === 'BEARISH' ? 'text-red-400' : 'text-yellow-400'}`}>
+                      {buySellData.currentTrend}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Zone</span>
+                    <span className={`font-bold ${
+                      buySellData.currentZone === 'green' ? 'text-emerald-400' :
+                      buySellData.currentZone === 'red' ? 'text-red-400' :
+                      buySellData.currentZone === 'blue' ? 'text-blue-400' :
+                      buySellData.currentZone === 'orange' ? 'text-orange-400' :
+                      buySellData.currentZone === 'yellow' ? 'text-yellow-400' :
+                      'text-cyan-400'
+                    }`}>
+                      {buySellData.currentZone.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Last Signal</span>
+                    <span className={`font-bold ${buySellData.currentSignal === 'BUY' ? 'text-emerald-400' : buySellData.currentSignal === 'SELL' ? 'text-red-400' : 'text-muted-foreground'}`}>
+                      {buySellData.currentSignal || '—'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Total Signals</span>
+                    <span className="text-foreground font-bold">{buySellData.signals.length}</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── CENTER: Chart Area ── */}
@@ -246,6 +290,7 @@ const Indicators: React.FC = () => {
                   matrixData={matrixData}
                   engineData={engineData}
                   tpSlData={tpSlData}
+                  buySellData={buySellData}
                 />
               )}
             </div>
