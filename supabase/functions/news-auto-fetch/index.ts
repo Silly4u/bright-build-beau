@@ -172,13 +172,38 @@ CHỈ trả về JSON, không giải thích thêm.`;
     
     // Parse JSON from response (handle markdown code blocks)
     const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/) || [null, content];
-    const parsed = JSON.parse(jsonMatch[1]!.trim());
+    let rawJson = jsonMatch[1]!.trim();
     
-    return {
-      title: parsed.title || title,
-      summary: parsed.summary || "",
-      full_content: parsed.full_content || "",
-    };
+    // Try to parse, with fallback extraction
+    try {
+      const parsed = JSON.parse(rawJson);
+      return {
+        title: parsed.title || title,
+        summary: parsed.summary || "",
+        full_content: parsed.full_content || "",
+      };
+    } catch {
+      // Fallback: extract fields with regex
+      const titleMatch = rawJson.match(/"title"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+      const summaryMatch = rawJson.match(/"summary"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+      const fullContentStart = rawJson.indexOf('"full_content"');
+      let fullContent = "";
+      if (fullContentStart > -1) {
+        const afterColon = rawJson.indexOf('"', fullContentStart + 15);
+        if (afterColon > -1) {
+          // Find the last closing quote before }
+          const remaining = rawJson.slice(afterColon + 1);
+          const endQuote = remaining.lastIndexOf('"');
+          if (endQuote > -1) fullContent = remaining.slice(0, endQuote).replace(/\\n/g, "\n").replace(/\\"/g, '"');
+        }
+      }
+      
+      return {
+        title: titleMatch?.[1]?.replace(/\\"/g, '"') || title,
+        summary: summaryMatch?.[1]?.replace(/\\n/g, "\n").replace(/\\"/g, '"') || "",
+        full_content: fullContent || "",
+      };
+    }
   } catch (e) {
     console.error("AI rewrite error:", e);
     return null;
