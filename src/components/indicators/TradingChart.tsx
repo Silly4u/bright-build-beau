@@ -5,6 +5,7 @@ import {
   createSeriesMarkers,
 } from 'lightweight-charts';
 import type { Candle, Indicators, Zone } from '@/hooks/useMarketData';
+import { RectanglePrimitive } from '@/lib/chartRectanglePrimitive';
 import { computeLiquidityZones } from '@/lib/liquidityHunter';
 import type { SmcAnalysis } from '@/hooks/useSmcAnalysis';
 import type { AlphaNetData } from '@/hooks/useAlphaNet';
