@@ -547,20 +547,29 @@ const TradingChart: React.FC<TradingChartProps> = ({
         meanSeries.setData(alphaNetData.rz_mean.map(toChartPt));
       }
 
-      // SuperTrend line
+      // SuperTrend line — continuous with color change at transitions
       if (alphaNetData.supertrend_line?.length > 0) {
-        // Split into bull/bear segments for proper coloring
+        const stData = alphaNetData.supertrend_line;
         const bullPoints: { time: any; value: number }[] = [];
         const bearPoints: { time: any; value: number }[] = [];
 
-        alphaNetData.supertrend_line.forEach(pt => {
-          const t = (pt.time / 1000) as any;
-          if (pt.trend === 1) {
-            bullPoints.push({ time: t, value: pt.value });
-          } else {
-            bearPoints.push({ time: t, value: pt.value });
+        for (let i = 0; i < stData.length; i++) {
+          const t = (stData[i].time / 1000) as any;
+          const v = stData[i].value;
+          const isBull = stData[i].trend === 1;
+
+          // Add transition point to both series at crossover
+          if (i > 0 && stData[i].trend !== stData[i - 1].trend) {
+            bullPoints.push({ time: t, value: v });
+            bearPoints.push({ time: t, value: v });
           }
-        });
+
+          if (isBull) {
+            bullPoints.push({ time: t, value: v });
+          } else {
+            bearPoints.push({ time: t, value: v });
+          }
+        }
 
         if (bullPoints.length > 0) {
           const bullST = chart.addSeries(LineSeries, {
@@ -578,29 +587,30 @@ const TradingChart: React.FC<TradingChartProps> = ({
         }
       }
 
-      // Signal points with strength stars (▲ AI 3★, ▼ AI 1★)
+      // Signal markers as candle markers (like TradingView label boxes)
       if (alphaNetData.signal_points?.length > 0) {
+        const markers: any[] = [];
         alphaNetData.signal_points.forEach(sp => {
           const stars = '★'.repeat(Math.min(sp.strength, 4));
-          candleSeries.createPriceLine({
-            price: sp.price,
-            color: sp.type === 'BUY' ? '#26a69a' : '#ef5350',
-            lineWidth: 1, lineStyle: 0, axisLabelVisible: false,
-            title: sp.type === 'BUY' ? `▲ AI ${stars}` : `▼ AI ${stars}`,
-          } as any);
+          const isBuy = sp.type === 'BUY';
+          // Find matching candle
+          const candle = candles.find(c => c.time === sp.time);
+          if (!candle) return;
+          markers.push({
+            time: (sp.time / 1000) as any,
+            position: isBuy ? 'belowBar' : 'aboveBar',
+            color: isBuy ? '#26a69a' : '#ef5350',
+            shape: isBuy ? 'arrowUp' : 'arrowDown',
+            text: `AI ${sp.strength}${stars}`,
+          });
         });
-      }
-
-      // Current signal marker
-      if (alphaNetData.signal === 'BUY' || alphaNetData.signal === 'SELL') {
-        const lastCandle = candles[candles.length - 1];
-        if (lastCandle) {
-          candleSeries.createPriceLine({
-            price: lastCandle.close,
-            color: alphaNetData.signal === 'BUY' ? '#26a69a' : '#ef5350',
-            lineWidth: 2, lineStyle: 0, axisLabelVisible: true,
-            title: alphaNetData.signal === 'BUY' ? '▲ AI BUY' : '▼ AI SELL',
-          } as any);
+        if (markers.length > 0) {
+          // Sort markers by time (required by lightweight-charts)
+          markers.sort((a, b) => {
+            if (typeof a.time === 'number' && typeof b.time === 'number') return a.time - b.time;
+            return 0;
+          });
+          candleSeries.setMarkers(markers);
         }
       }
     }
