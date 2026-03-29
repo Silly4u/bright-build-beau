@@ -35,6 +35,7 @@ const DEFAULT_INDICATORS: IndicatorConfig[] = [
   { id: 'matrix', label: 'Matrix NWE', enabled: true, color: '#00BCD4', category: 'Envelope' },
   { id: 'engine', label: 'MS Engine', enabled: true, color: '#FF9800', category: 'Structure' },
   { id: 'tp_sl', label: 'TP/SL Zones', enabled: true, color: '#E91E63', category: 'Risk' },
+  { id: 'buy_sell', label: 'Buy/Sell Signal', enabled: false, color: '#4CAF50', category: 'Signal' },
 ];
 
 const Indicators: React.FC = () => {
