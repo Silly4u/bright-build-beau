@@ -661,8 +661,8 @@ const TradingChart: React.FC<TradingChartProps> = ({
       // Order Blocks (rectangle primitives)
       engineData.orderBlocks.forEach(ob => {
         const startT = Math.floor(ob.startTime / 1000);
-        const endT = ob.mitigated
-          ? Math.floor(ob.endTime / 1000)
+        const endT = ob.mitigated && ob.mitigatedTime
+          ? Math.floor(ob.mitigatedTime / 1000)
           : Math.floor(candles[candles.length - 1].time / 1000);
         if (startT >= endT) return;
 
@@ -680,6 +680,28 @@ const TradingChart: React.FC<TradingChartProps> = ({
         });
         candleSeries.attachPrimitive(rect);
 
+        // Buy/Sell activity inside OB
+        const blT = Math.floor(ob.blPosTime / 1000);
+        const brT = Math.floor(ob.brPosTime / 1000);
+        if (blT > startT) {
+          const buyRect = new RectanglePrimitive({
+            p1: { time: startT, price: ob.top },
+            p2: { time: Math.min(blT, endT), price: ob.avg },
+            fillColor: 'rgba(8,153,129,0.18)',
+            borderColor: 'transparent', borderWidth: 0,
+          });
+          candleSeries.attachPrimitive(buyRect);
+        }
+        if (brT > startT) {
+          const sellRect = new RectanglePrimitive({
+            p1: { time: startT, price: ob.avg },
+            p2: { time: Math.min(brT, endT), price: ob.bottom },
+            fillColor: 'rgba(242,54,69,0.18)',
+            borderColor: 'transparent', borderWidth: 0,
+          });
+          candleSeries.attachPrimitive(sellRect);
+        }
+
         // Mid-line dashed
         const midLine = chart.addSeries(LineSeries, {
           color: `${borderClr}80`, lineWidth: 1, lineStyle: 2,
@@ -692,7 +714,9 @@ const TradingChart: React.FC<TradingChartProps> = ({
       engineData.fvgs.forEach(fvg => {
         const fillColor = fvg.bull ? 'rgba(8,153,129,0.12)' : 'rgba(242,54,69,0.12)';
         const startT = Math.floor(fvg.time / 1000);
-        const endT = Math.floor(candles[candles.length - 1].time / 1000);
+        const endT = fvg.mitigated && fvg.mitigatedTime
+          ? Math.floor(fvg.mitigatedTime / 1000)
+          : Math.floor(candles[candles.length - 1].time / 1000);
         if (startT >= endT) return;
 
         const rect = new RectanglePrimitive({
@@ -714,28 +738,29 @@ const TradingChart: React.FC<TradingChartProps> = ({
       });
 
       // Structure breaks (BOS/CHoCH) — horizontal lines from swing to break
-      engineData.structures.slice(-20).forEach(s => {
+      engineData.structures.slice(-30).forEach(s => {
         const isBull = s.direction === 'bull';
         const color = isBull ? '#089981' : '#f23645';
-        const startT = Math.floor(s.startTime / 1000);
-        const endT = Math.floor(s.endTime / 1000);
+        const startT = Math.floor(s.x1Time / 1000);
+        const endT = Math.floor(s.x2Time / 1000);
         if (startT >= endT) return;
 
-        const lineStyle = s.isSweep ? 3 : (s.type === 'CHoCH' ? 2 : 0);
+        // line style: solid=0, dashed=2, dotted=3
+        const lineStyle = s.lineStyle === 'dotted' ? 3 : (s.lineStyle === 'dashed' ? 2 : 0);
         const line = chart.addSeries(LineSeries, {
           color, lineWidth: 1, lineStyle,
           priceLineVisible: false, lastValueVisible: false,
         });
         setSafeDataEng(line, startT, s.price, endT, s.price);
 
-        // Label
-        const labelText = s.isSweep ? 'x' : s.type;
+        // Label at midpoint of line
+        const midTime = Math.floor((s.x1Time + s.x2Time) / 2 / 1000);
         allMarkers.push({
-          time: endT as any,
-          position: isBull ? 'belowBar' : 'aboveBar',
+          time: (isBull ? midTime : midTime) as any,
+          position: isBull ? 'aboveBar' : 'belowBar',
           color,
           shape: 'circle' as const,
-          text: labelText,
+          text: s.label,
         });
       });
 
