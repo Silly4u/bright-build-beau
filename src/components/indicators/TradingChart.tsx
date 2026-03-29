@@ -639,19 +639,27 @@ const TradingChart: React.FC<TradingChartProps> = ({
       const lowerData = matrixData.lower.map(p => ({ time: (p.time / 1000) as any, value: p.value }));
       if (lowerData.length > 0) lowerSeries.setData(lowerData);
 
-      // Buy/Sell signals as dedicated line series markers
-      matrixData.signals.forEach(sig => {
-        const markerSeries = chart.addSeries(LineSeries, {
-          color: sig.type === 'buy' ? '#26a69a' : '#ef5350',
-          lineWidth: 0,
-          pointMarkersVisible: true,
-          pointMarkersRadius: 5,
-          priceLineVisible: false,
-          lastValueVisible: false,
-          title: sig.type === 'buy' ? 'Buy' : 'Sell',
+      // Buy/Sell signals — group into 2 series (buy + sell)
+      const buySignals = matrixData.signals.filter(s => s.type === 'buy');
+      const sellSignals = matrixData.signals.filter(s => s.type === 'sell');
+
+      if (buySignals.length > 0) {
+        const buySeries = chart.addSeries(LineSeries, {
+          color: '#26a69a', lineWidth: 0,
+          pointMarkersVisible: true, pointMarkersRadius: 6,
+          priceLineVisible: false, lastValueVisible: false,
         } as any);
-        markerSeries.setData([{ time: (sig.time / 1000) as any, value: sig.price }]);
-      });
+        buySeries.setData(buySignals.map(s => ({ time: (s.time / 1000) as any, value: s.price })));
+      }
+
+      if (sellSignals.length > 0) {
+        const sellSeries = chart.addSeries(LineSeries, {
+          color: '#ef5350', lineWidth: 0,
+          pointMarkersVisible: true, pointMarkersRadius: 6,
+          priceLineVisible: false, lastValueVisible: false,
+        } as any);
+        sellSeries.setData(sellSignals.map(s => ({ time: (s.time / 1000) as any, value: s.price })));
+      }
     }
 
     // ── Market Structure Engine ──
