@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   createChart, ColorType, CrosshairMode, IChartApi,
   CandlestickSeries, LineSeries, AreaSeries, HistogramSeries,
+  createSeriesMarkers,
 } from 'lightweight-charts';
 import type { Candle, Indicators, Zone } from '@/hooks/useMarketData';
 import { computeLiquidityZones } from '@/lib/liquidityHunter';
