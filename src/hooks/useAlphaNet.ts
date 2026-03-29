@@ -10,7 +10,13 @@ export interface AlphaNetData {
   rz_state: string;
   signal: 'BUY' | 'SELL' | 'HOLD';
   supertrend_line: { time: number; value: number; trend: number }[];
+  signal_points: { time: number; type: 'BUY' | 'SELL'; price: number; strength: number }[];
   rz_bands: { up_band: number; lo_band: number; mean: number };
+  rz_upper_outer: { time: number; value: number }[];
+  rz_upper_inner: { time: number; value: number }[];
+  rz_mean: { time: number; value: number }[];
+  rz_lower_inner: { time: number; value: number }[];
+  rz_lower_outer: { time: number; value: number }[];
 }
 
 export function useAlphaNet(candles: Candle[], enabled: boolean) {
