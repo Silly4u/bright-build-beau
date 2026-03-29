@@ -74,6 +74,8 @@ const Indicators: React.FC = () => {
   const proEmaData = useProEma(marketData.candles, proEmaEnabled && !marketData.loading);
   const srEnabled = indicators.find(i => i.id === 'support_resistance')?.enabled ?? false;
   const srData = useSupportResistance(marketData.candles, srEnabled && !marketData.loading);
+  const wyckoffEnabled = indicators.find(i => i.id === 'wyckoff')?.enabled ?? false;
+  const wyckoffData = useWyckoff(marketData.candles, wyckoffEnabled && !marketData.loading);
 
   const toggleIndicator = (id: string) => {
     setIndicators(prev => prev.map(ind => ind.id === id ? { ...ind, enabled: !ind.enabled } : ind));
