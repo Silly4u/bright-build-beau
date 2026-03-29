@@ -4,7 +4,7 @@ import type { Candle } from '@/hooks/useMarketData';
 export interface MatrixSignal {
   time: number;
   price: number;
-  type: 'buy' | 'sell';
+  type: 'buy' | 'sell' | 'crossUp' | 'crossDown';
 }
 
 export interface MatrixData {
@@ -93,18 +93,31 @@ export function useMatrixIndicator(
       const upperVal = nwe[nweIdx] + sae;
       const lowerVal = nwe[nweIdx] - sae;
 
-      // Crossover/crossunder detection
+      // Crossover/crossunder detection + ▲▼ markers
       if (k > 0) {
         const prevClose = candles[ci - 1].close;
         const prevUpper = nwe[nweIdx + 1] + sae;
         const prevLower = nwe[nweIdx + 1] - sae;
 
+        // crossover(close, upper) → ▼ arrow
         if (close > upperVal && prevClose <= prevUpper) {
           crossPrice = close;
           crossDirection = 'above';
-        } else if (close < lowerVal && prevClose >= prevLower) {
+          signals.push({
+            time: candles[ci].time,
+            price: candles[ci].high,
+            type: 'crossDown', // ▼ price crossed above upper band
+          });
+        }
+        // crossunder(close, lower) → ▲ arrow
+        else if (close < lowerVal && prevClose >= prevLower) {
           crossPrice = close;
           crossDirection = 'below';
+          signals.push({
+            time: candles[ci].time,
+            price: candles[ci].low,
+            type: 'crossUp', // ▲ price crossed below lower band
+          });
         }
       }
 
