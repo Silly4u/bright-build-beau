@@ -762,7 +762,106 @@ const TradingChart: React.FC<TradingChartProps> = ({
       }
     }
 
-    // ── Crosshair data (OHLC legend) ──
+    // ── Buy/Sell Signal (Wavy Tunnel + Supertrend) ──
+    if (buySellData && enabledIndicators.includes('buy_sell')) {
+      const setSafeData = (series: any, t1: number, v1: number, t2: number, v2: number) => {
+        if (t1 === t2) { series.setData([{ time: t1 as any, value: v2 }]); return; }
+        if (t1 < t2) { series.setData([{ time: t1 as any, value: v1 }, { time: t2 as any, value: v2 }]); return; }
+        series.setData([{ time: t2 as any, value: v2 }, { time: t1 as any, value: v1 }]);
+      };
+
+      // Wavy Tunnel (EMA 34 high/mid/low) - aqua dotted
+      const wavyHSeries = chart.addSeries(LineSeries, {
+        color: 'rgba(0,188,212,0.4)', lineWidth: 1, lineStyle: 2,
+        priceLineVisible: false, lastValueVisible: false, title: 'W34H',
+      });
+      const wavyMSeries = chart.addSeries(LineSeries, {
+        color: 'rgba(192,192,192,0.35)', lineWidth: 1, lineStyle: 2,
+        priceLineVisible: false, lastValueVisible: false, title: 'W34M',
+      });
+      const wavyLSeries = chart.addSeries(LineSeries, {
+        color: 'rgba(0,188,212,0.4)', lineWidth: 1, lineStyle: 2,
+        priceLineVisible: false, lastValueVisible: false, title: 'W34L',
+      });
+      const mapTs = (arr: { time: number; value: number }[]) =>
+        arr.map(p => ({ time: (p.time / 1000) as any, value: p.value }));
+      
+      const wH = mapTs(buySellData.wavyHigh);
+      const wM = mapTs(buySellData.wavyMid);
+      const wL = mapTs(buySellData.wavyLow);
+      if (wH.length > 0) wavyHSeries.setData(wH);
+      if (wM.length > 0) wavyMSeries.setData(wM);
+      if (wL.length > 0) wavyLSeries.setData(wL);
+
+      // Tunnel (EMA 144/169) - purple
+      const t1Series = chart.addSeries(LineSeries, {
+        color: 'rgba(156,39,176,0.6)', lineWidth: 1, lineStyle: 0,
+        priceLineVisible: false, lastValueVisible: false, title: 'T144',
+      });
+      const t2Series = chart.addSeries(LineSeries, {
+        color: 'rgba(156,39,176,0.6)', lineWidth: 2, lineStyle: 0,
+        priceLineVisible: false, lastValueVisible: false, title: 'T169',
+      });
+      const tun1 = mapTs(buySellData.tunnel1);
+      const tun2 = mapTs(buySellData.tunnel2);
+      if (tun1.length > 0) t1Series.setData(tun1);
+      if (tun2.length > 0) t2Series.setData(tun2);
+
+      // Tunnel fill between 144 and 169
+      if (tun1.length > 0 && tun2.length > 0) {
+        const tunnelFill = chart.addSeries(AreaSeries, {
+          topColor: 'rgba(156,39,176,0.06)', bottomColor: 'rgba(156,39,176,0.06)',
+          lineColor: 'transparent', lineWidth: 1 as 1,
+          priceLineVisible: false, lastValueVisible: false,
+        });
+        // Use midpoint of tunnel
+        const tunnelMid = tun1.map((p, i) => ({
+          time: p.time,
+          value: tun2[i] ? (p.value + tun2[i].value) / 2 : p.value,
+        }));
+        tunnelFill.setData(tunnelMid);
+      }
+
+      // Supertrend line (green when bullish, red when bearish)
+      const bullST: { time: any; value: number }[] = [];
+      const bearST: { time: any; value: number }[] = [];
+      buySellData.supertrend.forEach(pt => {
+        const t = (pt.time / 1000) as any;
+        if (pt.direction === 1) {
+          bullST.push({ time: t, value: pt.value });
+        } else {
+          bearST.push({ time: t, value: pt.value });
+        }
+      });
+
+      if (bullST.length > 0) {
+        const stBullSeries = chart.addSeries(LineSeries, {
+          color: '#4CAF50', lineWidth: 2, lineStyle: 0,
+          priceLineVisible: false, lastValueVisible: false, title: 'ST ▲',
+        });
+        stBullSeries.setData(bullST);
+      }
+      if (bearST.length > 0) {
+        const stBearSeries = chart.addSeries(LineSeries, {
+          color: '#F44336', lineWidth: 2, lineStyle: 0,
+          priceLineVisible: false, lastValueVisible: false, title: 'ST ▼',
+        });
+        stBearSeries.setData(bearST);
+      }
+
+      // Buy/Sell signal markers
+      buySellData.signals.forEach(sig => {
+        const idx = sig.index;
+        if (idx < 0 || idx >= candles.length) return;
+        candleSeries.createPriceLine({
+          price: sig.price,
+          color: sig.type === 'BUY' ? '#4CAF50' : '#F44336',
+          lineWidth: 1, lineStyle: 0, axisLabelVisible: false,
+          title: sig.type === 'BUY' ? '▲ Buy' : '▼ Sell',
+        } as any);
+      });
+    }
+
     chart.subscribeCrosshairMove((param) => {
       if (!param || !param.time) {
         const last = candles[candles.length - 1];
