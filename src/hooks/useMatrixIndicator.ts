@@ -80,67 +80,7 @@ export function useMatrixIndicator(
     //
     // We iterate chronologically (oldest → newest) to maintain state.
     const signals: MatrixSignal[] = [];
-
-    // Build lookup: candleIdx → { upperVal, lowerVal }
-    // mid/upper/lower arrays are chronological and correspond to the last `len` candles
-    const startIdx = n - len; // candle index where NWE data starts
-
-    let crossPrice: number | null = null;
-    let crossDirection: string | null = null;
-
-    for (let k = 0; k < len; k++) {
-      const ci = startIdx + k; // candle index
-      const close = candles[ci].close;
-      const prevClose = k > 0 ? candles[ci - 1].close : null;
-      const upperVal = nwe[len - 1 - k] + sae;
-      const lowerVal = nwe[len - 1 - k] - sae;
-
-      // Previous bar's upper/lower for crossover detection
-      let prevUpper: number | null = null;
-      let prevLower: number | null = null;
-      if (k > 0) {
-        prevUpper = nwe[len - k] + sae;
-        prevLower = nwe[len - k] - sae;
-      }
-
-      // Detect crossover(close, upper): close > upper AND prevClose <= prevUpper
-      const crossOverUpper = prevClose !== null && prevUpper !== null &&
-        close > upperVal && prevClose <= prevUpper;
-      // Detect crossunder(close, lower): close < lower AND prevClose >= prevLower
-      const crossUnderLower = prevClose !== null && prevLower !== null &&
-        close < lowerVal && prevClose >= prevLower;
-
-      if (crossOverUpper) {
-        crossPrice = close;
-        crossDirection = 'above';
-      } else if (crossUnderLower) {
-        crossPrice = close;
-        crossDirection = 'below';
-      }
-
-      // Compute conditions
-      const condSell = crossPrice !== null && crossDirection === 'above' &&
-        close < crossPrice && close < upperVal && close > lowerVal;
-      const condBuy = crossPrice !== null && crossDirection === 'below' &&
-        close > crossPrice && close > lowerVal && close < upperVal;
-
-      // Pine plots condSell[1] / condBuy[1] → signal appears on NEXT bar
-      // We store the condition and emit on the next iteration
-      if (k > 0) {
-        const prevCi = ci - 1;
-        const prevCondSell = (() => {
-          // We need previous bar's condition. Recompute inline for accuracy.
-          const pc = candles[prevCi].close;
-          const pu = nwe[len - k] + sae;
-          const pl = nwe[len - k] - sae;
-          // crossPrice/crossDirection at that point... This is tricky.
-          // Instead, let's use a stored approach below.
-          return false;
-        })();
-      }
-    }
-
-    // Cleaner approach: two-pass. First compute conditions, then shift by 1.
+    const startIdx = n - len;
     const conditions: { sell: boolean; buy: boolean }[] = new Array(len).fill(null).map(() => ({ sell: false, buy: false }));
 
     crossPrice = null;
