@@ -13,6 +13,7 @@ import EconomicCalendar from "./pages/EconomicCalendar.tsx";
 import Dictionary from "./pages/Dictionary.tsx";
 import DictionaryDetail from "./pages/DictionaryDetail.tsx";
 import NewsDetail from "./pages/NewsDetail.tsx";
+import AnalysisDetail from "./pages/AnalysisDetail.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
