@@ -639,20 +639,23 @@ const TradingChart: React.FC<TradingChartProps> = ({
       const lowerData = matrixData.lower.map(p => ({ time: (p.time / 1000) as any, value: p.value }));
       if (lowerData.length > 0) lowerSeries.setData(lowerData);
 
-      // Buy/Sell labels using markers on candlestick series
+      // Buy/Sell + ▲▼ cross markers on candlestick series
       if (matrixData.signals.length > 0) {
-        const markers = matrixData.signals.map(sig => ({
-          time: (sig.time / 1000) as any,
-          position: sig.type === 'sell' ? 'aboveBar' as const : 'belowBar' as const,
-          color: sig.type === 'sell' ? '#ef5350' : '#26a69a',
-          shape: sig.type === 'sell' ? 'arrowDown' as const : 'arrowUp' as const,
-          text: sig.type === 'sell' ? 'Sell' : 'Buy',
-        }));
+        const markers = matrixData.signals.map(sig => {
+          if (sig.type === 'sell') {
+            return { time: (sig.time / 1000) as any, position: 'aboveBar' as const, color: '#ef5350', shape: 'arrowDown' as const, text: 'Sell' };
+          } else if (sig.type === 'buy') {
+            return { time: (sig.time / 1000) as any, position: 'belowBar' as const, color: '#26a69a', shape: 'arrowUp' as const, text: 'Buy' };
+          } else if (sig.type === 'crossDown') {
+            // ▼ price crossed above upper band
+            return { time: (sig.time / 1000) as any, position: 'aboveBar' as const, color: '#ef5350', shape: 'arrowDown' as const, text: '▼' };
+          } else {
+            // ▲ price crossed below lower band
+            return { time: (sig.time / 1000) as any, position: 'belowBar' as const, color: '#26a69a', shape: 'arrowUp' as const, text: '▲' };
+          }
+        });
 
-        // Sort markers by time (required by lightweight-charts)
         markers.sort((a, b) => (a.time as number) - (b.time as number));
-
-        // Merge with any existing markers
         createSeriesMarkers(candleSeries, markers);
       }
     }
