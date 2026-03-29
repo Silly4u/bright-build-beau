@@ -1010,7 +1010,75 @@ const TradingChart: React.FC<TradingChartProps> = ({
       });
     }
 
-    chart.subscribeCrosshairMove((param) => {
+    // ── Wyckoff (Accumulation/Distribution boxes + events + signals) ──
+    if (wyckoffData && enabledIndicators.includes('wyckoff')) {
+      const setSafeData = (series: any, t1: number, v1: number, t2: number, v2: number) => {
+        if (t1 === t2) { series.setData([{ time: t1 as any, value: v2 }]); return; }
+        if (t1 < t2) { series.setData([{ time: t1 as any, value: v1 }, { time: t2 as any, value: v2 }]); return; }
+        series.setData([{ time: t2 as any, value: v2 }, { time: t1 as any, value: v1 }]);
+      };
+
+      // Wyckoff boxes (Accumulation = green, Distribution = red, Sideways = gray)
+      wyckoffData.boxes.forEach(box => {
+        const fillColor = box.phase === 'accumulation' ? 'rgba(76,175,79,0.06)' :
+                          box.phase === 'distribution' ? 'rgba(255,82,82,0.06)' : 'rgba(120,123,134,0.05)';
+        const lineColor = box.phase === 'accumulation' ? 'rgba(76,175,79,0.35)' :
+                          box.phase === 'distribution' ? 'rgba(255,82,82,0.35)' : 'rgba(120,123,134,0.25)';
+
+        const startT = Math.floor(box.startTime / 1000);
+        const endT = Math.floor(box.endTime / 1000);
+
+        // Top line
+        const topL = chart.addSeries(LineSeries, {
+          color: lineColor, lineWidth: 1, lineStyle: 0,
+          priceLineVisible: false, lastValueVisible: false,
+        });
+        setSafeData(topL, startT, box.top, endT, box.top);
+
+        // Bottom line
+        const botL = chart.addSeries(LineSeries, {
+          color: lineColor, lineWidth: 1, lineStyle: 0,
+          priceLineVisible: false, lastValueVisible: false,
+        });
+        setSafeData(botL, startT, box.bottom, endT, box.bottom);
+
+        // Fill
+        const fill = chart.addSeries(AreaSeries, {
+          topColor: fillColor, bottomColor: fillColor,
+          lineColor: 'transparent', lineWidth: 1 as 1,
+          priceLineVisible: false, lastValueVisible: false,
+        });
+        const mid = (box.top + box.bottom) / 2;
+        const fillData = candles
+          .filter(c => { const t = Math.floor(c.time / 1000); return t >= startT && t <= endT; })
+          .map(c => ({ time: Math.floor(c.time / 1000) as any, value: mid }));
+        if (fillData.length > 0) fill.setData(fillData);
+      });
+
+      // Wyckoff events (SC, AR, ST, BC, Spring, UTAD) as price line markers
+      wyckoffData.events.slice(-15).forEach(evt => {
+        if (evt.index < 0 || evt.index >= candles.length) return;
+        const isAccum = evt.type === 'accumulation';
+        candleSeries.createPriceLine({
+          price: evt.price,
+          color: isAccum ? '#4CAF50' : '#FF5252',
+          lineWidth: 1, lineStyle: 0, axisLabelVisible: false,
+          title: `${evt.location === 'below' ? '▲' : '▼'} ${evt.label}`,
+        } as any);
+      });
+
+      // BUY/SELL breakout signals
+      wyckoffData.signals.slice(-10).forEach(sig => {
+        if (sig.index < 0 || sig.index >= candles.length) return;
+        candleSeries.createPriceLine({
+          price: sig.price,
+          color: sig.type === 'BUY' ? '#CDDC39' : '#FF1744',
+          lineWidth: 2, lineStyle: 0, axisLabelVisible: false,
+          title: sig.type === 'BUY' ? '▲ WK Buy' : '▼ WK Sell',
+        } as any);
+      });
+    }
+
       if (!param || !param.time) {
         const last = candles[candles.length - 1];
         const prev = candles[candles.length - 2];
