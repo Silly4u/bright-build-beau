@@ -121,20 +121,7 @@ const Services: React.FC = () => {
           <p className="reveal-hidden page-reveal text-muted-foreground text-lg leading-relaxed max-w-2xl mx-auto mb-8">
             Từ tín hiệu giao dịch hàng ngày đến mentorship 1-1 chuyên sâu, UNCLETRADER có đủ công cụ để đưa bạn từ thua lỗ sang có lợi nhuận ổn định.
           </p>
-
-          {/* Video */}
-          <div className="reveal-hidden page-reveal glass-card rounded-2xl overflow-hidden cyber-border max-w-3xl mx-auto mb-10">
-            <video
-              controls
-              className="w-full aspect-video"
-              preload="metadata"
-            >
-              <source src="/videos/thiet-lap-laptop.mp4" type="video/mp4" />
-              Trình duyệt không hỗ trợ video.
-            </video>
-          </div>
-
-          <div className="reveal-hidden page-reveal flex items-center justify-center gap-8">
+          <div className="reveal-hidden page-reveal flex items-center justify-center gap-8 mt-10">
             {[
               { label: 'Signals', count: '400+', color: 'text-cyan-brand' },
               { label: 'Học viên', count: '2,400+', color: 'text-violet-light' },
