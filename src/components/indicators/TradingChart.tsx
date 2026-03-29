@@ -108,6 +108,9 @@ const TradingChart: React.FC<TradingChartProps> = ({
     });
     chartRef.current = chart;
 
+    // Shared markers array — all indicators push markers here, applied once at the end
+    const allMarkers: any[] = [];
+
     // ── AlphaNet AI: RZ Bands FIRST (so candles draw on top) ──
     if (alphaNetData && enabledIndicators.includes('alphanet')) {
       const toChartPtRZ = (p: { time: number; value: number }) => ({
