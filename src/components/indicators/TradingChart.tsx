@@ -1033,11 +1033,8 @@ const TradingChart: React.FC<TradingChartProps> = ({
     if (srData && enabledIndicators.includes('support_resistance')) {
       const firstT = Math.floor(candles[0].time / 1000);
       const lastT = Math.floor(candles[candles.length - 1].time / 1000);
-      // Extend far both directions for "extend.both" effect
-      const farLeft = firstT - (lastT - firstT) * 5;
-      const farRight = lastT + (lastT - firstT) * 5;
 
-      // S/R Channel boxes using RectanglePrimitive (matches Pine box.new extend=extend.both)
+      // S/R Channel boxes using visible chart range times (must exist on time scale)
       srData.channels.forEach(ch => {
         const fillColor = ch.type === 'resistance' ? 'rgba(239,83,80,0.12)' :
                           ch.type === 'support' ? 'rgba(0,230,118,0.12)' : 'rgba(158,158,158,0.08)';
@@ -1045,8 +1042,8 @@ const TradingChart: React.FC<TradingChartProps> = ({
                             ch.type === 'support' ? 'rgba(0,230,118,0.5)' : 'rgba(158,158,158,0.3)';
 
         candleSeries.attachPrimitive(new RectanglePrimitive({
-          p1: { time: farLeft, price: ch.top },
-          p2: { time: farRight, price: ch.bottom },
+          p1: { time: firstT, price: ch.top },
+          p2: { time: lastT, price: ch.bottom },
           fillColor, borderColor, borderWidth: 1,
         }));
       });
