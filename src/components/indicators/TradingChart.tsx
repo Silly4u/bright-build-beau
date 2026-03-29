@@ -12,6 +12,7 @@ import type { EngineData } from '@/hooks/useEngineIndicator';
 import type { TpSlData } from '@/hooks/useTpSlIndicator';
 import type { BuySellData } from '@/hooks/useBuySellSignal';
 import type { OscillatorMatrixData } from '@/hooks/useOscillatorMatrix';
+import type { ProEmaData } from '@/hooks/useProEma';
 
 export interface AITrendline {
   start: { time: number; price: number };
