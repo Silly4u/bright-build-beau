@@ -13,6 +13,8 @@ export interface TermDetail {
   english: string;
   category: string;
   illustration?: string;
+  videoId?: string; // YouTube video ID
+  relatedTerms?: string[]; // IDs of related terms
   basic: { definition: string; example: string; howToApply: string; commonMistakes: string };
   advanced: { definition: string; example: string; howToApply: string; commonMistakes: string; proTips?: string[]; keyTakeaways?: string[] };
 }
