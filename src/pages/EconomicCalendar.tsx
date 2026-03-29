@@ -179,15 +179,17 @@ const EconomicCalendar: React.FC = () => {
             {/* Row 2: Impact filters + Legend */}
             <div className="flex flex-wrap items-center gap-3 text-xs">
               <span className="text-muted-foreground/60">Lọc:</span>
-              {(['high', 'medium', 'low'] as const).map(level => {
+              {([
+                { level: 'high', activeClass: 'border-red-400/30 bg-red-400/10 text-red-400' },
+                { level: 'medium', activeClass: 'border-yellow-400/30 bg-yellow-400/10 text-yellow-400' },
+                { level: 'low', activeClass: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-400' },
+              ] as const).map(({ level, activeClass }) => {
                 const s = IMPACT_STYLES[level];
                 const active = impactFilter.includes(level);
                 return (
                   <button key={level} onClick={() => toggleImpact(level)}
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition-all ${
-                      active
-                        ? `border-${level === 'high' ? 'red' : level === 'medium' ? 'yellow' : 'emerald'}-400/30 bg-${level === 'high' ? 'red' : level === 'medium' ? 'yellow' : 'emerald'}-400/10 text-${level === 'high' ? 'red' : level === 'medium' ? 'yellow' : 'emerald'}-400`
-                        : 'border-foreground/10 text-muted-foreground/40 line-through'
+                      active ? activeClass : 'border-foreground/10 text-muted-foreground/40 line-through'
                     }`}>
                     <Stars count={s.stars} />
                     <span className="font-medium">{s.label}</span>
