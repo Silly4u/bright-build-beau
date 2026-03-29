@@ -8,7 +8,7 @@ export interface TpSlTrade {
   entryPrice: number;
   slPrice: number;
   tpPrice: number;
-  result: 'TP' | 'SL' | 'open';
+  result: 'TP' | 'SL' | 'open' | 'closed';
   exitIndex?: number;
   exitTime?: number;
 }
