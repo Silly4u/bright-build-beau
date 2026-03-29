@@ -26,6 +26,7 @@ const SIGNAL_COLORS: Record<string, { bg: string; border: string; text: string; 
 const ENABLED_INDICATORS = ['bb_squeeze', 'breakout', 'breakdown', 'confluence', 'momentum', 'vol_spike', 'rsi_div', 'sup_bounce', 'macd_cross'];
 
 const Analysis: React.FC = () => {
+  const navigate = useNavigate();
   const [btcTimeframe, setBtcTimeframe] = useState('H4');
   const [goldTimeframe, setGoldTimeframe] = useState('H4');
   const [logs, setLogs] = useState<string[]>([]);
