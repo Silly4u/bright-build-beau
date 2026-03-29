@@ -16,6 +16,7 @@ import { useBuySellSignal } from '@/hooks/useBuySellSignal';
 import { useOscillatorMatrix } from '@/hooks/useOscillatorMatrix';
 import { useProEma } from '@/hooks/useProEma';
 import { useSupportResistance } from '@/hooks/useSupportResistance';
+import { useWyckoff } from '@/hooks/useWyckoff';
 
 const PAIRS = [
   { symbol: 'BTC/USDT', label: 'BTC', color: '#F7931A' },
@@ -42,6 +43,7 @@ const DEFAULT_INDICATORS: IndicatorConfig[] = [
   { id: 'oscillator', label: 'Oscillator Matrix', enabled: false, color: '#FF5722', category: 'Oscillator' },
   { id: 'pro_ema', label: 'Pro EMA', enabled: false, color: '#FFA726', category: 'Trend' },
   { id: 'support_resistance', label: 'Pro S/R', enabled: false, color: '#00E676', category: 'S/R' },
+  { id: 'wyckoff', label: 'Wyckoff', enabled: false, color: '#B388FF', category: 'Structure' },
 ];
 
 const Indicators: React.FC = () => {
@@ -72,6 +74,8 @@ const Indicators: React.FC = () => {
   const proEmaData = useProEma(marketData.candles, proEmaEnabled && !marketData.loading);
   const srEnabled = indicators.find(i => i.id === 'support_resistance')?.enabled ?? false;
   const srData = useSupportResistance(marketData.candles, srEnabled && !marketData.loading);
+  const wyckoffEnabled = indicators.find(i => i.id === 'wyckoff')?.enabled ?? false;
+  const wyckoffData = useWyckoff(marketData.candles, wyckoffEnabled && !marketData.loading);
 
   const toggleIndicator = (id: string) => {
     setIndicators(prev => prev.map(ind => ind.id === id ? { ...ind, enabled: !ind.enabled } : ind));
@@ -379,6 +383,49 @@ const Indicators: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Wyckoff Dashboard */}
+            {wyckoffEnabled && wyckoffData && (
+              <div className="mt-3 border border-white/5 rounded-lg overflow-hidden">
+                <div className="bg-[#1B1F2B] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
+                  WYCKOFF
+                </div>
+                <div className="bg-[#0d1526] p-2 space-y-1.5">
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Phase</span>
+                    <span className={`font-bold ${
+                      wyckoffData.currentPhase === 'accumulation' ? 'text-emerald-400' :
+                      wyckoffData.currentPhase === 'distribution' ? 'text-red-400' :
+                      wyckoffData.currentPhase === 'bullish' ? 'text-lime-400' :
+                      wyckoffData.currentPhase === 'bearish' ? 'text-purple-400' :
+                      'text-muted-foreground'
+                    }`}>
+                      {wyckoffData.currentPhase.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Boxes</span>
+                    <span className="text-foreground font-bold">{wyckoffData.boxes.length}</span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Events</span>
+                    <span className="text-foreground font-bold">{wyckoffData.events.length}</span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-muted-foreground/60">Signals</span>
+                    <span className="text-foreground font-bold">{wyckoffData.signals.length}</span>
+                  </div>
+                  {wyckoffData.events.length > 0 && (
+                    <div className="flex justify-between text-[10px] font-mono">
+                      <span className="text-muted-foreground/60">Last Event</span>
+                      <span className={`font-bold ${wyckoffData.events[wyckoffData.events.length - 1].type === 'accumulation' ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {wyckoffData.events[wyckoffData.events.length - 1].label}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           <div className="bg-[#0d1526] border border-white/5 rounded-lg overflow-hidden flex flex-col">
             {/* Chart header with pair info */}
@@ -424,6 +471,7 @@ const Indicators: React.FC = () => {
                   oscillatorData={oscillatorData}
                   proEmaData={proEmaData}
                   srData={srData}
+                  wyckoffData={wyckoffData}
                 />
               )}
             </div>
