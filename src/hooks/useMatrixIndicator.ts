@@ -1,11 +1,17 @@
 import { useMemo } from 'react';
 import type { Candle } from '@/hooks/useMarketData';
 
+export interface MatrixSignal {
+  time: number;
+  price: number;
+  type: 'buy' | 'sell';
+}
+
 export interface MatrixData {
   upper: { time: number; value: number }[];
   lower: { time: number; value: number }[];
   mid: { time: number; value: number }[];
-  signals: { time: number; price: number; type: 'buy' | 'sell' }[];
+  signals: MatrixSignal[];
 }
 
 /**
@@ -64,60 +70,74 @@ export function useMatrixIndicator(
       lower.push({ time: t, value: nwe[i] - sae });
     }
 
-    // Generate signals matching Pine Script logic
-    // Pine iterates i=0..len-1 where i=0 is most recent
-    // ▼ when src[i] > nwe[i]+sae AND src[i+1] < nwe[i]+sae (cross above upper)
-    // ▲ when src[i] < nwe[i]-sae AND src[i+1] > nwe[i]-sae (cross below lower)
-    // Sell: after ▼, if src[i-1] < src[i] and src[i-1] between bands
-    // Buy: after ▲, if src[i-1] > src[i] and src[i-1] between bands
-    const signals: { time: number; price: number; type: 'buy' | 'sell' }[] = [];
+    // ── Generate Buy/Sell signals matching Pine Script stateful logic ──
+    // Pine uses non-repaint plotshape approach:
+    // 1. Track crossover(close, upper) → crossPrice = close, crossDirection = "above"
+    // 2. Track crossunder(close, lower) → crossPrice = close, crossDirection = "below"
+    // 3. condSell = crossDirection=="above" && close < crossPrice && close < upper && close > lower
+    // 4. condBuy  = crossDirection=="below" && close > crossPrice && close > lower && close < upper
+    // 5. Plot on NEXT bar [1], then reset crossPrice/crossDirection
+    //
+    // We iterate chronologically (oldest → newest) to maintain state.
+    const signals: MatrixSignal[] = [];
+    const startIdx = n - len;
+    const conditions: { sell: boolean; buy: boolean }[] = new Array(len).fill(null).map(() => ({ sell: false, buy: false }));
 
-    for (let i = 0; i < len - 1; i++) {
-      const upperVal = nwe[i] + sae;
-      const lowerVal = nwe[i] - sae;
+    let crossPrice: number | null = null;
+    let crossDirection: string | null = null;
 
-      // Cross above upper band: src[i] > upper AND src[i+1] < upper
-      if (src[i] > upperVal && src[i + 1] < (nwe[i + 1] + sae)) {
-        // Check sell condition: i > 1, src[i-1] < src[i], src[i-1] between bands
-        if (i > 0) {
-          const prevUpper = nwe[i - 1] + sae;
-          const prevLower = nwe[i - 1] - sae;
-          if (src[i - 1] < src[i] && src[i - 1] < prevUpper && src[i - 1] > prevLower) {
-            // Pine: label at n-i+2 which is 2 bars after the signal in Pine's reverse indexing
-            const candleIdx = n - 1 - i;
-            if (candleIdx >= 0 && candleIdx < n) {
-              signals.push({
-                time: candles[candleIdx].time,
-                price: candles[candleIdx].high,
-                type: 'sell',
-              });
-            }
-          }
+    for (let k = 0; k < len; k++) {
+      const ci = startIdx + k;
+      const close = candles[ci].close;
+      const nweIdx = len - 1 - k; // index into nwe array (reversed)
+      const upperVal = nwe[nweIdx] + sae;
+      const lowerVal = nwe[nweIdx] - sae;
+
+      // Crossover/crossunder detection
+      if (k > 0) {
+        const prevClose = candles[ci - 1].close;
+        const prevUpper = nwe[nweIdx + 1] + sae;
+        const prevLower = nwe[nweIdx + 1] - sae;
+
+        if (close > upperVal && prevClose <= prevUpper) {
+          crossPrice = close;
+          crossDirection = 'above';
+        } else if (close < lowerVal && prevClose >= prevLower) {
+          crossPrice = close;
+          crossDirection = 'below';
         }
       }
 
-      // Cross below lower band: src[i] < lower AND src[i+1] > lower
-      if (src[i] < lowerVal && src[i + 1] > (nwe[i + 1] - sae)) {
-        // Check buy condition: i > 1, src[i-1] > src[i], src[i-1] between bands
-        if (i > 0) {
-          const prevUpper = nwe[i - 1] + sae;
-          const prevLower = nwe[i - 1] - sae;
-          if (src[i - 1] > src[i] && src[i - 1] < prevUpper && src[i - 1] > prevLower) {
-            const candleIdx = n - 1 - i;
-            if (candleIdx >= 0 && candleIdx < n) {
-              signals.push({
-                time: candles[candleIdx].time,
-                price: candles[candleIdx].low,
-                type: 'buy',
-              });
-            }
-          }
-        }
+      conditions[k].sell = crossPrice !== null && crossDirection === 'above' &&
+        close < crossPrice && close < upperVal && close > lowerVal;
+      conditions[k].buy = crossPrice !== null && crossDirection === 'below' &&
+        close > crossPrice && close > lowerVal && close < upperVal;
+
+      // Reset after signal
+      if (conditions[k].sell || conditions[k].buy) {
+        crossPrice = null;
+        crossDirection = null;
       }
     }
 
-    // Sort signals chronologically
-    signals.sort((a, b) => a.time - b.time);
+    // Apply [1] shift: signal on bar k uses condition from bar k-1
+    for (let k = 1; k < len; k++) {
+      const ci = startIdx + k;
+      if (conditions[k - 1].sell) {
+        signals.push({
+          time: candles[ci].time,
+          price: candles[ci].high,
+          type: 'sell',
+        });
+      }
+      if (conditions[k - 1].buy) {
+        signals.push({
+          time: candles[ci].time,
+          price: candles[ci].low,
+          type: 'buy',
+        });
+      }
+    }
 
     return { upper, lower, mid, signals };
   }, [candles, enabled, bandwidth, mult]);

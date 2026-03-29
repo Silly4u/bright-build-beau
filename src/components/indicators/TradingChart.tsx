@@ -639,19 +639,22 @@ const TradingChart: React.FC<TradingChartProps> = ({
       const lowerData = matrixData.lower.map(p => ({ time: (p.time / 1000) as any, value: p.value }));
       if (lowerData.length > 0) lowerSeries.setData(lowerData);
 
-      // Buy/Sell signals — render on the upper/lower series using price lines
-      // This avoids creating extra series that can affect chart scaling
-      matrixData.signals.forEach(sig => {
-        const targetSeries = sig.type === 'sell' ? upperSeries : lowerSeries;
-        targetSeries.createPriceLine({
-          price: sig.price,
-          color: sig.type === 'buy' ? '#26a69a' : '#ef5350',
-          lineWidth: 1,
-          lineStyle: 2,
-          axisLabelVisible: true,
-          title: sig.type === 'buy' ? '▲ Buy' : '▼ Sell',
-        } as any);
-      });
+      // Buy/Sell labels using markers on candlestick series
+      if (matrixData.signals.length > 0) {
+        const markers = matrixData.signals.map(sig => ({
+          time: (sig.time / 1000) as any,
+          position: sig.type === 'sell' ? 'aboveBar' as const : 'belowBar' as const,
+          color: sig.type === 'sell' ? '#ef5350' : '#26a69a',
+          shape: sig.type === 'sell' ? 'arrowDown' as const : 'arrowUp' as const,
+          text: sig.type === 'sell' ? 'Sell' : 'Buy',
+        }));
+
+        // Sort markers by time (required by lightweight-charts)
+        markers.sort((a, b) => (a.time as number) - (b.time as number));
+
+        // Merge with any existing markers
+        createSeriesMarkers(candleSeries, markers);
+      }
     }
 
     // ── Market Structure Engine ──
