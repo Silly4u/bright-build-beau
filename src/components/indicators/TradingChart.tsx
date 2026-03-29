@@ -473,39 +473,101 @@ const TradingChart: React.FC<TradingChartProps> = ({
       });
     }
 
-    // ── AlphaNet AI SuperTrend Line ──
-    if (alphaNetData && enabledIndicators.includes('alphanet') && alphaNetData.supertrend_line.length > 0) {
-      const bullPoints: { time: any; value: number }[] = [];
-      const bearPoints: { time: any; value: number }[] = [];
+    // ── AlphaNet AI: RZ Bands (gradient zones like reference image) ──
+    if (alphaNetData && enabledIndicators.includes('alphanet')) {
+      const toChartPt = (p: { time: number; value: number }) => ({
+        time: (p.time / 1000) as any,
+        value: p.value,
+      });
 
-      alphaNetData.supertrend_line.forEach(pt => {
-        const t = (pt.time / 1000) as any;
-        if (pt.trend === 1) {
-          bullPoints.push({ time: t, value: pt.value });
-          bearPoints.push({ time: t, value: NaN as any });
-        } else {
-          bearPoints.push({ time: t, value: pt.value });
-          bullPoints.push({ time: t, value: NaN as any });
+      // Upper resistance zone (red gradient): outer → inner
+      if (alphaNetData.rz_upper_outer?.length > 0 && alphaNetData.rz_upper_inner?.length > 0) {
+        const upperOuter = chart.addSeries(AreaSeries, {
+          topColor: 'rgba(239,83,80,0.25)', bottomColor: 'rgba(239,83,80,0.08)',
+          lineColor: 'rgba(239,83,80,0.4)', lineWidth: 1 as 1,
+          priceLineVisible: false, lastValueVisible: false,
+        });
+        upperOuter.setData(alphaNetData.rz_upper_outer.map(toChartPt));
+
+        const upperInner = chart.addSeries(AreaSeries, {
+          topColor: 'rgba(239,83,80,0.12)', bottomColor: 'transparent',
+          lineColor: 'rgba(239,83,80,0.25)', lineWidth: 1 as 1,
+          priceLineVisible: false, lastValueVisible: false,
+        });
+        upperInner.setData(alphaNetData.rz_upper_inner.map(toChartPt));
+      }
+
+      // Lower support zone (teal gradient): inner → outer
+      if (alphaNetData.rz_lower_outer?.length > 0 && alphaNetData.rz_lower_inner?.length > 0) {
+        const lowerInner = chart.addSeries(AreaSeries, {
+          topColor: 'transparent', bottomColor: 'rgba(38,166,154,0.12)',
+          lineColor: 'rgba(38,166,154,0.25)', lineWidth: 1 as 1,
+          priceLineVisible: false, lastValueVisible: false,
+        });
+        lowerInner.setData(alphaNetData.rz_lower_inner.map(toChartPt));
+
+        const lowerOuter = chart.addSeries(AreaSeries, {
+          topColor: 'rgba(38,166,154,0.08)', bottomColor: 'rgba(38,166,154,0.25)',
+          lineColor: 'rgba(38,166,154,0.4)', lineWidth: 1 as 1,
+          priceLineVisible: false, lastValueVisible: false,
+        });
+        lowerOuter.setData(alphaNetData.rz_lower_outer.map(toChartPt));
+      }
+
+      // Mean line (dashed gray)
+      if (alphaNetData.rz_mean?.length > 0) {
+        const meanSeries = chart.addSeries(LineSeries, {
+          color: 'rgba(255,255,255,0.15)', lineWidth: 1, lineStyle: 2,
+          priceLineVisible: false, lastValueVisible: false,
+        });
+        meanSeries.setData(alphaNetData.rz_mean.map(toChartPt));
+      }
+
+      // SuperTrend line
+      if (alphaNetData.supertrend_line?.length > 0) {
+        // Split into bull/bear segments for proper coloring
+        const bullPoints: { time: any; value: number }[] = [];
+        const bearPoints: { time: any; value: number }[] = [];
+
+        alphaNetData.supertrend_line.forEach(pt => {
+          const t = (pt.time / 1000) as any;
+          if (pt.trend === 1) {
+            bullPoints.push({ time: t, value: pt.value });
+          } else {
+            bearPoints.push({ time: t, value: pt.value });
+          }
+        });
+
+        if (bullPoints.length > 0) {
+          const bullST = chart.addSeries(LineSeries, {
+            color: '#26a69a', lineWidth: 2, priceLineVisible: false,
+            lastValueVisible: false,
+          });
+          bullST.setData(bullPoints);
         }
-      });
+        if (bearPoints.length > 0) {
+          const bearST = chart.addSeries(LineSeries, {
+            color: '#ef5350', lineWidth: 2, priceLineVisible: false,
+            lastValueVisible: false,
+          });
+          bearST.setData(bearPoints);
+        }
+      }
 
-      // Bullish SuperTrend (green)
-      const bullST = chart.addSeries(LineSeries, {
-        color: '#26a69a', lineWidth: 2, priceLineVisible: false,
-        lastValueVisible: false, title: 'AI ST ▲',
-      });
-      const validBull = bullPoints.filter(p => !isNaN(p.value));
-      if (validBull.length > 0) bullST.setData(validBull);
+      // Signal points with strength stars (▲ AI 3★, ▼ AI 1★)
+      if (alphaNetData.signal_points?.length > 0) {
+        alphaNetData.signal_points.forEach(sp => {
+          const stars = '★'.repeat(Math.min(sp.strength, 4));
+          candleSeries.createPriceLine({
+            price: sp.price,
+            color: sp.type === 'BUY' ? '#26a69a' : '#ef5350',
+            lineWidth: 1, lineStyle: 0, axisLabelVisible: false,
+            title: sp.type === 'BUY' ? `▲ AI ${stars}` : `▼ AI ${stars}`,
+          } as any);
+        });
+      }
 
-      // Bearish SuperTrend (red)
-      const bearST = chart.addSeries(LineSeries, {
-        color: '#ef5350', lineWidth: 2, priceLineVisible: false,
-        lastValueVisible: false, title: 'AI ST ▼',
-      });
-      const validBear = bearPoints.filter(p => !isNaN(p.value));
-      if (validBear.length > 0) bearST.setData(validBear);
-
-      // Signal marker
+      // Current signal marker
       if (alphaNetData.signal === 'BUY' || alphaNetData.signal === 'SELL') {
         const lastCandle = candles[candles.length - 1];
         if (lastCandle) {
