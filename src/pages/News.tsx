@@ -78,7 +78,7 @@ const News: React.FC = () => {
       <Header />
 
       {/* Hot Ticker */}
-      <div className="pt-20">
+      <div className="pt-24">
         <div className="bg-gradient-to-r from-rose-500/10 via-transparent to-rose-500/10 border-b border-rose-500/20">
           <div className="max-w-7xl mx-auto px-6 py-2.5 flex items-center gap-3">
             <span className="bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded animate-pulse">LIVE</span>

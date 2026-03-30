@@ -108,7 +108,7 @@ const NewsDetail: React.FC = () => {
     <main className="min-h-screen bg-[#0b1120]">
       <Header />
 
-      <div className="pt-24 px-6 lg:px-8">
+      <div className="pt-28 px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           {/* Breadcrumb */}
           <div className="flex items-center gap-3 mb-6">

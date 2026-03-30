@@ -111,7 +111,7 @@ const Indicators: React.FC = () => {
       <Header />
 
       {/* ═══ TOP BAR: Logo | Pair | Timeframe | Bot Status ═══ */}
-      <div className="pt-20 px-2 lg:px-4">
+      <div className="pt-24 px-2 lg:px-4">
         <div className="bg-[#0d1526] border border-white/5 rounded-lg px-4 py-2.5 flex flex-wrap items-center gap-3 text-xs">
           {/* Coin pair selector */}
           <div className="flex items-center gap-2">
