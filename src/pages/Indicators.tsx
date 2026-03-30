@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
+import { useAuth } from '@/contexts/AuthContext';
+import { useIndicatorPermissions } from '@/hooks/useIndicatorPermissions';
 import Footer from '@/components/Footer';
 import TradingChart from '@/components/indicators/TradingChart';
 import SubIndicators from '@/components/indicators/SubIndicators';
