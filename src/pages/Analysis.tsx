@@ -277,7 +277,7 @@ const Analysis: React.FC = () => {
       <Header />
 
       {/* ── TOP BAR ── */}
-      <div className="pt-20 px-2 lg:px-4">
+      <div className="pt-24 px-2 lg:px-4">
         <div className="glass-card rounded-lg px-4 py-2.5 flex flex-wrap items-center gap-3 text-xs">
           {/* Pair badges */}
           <div className="flex items-center gap-2">

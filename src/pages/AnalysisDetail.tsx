@@ -114,7 +114,7 @@ const AnalysisDetail: React.FC = () => {
       <Header />
 
       {/* Top Bar */}
-      <div className="pt-20 px-2 lg:px-6">
+      <div className="pt-24 px-2 lg:px-6">
         <div className="glass-card rounded-lg px-4 py-2.5 flex flex-wrap items-center gap-3 text-xs">
           <Link to="/phan-tich" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>

@@ -124,7 +124,7 @@ const EconomicCalendar: React.FC = () => {
     <main className="min-h-screen bg-navy grain-overlay">
       <Header />
 
-      <section className="pt-24 pb-4 px-4 lg:px-8">
+      <section className="pt-28 pb-4 px-4 lg:px-8">
         <div className="max-w-6xl mx-auto">
 
           {/* Header */}
