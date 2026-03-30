@@ -35,6 +35,9 @@ const Analysis: React.FC = () => {
   const [scanLabel, setScanLabel] = useState('');
   const [autoSignal, setAutoSignal] = useState(false);
   const [sendingSignal, setSendingSignal] = useState<string | null>(null);
+  const [commentary, setCommentary] = useState('');
+  const [commentaryLoading, setCommentaryLoading] = useState(false);
+  const [commentaryTime, setCommentaryTime] = useState('');
   const dashboardRef = useRef<HTMLDivElement>(null);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
