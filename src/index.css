@@ -291,3 +291,15 @@ body {
 .crypto-input::placeholder {
   color: hsl(var(--color-muted) / 0.6);
 }
+
+/* Economic ticker marquee */
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-track {
+  animation: ticker-scroll 40s linear infinite;
+}
+.ticker-track:hover {
+  animation-play-state: paused;
+}
