@@ -512,10 +512,10 @@ serve(async (req) => {
 
     // 4. Check how many AI images we've generated today
     const aiImagesCount = await countTodayAiImages(supabase);
-    const canGenerateImage = aiImagesCount < 6;
-    let imageGenerated = false;
+    const maxAiImages = 6;
+    let aiImagesGenerated = 0;
 
-    console.log(`🖼️ AI images today: ${aiImagesCount}/6, can generate: ${canGenerateImage}`);
+    console.log(`🖼️ AI images today: ${aiImagesCount}/${maxAiImages}`);
 
     // 5. Process each stream article: AI rewrite + image
     const insertArticles: any[] = [];
@@ -534,21 +534,29 @@ serve(async (req) => {
         continue;
       }
 
-      // Image: generate AI for first eligible article, rest use original or Unsplash
+      // Image strategy:
+      // 1. Try AI generation if budget allows (spread across streams)
+      // 2. Use original source image if available
+      // 3. Fall back to diverse Unsplash image based on stream + title
       let imageUrl: string | null = null;
 
-      if (canGenerateImage && !imageGenerated) {
+      if ((aiImagesCount + aiImagesGenerated) < maxAiImages) {
         console.log(`🎨 Generating AI image for ${stream}...`);
         imageUrl = await aiGenerateImage(rewritten.title, stream, raw.imageUrl);
         if (imageUrl) {
-          imageGenerated = true;
-          console.log(`✅ AI image generated for ${stream}`);
+          aiImagesGenerated++;
+          console.log(`✅ AI image generated for ${stream} (${aiImagesCount + aiImagesGenerated}/${maxAiImages} today)`);
         }
       }
 
+      if (!imageUrl && raw.imageUrl && !raw.imageUrl.includes("unsplash.com")) {
+        // Use original source image (but not Unsplash placeholders)
+        imageUrl = raw.imageUrl;
+      }
+
       if (!imageUrl) {
-        // Use original image from source or Unsplash fallback
-        imageUrl = raw.imageUrl || await searchFreeImage(rewritten.title);
+        // Fallback: diverse Unsplash image unique to this stream + title
+        imageUrl = await searchFreeImage(rewritten.title, stream);
       }
 
       const badgeInfo = STREAM_BADGES[stream];
