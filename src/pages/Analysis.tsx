@@ -84,6 +84,36 @@ const Analysis: React.FC = () => {
   const btcAI = getAIPoints(btcData, 'BTC');
   const goldAI = getAIPoints(goldData, 'XAU');
 
+  // ── Fetch AI Commentary ──
+  const fetchCommentary = useCallback(async () => {
+    if (commentaryLoading) return;
+    if (!btcAI && !goldAI) return;
+    setCommentaryLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('market-commentary', {
+        body: {
+          btc: btcAI ? { price: btcPrice, trend: btcAI.trend, support: btcAI.support, resistance: btcAI.resistance, entry: btcAI.entry, target: btcAI.target, stopLoss: btcAI.stopLoss, timeframe: btcTimeframe } : null,
+          gold: goldAI ? { price: goldPrice, trend: goldAI.trend, support: goldAI.support, resistance: goldAI.resistance, entry: goldAI.entry, target: goldAI.target, stopLoss: goldAI.stopLoss, timeframe: goldTimeframe } : null,
+          dxy: { value: dxy.value, changePercent: dxy.changePercent },
+        },
+      });
+      if (error) throw error;
+      setCommentary(data.commentary || '');
+      setCommentaryTime(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }));
+    } catch (e) {
+      console.error('Commentary error:', e);
+    } finally {
+      setCommentaryLoading(false);
+    }
+  }, [btcAI, goldAI, btcPrice, goldPrice, dxy.value, dxy.changePercent, btcTimeframe, goldTimeframe, commentaryLoading]);
+
+  // Auto-fetch commentary when AI points are ready
+  useEffect(() => {
+    if ((btcAI || goldAI) && !commentary && !commentaryLoading) {
+      fetchCommentary();
+    }
+  }, [btcAI, goldAI]);
+
   // ── Compute trendlines from candle data ──
   const btcTrendlines = useMemo(() => computeDualTrendlines(btcData.candles), [btcData.candles]);
   const goldTrendlines = useMemo(() => computeDualTrendlines(goldData.candles), [goldData.candles]);
