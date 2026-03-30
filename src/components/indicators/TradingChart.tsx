@@ -244,6 +244,8 @@ const TradingChart: React.FC<TradingChartProps> = ({
       value: c.volume,
       color: c.close >= c.open ? 'rgba(38,166,154,0.25)' : 'rgba(239,83,80,0.25)',
     })));
+    volSeriesRef.current = volSeries;
+    prevCandlesLenRef.current = candles.length;
 
     // ── MA 9 (cyan line like reference) ──
     if (indicators) {
