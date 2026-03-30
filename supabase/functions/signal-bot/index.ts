@@ -28,7 +28,7 @@ const BINANCE_SYMBOL_MAP: Record<string, string> = {
 };
 
 // ─── BINANCE KLINES ───
-async function fetchCandles(symbol: string, interval: string, limit = 100): Promise<Candle[]> {
+async function fetchCandles(symbol: string, interval: string, limit = 100, endTime?: number): Promise<Candle[]> {
   const cleaned = String(symbol || "").replace("/", "").toUpperCase();
   const binanceSymbol = BINANCE_SYMBOL_MAP[cleaned] || BINANCE_SYMBOL_MAP[symbol] || cleaned || "BTCUSDT";
   const allowedIntervals = new Set(["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d", "3d", "1w", "1M"]);
@@ -47,7 +47,10 @@ async function fetchCandles(symbol: string, interval: string, limit = 100): Prom
   let lastError = "";
   for (const base of endpoints) {
     try {
-      const url = `${base}?symbol=${binanceSymbol}&interval=${safeInterval}&limit=${safeLimit}`;
+      let url = `${base}?symbol=${binanceSymbol}&interval=${safeInterval}&limit=${safeLimit}`;
+      if (endTime && Number.isFinite(endTime)) {
+        url += `&endTime=${endTime}`;
+      }
       const res = await fetch(url);
       const bodyText = await res.text();
 
