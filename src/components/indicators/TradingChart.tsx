@@ -1317,9 +1317,12 @@ const TradingChart: React.FC<TradingChartProps> = ({
       const mainRange = chart.timeScale().getVisibleLogicalRange();
       if (mainRange) rsiChart.timeScale().setVisibleLogicalRange(mainRange);
     };
-    chart.timeScale().subscribeVisibleLogicalRangeChange(() => {
-      const range = chart.timeScale().getVisibleLogicalRange();
+    chart.timeScale().subscribeVisibleLogicalRangeChange((range) => {
       if (range) rsiChart.timeScale().setVisibleLogicalRange(range);
+      // Load more history when user scrolls to the left edge
+      if (range && range.from < 10 && onLoadMore) {
+        onLoadMore();
+      }
     });
     rsiChart.timeScale().subscribeVisibleLogicalRangeChange(() => {
       const range = rsiChart.timeScale().getVisibleLogicalRange();
