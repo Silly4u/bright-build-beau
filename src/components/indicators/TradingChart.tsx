@@ -49,10 +49,11 @@ interface TradingChartProps {
   proEmaData?: ProEmaData | null;
   srData?: SupportResistanceResult | null;
   wyckoffData?: WyckoffResult | null;
+  onLoadMore?: () => void;
 }
 
 const TradingChart: React.FC<TradingChartProps> = ({
-  candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height = 380, label, scanning, scanLabel, timeframe, onTimeframeChange, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, oscillatorData, proEmaData, srData, wyckoffData,
+  candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height = 380, label, scanning, scanLabel, timeframe, onTimeframeChange, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, oscillatorData, proEmaData, srData, wyckoffData, onLoadMore,
 }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const rsiContainerRef = useRef<HTMLDivElement>(null);
