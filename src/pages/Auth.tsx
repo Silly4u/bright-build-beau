@@ -10,7 +10,9 @@ const PHONE_EMAIL_DOMAIN = '@cryptotrading.app';
 
 const Auth: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [loginMethod, setLoginMethod] = useState<'phone' | 'email'>('phone');
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -26,59 +28,71 @@ const Auth: React.FC = () => {
     setSuccess('');
     setLoading(true);
 
-    const cleanPhone = phone.replace(/[^0-9]/g, '');
-    if (cleanPhone.length < 9 || cleanPhone.length > 15) {
-      setError('Số điện thoại không hợp lệ');
-      setLoading(false);
-      return;
-    }
+    let authEmail: string;
 
-    const fakeEmail = phoneToEmail(phone);
+    if (loginMethod === 'phone') {
+      const cleanPhone = phone.replace(/[^0-9]/g, '');
+      if (cleanPhone.length < 9 || cleanPhone.length > 15) {
+        setError('Số điện thoại không hợp lệ');
+        setLoading(false);
+        return;
+      }
+      authEmail = phoneToEmail(phone);
+    } else {
+      if (!email.includes('@')) {
+        setError('Email không hợp lệ');
+        setLoading(false);
+        return;
+      }
+      authEmail = email;
+    }
 
     if (isLogin) {
       const { error } = await supabase.auth.signInWithPassword({
-        email: fakeEmail,
+        email: authEmail,
         password,
       });
       if (error) {
-        setError(error.message === 'Invalid login credentials' ? 'Sai số điện thoại hoặc mật khẩu' : error.message);
+        setError(error.message === 'Invalid login credentials' ? 'Sai thông tin đăng nhập' : error.message);
       } else {
         navigate('/indicators');
       }
     } else {
-      // Check if phone already exists in profiles
-      const { data: existing } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('phone', cleanPhone)
-        .maybeSingle();
+      if (loginMethod === 'phone') {
+        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        // Check if phone already exists
+        const { data: existing } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('phone', cleanPhone)
+          .maybeSingle();
 
-      if (existing) {
-        setError('Số điện thoại đã được đăng ký');
-        setLoading(false);
-        return;
+        if (existing) {
+          setError('Số điện thoại đã được đăng ký');
+          setLoading(false);
+          return;
+        }
+      }
+
+      const metadata: Record<string, string> = { display_name: name };
+      if (loginMethod === 'phone') {
+        metadata.phone = phone.replace(/[^0-9]/g, '');
       }
 
       const { error } = await supabase.auth.signUp({
-        email: fakeEmail,
+        email: authEmail,
         password,
-        options: {
-          data: {
-            display_name: name,
-            phone: cleanPhone,
-          },
-        },
+        options: { data: metadata },
       });
 
       if (error) {
         if (error.message.includes('already registered')) {
-          setError('Số điện thoại đã được đăng ký');
+          setError(loginMethod === 'phone' ? 'Số điện thoại đã được đăng ký' : 'Email đã được đăng ký');
         } else {
           setError(error.message);
         }
       } else {
         setSuccess('Đăng ký thành công! Đang đăng nhập...');
-        // Auto-confirm is enabled, so user is logged in
         setTimeout(() => navigate('/indicators'), 1000);
       }
     }
@@ -107,18 +121,58 @@ const Auth: React.FC = () => {
               <div className="mb-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">{success}</div>
             )}
 
+            {/* Login method toggle */}
+            <div className="flex mb-5 rounded-xl overflow-hidden border border-muted-foreground/20">
+              <button
+                type="button"
+                onClick={() => setLoginMethod('phone')}
+                className={`flex-1 py-2.5 text-sm font-semibold transition-all ${
+                  loginMethod === 'phone'
+                    ? 'bg-primary/20 text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                📱 Số điện thoại
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginMethod('email')}
+                className={`flex-1 py-2.5 text-sm font-semibold transition-all ${
+                  loginMethod === 'email'
+                    ? 'bg-primary/20 text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                ✉️ Email
+              </button>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label className="block font-mono-custom text-xs text-muted-foreground tracking-wider mb-2">SỐ ĐIỆN THOẠI</label>
-                <input
-                  type="tel"
-                  required
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="crypto-input w-full rounded-xl px-4 py-3"
-                  placeholder="0912345678"
-                />
-              </div>
+              {loginMethod === 'phone' ? (
+                <div>
+                  <label className="block font-mono-custom text-xs text-muted-foreground tracking-wider mb-2">SỐ ĐIỆN THOẠI</label>
+                  <input
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="crypto-input w-full rounded-xl px-4 py-3"
+                    placeholder="0912345678"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="block font-mono-custom text-xs text-muted-foreground tracking-wider mb-2">EMAIL</label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="crypto-input w-full rounded-xl px-4 py-3"
+                    placeholder="email@example.com"
+                  />
+                </div>
+              )}
 
               {!isLogin && (
                 <div>
