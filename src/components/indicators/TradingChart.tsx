@@ -226,6 +226,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
       open: c.open, high: c.high, low: c.low, close: c.close,
     }));
     candleSeries.setData(chartData);
+    candleSeriesRef.current = candleSeries;
 
     // ── Volume as histogram overlay (bottom of main chart) ──
     const volSeries = chart.addSeries(HistogramSeries, {
