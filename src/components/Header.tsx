@@ -60,7 +60,10 @@ const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { btc, gold } = useLivePrice();
+  const { user, signOut } = useAuth();
+  const { isSuperAdmin } = useIndicatorPermissions();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
