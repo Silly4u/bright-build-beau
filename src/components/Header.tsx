@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AppLogo from './AppLogo';
-import { Menu, X, Send, PhoneCall, TrendingUp, TrendingDown, ChevronDown } from 'lucide-react';
+import { Menu, X, Send, PhoneCall, TrendingUp, TrendingDown, ChevronDown, LogIn, LogOut, Shield } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useIndicatorPermissions } from '@/hooks/useIndicatorPermissions';
 
 const navLinks = [
   { href: '/', label: 'Trang Chủ' },
@@ -58,7 +60,10 @@ const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { btc, gold } = useLivePrice();
+  const { user, signOut } = useAuth();
+  const { isSuperAdmin } = useIndicatorPermissions();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
@@ -119,22 +124,32 @@ const Header: React.FC = () => {
 
           {/* Desktop CTAs */}
           <div className="hidden lg:flex items-center gap-2">
-            <a
-              href="https://t.me/UNCLETRADER"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-bold text-foreground/80 bg-foreground/[0.04] border border-foreground/[0.08] hover:bg-foreground/[0.08] hover:border-foreground/[0.12] transition-all duration-300"
-            >
-              <Send className="w-3.5 h-3.5" />
-              Telegram
-            </a>
-            <Link
-              to="/contact"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-bold text-primary-foreground bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/20"
-            >
-              <PhoneCall className="w-3.5 h-3.5" />
-              Tư Vấn Ngay
-            </Link>
+            {isSuperAdmin && (
+              <Link
+                to="/admin"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition-all duration-300"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                Admin
+              </Link>
+            )}
+            {user ? (
+              <button
+                onClick={async () => { await signOut(); navigate('/'); }}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-bold text-foreground/80 bg-foreground/[0.04] border border-foreground/[0.08] hover:bg-foreground/[0.08] transition-all duration-300"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Đăng Xuất
+              </button>
+            ) : (
+              <Link
+                to="/auth"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-bold text-primary-foreground bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/20"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                Đăng Nhập
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -175,24 +190,24 @@ const Header: React.FC = () => {
             })}
 
             <div className="pt-2 mt-2 border-t border-foreground/[0.06] flex flex-col gap-2">
-              <a
-                href="https://t.me/UNCLETRADER"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-foreground/80 bg-foreground/[0.04] border border-foreground/[0.08]"
-              >
-                <Send className="w-4 h-4" />
-                Tham Gia Telegram
-              </a>
-              <Link
-                to="/contact"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-primary-foreground bg-gradient-to-r from-primary to-secondary"
-              >
-                <PhoneCall className="w-4 h-4" />
-                Tư Vấn Ngay
-              </Link>
+              {user ? (
+                <button
+                  onClick={async () => { await signOut(); navigate('/'); setMenuOpen(false); }}
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-foreground/80 bg-foreground/[0.04] border border-foreground/[0.08]"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Đăng Xuất
+                </button>
+              ) : (
+                <Link
+                  to="/auth"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-primary-foreground bg-gradient-to-r from-primary to-secondary"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Đăng Nhập / Đăng Ký
+                </Link>
+              )}
             </div>
           </div>
         </div>
