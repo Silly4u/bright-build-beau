@@ -190,24 +190,24 @@ const Header: React.FC = () => {
             })}
 
             <div className="pt-2 mt-2 border-t border-foreground/[0.06] flex flex-col gap-2">
-              <a
-                href="https://t.me/UNCLETRADER"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-foreground/80 bg-foreground/[0.04] border border-foreground/[0.08]"
-              >
-                <Send className="w-4 h-4" />
-                Tham Gia Telegram
-              </a>
-              <Link
-                to="/contact"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-primary-foreground bg-gradient-to-r from-primary to-secondary"
-              >
-                <PhoneCall className="w-4 h-4" />
-                Tư Vấn Ngay
-              </Link>
+              {user ? (
+                <button
+                  onClick={async () => { await signOut(); navigate('/'); setMenuOpen(false); }}
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-foreground/80 bg-foreground/[0.04] border border-foreground/[0.08]"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Đăng Xuất
+                </button>
+              ) : (
+                <Link
+                  to="/auth"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-primary-foreground bg-gradient-to-r from-primary to-secondary"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Đăng Nhập / Đăng Ký
+                </Link>
+              )}
             </div>
           </div>
         </div>
