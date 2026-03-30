@@ -58,10 +58,43 @@ const TradingChart: React.FC<TradingChartProps> = ({
   const rsiContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const rsiChartRef = useRef<IChartApi | null>(null);
+  const candleSeriesRef = useRef<any>(null);
+  const volSeriesRef = useRef<any>(null);
+  const prevCandlesLenRef = useRef<number>(0);
 
   const [crosshairData, setCrosshairData] = useState<{
     open: number; high: number; low: number; close: number; time: string; change: number; changePercent: number;
   } | null>(null);
+
+  // Real-time candle update (runs on every candle change without recreating chart)
+  useEffect(() => {
+    if (!candleSeriesRef.current || !volSeriesRef.current || candles.length === 0) return;
+    
+    const lastCandle = candles[candles.length - 1];
+    const candlePoint = {
+      time: (lastCandle.time / 1000) as any,
+      open: lastCandle.open,
+      high: lastCandle.high,
+      low: lastCandle.low,
+      close: lastCandle.close,
+    };
+    
+    try {
+      candleSeriesRef.current.update(candlePoint);
+      volSeriesRef.current.update({
+        time: (lastCandle.time / 1000) as any,
+        value: lastCandle.volume,
+        color: lastCandle.close >= lastCandle.open ? 'rgba(38,166,154,0.25)' : 'rgba(239,83,80,0.25)',
+      });
+    } catch {
+      // If update fails (e.g. new candle added), full rebuild will handle it
+    }
+
+    // If a new candle was added (length changed), trigger full rebuild via the other effect
+    if (candles.length !== prevCandlesLenRef.current) {
+      prevCandlesLenRef.current = candles.length;
+    }
+  }, [candles]);
 
   useEffect(() => {
     if (!chartContainerRef.current || !rsiContainerRef.current || candles.length === 0) return;
