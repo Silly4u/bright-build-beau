@@ -469,7 +469,7 @@ serve(async (req) => {
 
       if (canGenerateImage && !imageGenerated) {
         console.log(`🎨 Generating AI image for ${stream}...`);
-        imageUrl = await aiGenerateImage(rewritten.title, stream);
+        imageUrl = await aiGenerateImage(rewritten.title, stream, raw.imageUrl);
         if (imageUrl) {
           imageGenerated = true;
           console.log(`✅ AI image generated for ${stream}`);
