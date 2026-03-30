@@ -18,6 +18,7 @@ import { useProEma } from '@/hooks/useProEma';
 import { useSupportResistance } from '@/hooks/useSupportResistance';
 import { useWyckoff } from '@/hooks/useWyckoff';
 import { computeDualTrendlines } from '@/lib/computeTrendline';
+import FloatingAssistant from '@/components/indicators/FloatingAssistant';
 
 const PAIRS = [
   { symbol: 'BTC/USDT', label: 'BTC', color: '#F7931A' },
