@@ -4,6 +4,7 @@ import AppLogo from './AppLogo';
 import { Menu, X, Send, PhoneCall, TrendingUp, TrendingDown, ChevronDown, LogIn, LogOut, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIndicatorPermissions } from '@/hooks/useIndicatorPermissions';
+import EconomicTicker from './EconomicTicker';
 
 const navLinks = [
   { href: '/', label: 'Trang Chủ' },
@@ -162,6 +163,9 @@ const Header: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* ── ECONOMIC TICKER ── */}
+      <EconomicTicker />
 
       {/* ── MOBILE MENU ── */}
       <div
