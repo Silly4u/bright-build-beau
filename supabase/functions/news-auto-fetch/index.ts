@@ -364,6 +364,28 @@ serve(async (req) => {
 
     console.log("🚀 Starting news auto-fetch cycle...");
 
+    // 0. Fetch recent titles to avoid duplicates (last 48h)
+    const since48h = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+    const { data: recentArticles } = await supabase
+      .from("news_articles")
+      .select("title, source")
+      .gte("created_at", since48h);
+    
+    const recentTitles = new Set(
+      (recentArticles || []).map((a: any) => a.title?.toLowerCase().trim())
+    );
+    // Also extract key phrases for fuzzy matching
+    const recentPhrases = new Set(
+      (recentArticles || []).map((a: any) => {
+        const t = a.title?.toLowerCase().trim() || "";
+        // Extract first 5 significant words as a fingerprint
+        return t.replace(/[^a-zàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ0-9\s]/g, "")
+          .split(/\s+/).filter(w => w.length > 2).slice(0, 5).join(" ");
+      })
+    );
+
+    console.log(`🔍 Found ${recentTitles.size} recent articles for dedup`);
+
     // 1. Fetch raw news from multiple sources in parallel
     const [ccNews, trendingCoins, coinDeskRss, decryptRss, cointelegraphRss] = await Promise.all([
       fetchCryptoCompareNews(),
@@ -378,7 +400,19 @@ serve(async (req) => {
     // 2. Normalize all articles
     const allRawArticles: Array<{title: string; body: string; imageUrl: string | null; source: string}> = [];
 
+    // Helper: check if article is duplicate
+    const isDuplicate = (title: string): boolean => {
+      const lower = title.toLowerCase().trim();
+      if (recentTitles.has(lower)) return true;
+      // Fuzzy check: extract phrase fingerprint and compare
+      const phrase = lower.replace(/[^a-zàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ0-9\s]/g, "")
+        .split(/\s+/).filter(w => w.length > 2).slice(0, 5).join(" ");
+      if (phrase && recentPhrases.has(phrase)) return true;
+      return false;
+    };
+
     for (const a of ccNews.slice(0, 15)) {
+      if (isDuplicate(a.title || "")) continue;
       allRawArticles.push({
         title: a.title || "",
         body: a.body?.slice(0, 1000) || a.title || "",
@@ -388,14 +422,19 @@ serve(async (req) => {
     }
 
     for (const a of coinDeskRss) {
+      if (isDuplicate(a.title)) continue;
       allRawArticles.push({ title: a.title, body: a.description, imageUrl: a.imageUrl, source: "CoinDesk" });
     }
     for (const a of decryptRss) {
+      if (isDuplicate(a.title)) continue;
       allRawArticles.push({ title: a.title, body: a.description, imageUrl: a.imageUrl, source: "Decrypt" });
     }
     for (const a of cointelegraphRss) {
+      if (isDuplicate(a.title)) continue;
       allRawArticles.push({ title: a.title, body: a.description, imageUrl: a.imageUrl, source: "CoinTelegraph" });
     }
+
+    console.log(`✅ After dedup: ${allRawArticles.length} unique articles`);
 
     // 3. Classify and pick 1 article per stream
     const streamPicks: Record<string, typeof allRawArticles[0]> = {};
