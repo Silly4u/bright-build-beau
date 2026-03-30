@@ -596,8 +596,8 @@ serve(async (req) => {
         success: true,
         articles_count: inserted?.length || 0,
         articles: inserted,
-        ai_image_generated: imageGenerated,
-        total_ai_images_today: aiImagesCount + (imageGenerated ? 1 : 0),
+        ai_images_generated: aiImagesGenerated,
+        total_ai_images_today: aiImagesCount + aiImagesGenerated,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
