@@ -445,9 +445,11 @@ serve(async (req) => {
     const interval = TF_MAP[timeframe] || "4h";
     const limit = body.limit || 100;
 
+    const endTime = body.endTime || undefined;
+
     // Mode: fetch candles only
     if (mode === "candles") {
-      const candles = await fetchCandles(symbol, interval, limit);
+      const candles = await fetchCandles(symbol, interval, limit, endTime);
       return new Response(JSON.stringify({ candles }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -455,7 +457,7 @@ serve(async (req) => {
 
     // Mode: calculate indicators
     if (mode === "indicators") {
-      const candles = await fetchCandles(symbol, interval, limit);
+      const candles = await fetchCandles(symbol, interval, limit, endTime);
       const closes = candles.map(c => c.close);
       const volumes = candles.map(c => c.volume);
 
