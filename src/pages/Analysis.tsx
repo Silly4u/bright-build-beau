@@ -405,6 +405,51 @@ const Analysis: React.FC = () => {
                 </a>
               </div>
             </div>
+
+            {/* ── AI MARKET COMMENTARY ── */}
+            <div className="glass-card rounded-xl p-5 border border-primary/10 mt-2">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-bold text-foreground">Nhận Định Thị Trường — AI Gemini</span>
+                  {commentaryTime && (
+                    <span className="text-[9px] text-muted-foreground/50 font-mono ml-2">cập nhật {commentaryTime}</span>
+                  )}
+                </div>
+                <button
+                  onClick={fetchCommentary}
+                  disabled={commentaryLoading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold text-primary border border-primary/20 hover:bg-primary/10 transition-all disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3 h-3 ${commentaryLoading ? 'animate-spin' : ''}`} />
+                  {commentaryLoading ? 'Đang viết...' : 'Viết lại'}
+                </button>
+              </div>
+
+              {commentaryLoading && !commentary ? (
+                <div className="space-y-3 animate-pulse">
+                  <div className="h-3 bg-foreground/5 rounded w-full" />
+                  <div className="h-3 bg-foreground/5 rounded w-11/12" />
+                  <div className="h-3 bg-foreground/5 rounded w-4/5" />
+                  <div className="h-3 bg-foreground/5 rounded w-full" />
+                  <div className="h-3 bg-foreground/5 rounded w-3/4" />
+                  <div className="h-3 bg-foreground/5 rounded w-full" />
+                  <div className="h-3 bg-foreground/5 rounded w-5/6" />
+                </div>
+              ) : commentary ? (
+                <div className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
+                  {commentary}
+                </div>
+              ) : (
+                <div className="text-xs text-muted-foreground/40 text-center py-6">
+                  ⏳ Đang chờ dữ liệu tín hiệu để viết nhận định...
+                </div>
+              )}
+
+              <div className="mt-4 pt-3 border-t border-foreground/5 text-[9px] text-muted-foreground/40">
+                ⚠️ Bài nhận định được tạo bởi AI, chỉ mang tính tham khảo. Không phải lời khuyên đầu tư.
+              </div>
+            </div>
           </div>
 
           {/* ── RIGHT SIDEBAR: Signals + DXY + CTA ── */}
