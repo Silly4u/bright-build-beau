@@ -1338,8 +1338,11 @@ const TradingChart: React.FC<TradingChartProps> = ({
       try { rsiChart.remove(); } catch {}
       chartRef.current = null;
       rsiChartRef.current = null;
+      candleSeriesRef.current = null;
+      volSeriesRef.current = null;
     };
-  }, [candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, oscillatorData, proEmaData, srData, wyckoffData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [candles.length, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, oscillatorData, proEmaData, srData, wyckoffData]);
 
   const lastCandle = candles[candles.length - 1];
   const isUp = crosshairData ? crosshairData.change >= 0 : (lastCandle ? lastCandle.close >= lastCandle.open : true);
