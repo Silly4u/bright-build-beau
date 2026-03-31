@@ -1280,8 +1280,8 @@ const TradingChart: React.FC<TradingChartProps> = ({
       layout: {
         background: { type: ColorType.Solid, color: chartBg },
         textColor,
-        fontFamily: "'JetBrains Mono', monospace",
-        fontSize: 9,
+        fontFamily: "'JetBrains Mono', 'SF Mono', monospace",
+        fontSize: 10,
       },
       grid: { vertLines: { color: gridColor }, horzLines: { color: gridColor } },
       rightPriceScale: {
@@ -1293,11 +1293,11 @@ const TradingChart: React.FC<TradingChartProps> = ({
         timeVisible: true,
         visible: true,
         rightOffset: 5,
-        barSpacing: 8,
+        barSpacing: 6,
       },
       crosshair: {
-        vertLine: { color: 'rgba(255,255,255,0.15)', width: 1, style: 2, labelBackgroundColor: '#1f2937' },
-        horzLine: { color: 'rgba(255,255,255,0.15)', width: 1, style: 2, labelBackgroundColor: '#1f2937' },
+        vertLine: { color: 'rgba(132,142,156,0.3)', width: 1, style: 0, labelBackgroundColor: '#1e2329' },
+        horzLine: { color: 'rgba(132,142,156,0.3)', width: 1, style: 0, labelBackgroundColor: '#1e2329' },
       },
       width: rsiContainerRef.current.clientWidth,
       height: 100,
