@@ -1364,7 +1364,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
       try { chart.remove(); } catch {}
       chartRef.current = null;
       candleSeriesRef.current = null;
-      volSeriesRef.current = null;
+      
       dataSnapshotRef.current = null;
       initialViewportAppliedRef.current = false;
     };
