@@ -102,6 +102,10 @@ const TradingChart: React.FC<TradingChartProps> = ({
   useEffect(() => {
     if (!chartContainerRef.current || !rsiContainerRef.current || candles.length === 0) return;
 
+    // Save scroll position before cleanup
+    if (chartRef.current) {
+      try { savedScrollPosRef.current = chartRef.current.timeScale().scrollPosition(); } catch {}
+    }
     // Cleanup
     [chartRef, rsiChartRef].forEach(ref => {
       if (ref.current) { try { ref.current.remove(); } catch {} ref.current = null; }
