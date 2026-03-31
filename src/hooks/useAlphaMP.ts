@@ -44,7 +44,11 @@ export function useAlphaMP(
       }));
 
       const raw: MatrixProOutput = runAlphaNetMatrixPro(engineCandles, config);
-      return toLovableMatrixSeries(raw);
+      const result = toLovableMatrixSeries(raw);
+      if (result.upperSeries.length > 0) {
+        console.log('[AlphaMP] Sample upper:', result.upperSeries[0], 'candle time sample:', Math.floor(candles[0].time / 1000), 'candle close:', candles[0].close);
+      }
+      return result;
     } catch (e) {
       console.warn('[AlphaMP] Engine error:', e);
       return null;
