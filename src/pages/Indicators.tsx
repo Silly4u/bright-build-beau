@@ -10,12 +10,9 @@ import IndicatorPanel, { IndicatorConfig } from '@/components/indicators/Indicat
 import SignalFeed from '@/components/indicators/SignalFeed';
 import { useMarketData, useSignals } from '@/hooks/useMarketData';
 import { useSmcAnalysis } from '@/hooks/useSmcAnalysis';
-import { useAlphaNet } from '@/hooks/useAlphaNet';
-import AlphaNetDashboard from '@/components/indicators/AlphaNetDashboard';
 import { useMatrixIndicator } from '@/hooks/useMatrixIndicator';
 import { useEngineIndicator } from '@/hooks/useEngineIndicator';
 import { useTpSlIndicator } from '@/hooks/useTpSlIndicator';
-import { useBuySellSignal } from '@/hooks/useBuySellSignal';
 
 import { useProEma } from '@/hooks/useProEma';
 import { useSupportResistance } from '@/hooks/useSupportResistance';
