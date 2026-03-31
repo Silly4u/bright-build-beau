@@ -1258,8 +1258,13 @@ const TradingChart: React.FC<TradingChartProps> = ({
       createSeriesMarkers(candleSeries, allMarkers);
     }
 
-    // Fit content — rightOffset already centers the last candle
+    // On first load: fit content then center last candle. On rebuild: restore scroll position.
     chart.timeScale().fitContent();
+    if (isFirstLoadRef.current) {
+      isFirstLoadRef.current = false;
+    } else if (savedScrollPosRef.current !== null) {
+      chart.timeScale().scrollToPosition(savedScrollPosRef.current, false);
+    }
 
     // ═══════════ RSI CHART (synced) ═══════════
     const rsiChart = createChart(rsiContainerRef.current, {
