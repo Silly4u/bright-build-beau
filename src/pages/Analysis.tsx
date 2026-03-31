@@ -326,7 +326,7 @@ const Analysis: React.FC = () => {
 
       {/* ── MAIN LAYOUT ── */}
       <div ref={dashboardRef} className="px-2 lg:px-4 py-2">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-2">
+        <div className="grid grid-cols-1 gap-2">
 
           {/* ── LEFT: Charts in 2 columns ── */}
           <div className="space-y-2">
