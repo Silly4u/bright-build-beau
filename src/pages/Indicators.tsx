@@ -45,11 +45,9 @@ const TIMEFRAMES = ['M15', 'H1', 'H4', 'D1'];
 
 const DEFAULT_INDICATORS: IndicatorConfig[] = [
   
-  { id: 'alphanet', label: 'AlphaNet AI', enabled: false, color: '#7C3AED', category: 'AI' },
   { id: 'matrix', label: 'Matrix NWE', enabled: false, color: '#00BCD4', category: 'Envelope' },
   { id: 'engine', label: 'MS Engine', enabled: false, color: '#FF9800', category: 'Structure' },
   { id: 'tp_sl', label: 'TP/SL Zones', enabled: false, color: '#E91E63', category: 'Risk' },
-  { id: 'buy_sell', label: 'Buy/Sell Signal', enabled: false, color: '#4CAF50', category: 'Signal' },
   
   { id: 'pro_ema', label: 'Pro EMA', enabled: false, color: '#FFA726', category: 'Trend' },
   { id: 'support_resistance', label: 'Pro S/R', enabled: false, color: '#00E676', category: 'S/R' },
