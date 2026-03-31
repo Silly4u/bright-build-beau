@@ -550,7 +550,7 @@ const Indicators: React.FC = () => {
                   engineData={engineData}
                   tpSlData={tpSlData}
                   buySellData={buySellData}
-                  oscillatorData={oscillatorData}
+                  
                   proEmaData={proEmaData}
                   srData={srData}
                   wyckoffData={wyckoffData}
