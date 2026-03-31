@@ -13,7 +13,7 @@ import type { MatrixData } from '@/hooks/useMatrixIndicator';
 import type { EngineData } from '@/hooks/useEngineIndicator';
 import type { TpSlData } from '@/hooks/useTpSlIndicator';
 import type { BuySellData } from '@/hooks/useBuySellSignal';
-import type { OscillatorMatrixData } from '@/hooks/useOscillatorMatrix';
+
 import type { ProEmaData } from '@/hooks/useProEma';
 import type { SupportResistanceResult } from '@/hooks/useSupportResistance';
 import type { WyckoffResult } from '@/hooks/useWyckoff';
