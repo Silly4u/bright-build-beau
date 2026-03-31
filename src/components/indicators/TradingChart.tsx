@@ -1495,15 +1495,17 @@ const TradingChart: React.FC<TradingChartProps> = ({
         ]);
       });
 
-      // 6. Markers (Buy, Sell, TP hit)
+      // 6. Markers (TP hit only — no Buy/Sell labels)
       alphaEventData.markers.forEach(m => {
-        allMarkers.push({
-          time: m.time as any,
-          position: m.position as any,
-          color: m.color === '#d69094' ? '#c026d3' : m.color, // TP markers in magenta
-          shape: m.shape as any,
-          text: m.text,
-        });
+        if (m.text === 'TP') {
+          allMarkers.push({
+            time: m.time as any,
+            position: m.position as any,
+            color: '#c026d3',
+            shape: m.shape as any,
+            text: m.text,
+          });
+        }
       });
     }
 
