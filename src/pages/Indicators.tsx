@@ -614,6 +614,7 @@ const Indicators: React.FC = () => {
                   alphaLHData={alphaLHData}
                   
                   alphaEventData={alphaEventData}
+                  alphaProData={alphaProData}
                   onLoadMore={fetchOlderCandles}
                 />
               )}
