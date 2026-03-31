@@ -13,7 +13,7 @@ const INDICATOR_LIST = [
   { id: 'engine', label: 'MS Engine' },
   { id: 'tp_sl', label: 'TP/SL Zones' },
   { id: 'buy_sell', label: 'Buy/Sell Signal' },
-  { id: 'oscillator', label: 'Oscillator Matrix' },
+  
   { id: 'pro_ema', label: 'Pro EMA' },
   { id: 'support_resistance', label: 'Pro S/R' },
   { id: 'wyckoff', label: 'Wyckoff' },

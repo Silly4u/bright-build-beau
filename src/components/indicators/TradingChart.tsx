@@ -13,7 +13,7 @@ import type { MatrixData } from '@/hooks/useMatrixIndicator';
 import type { EngineData } from '@/hooks/useEngineIndicator';
 import type { TpSlData } from '@/hooks/useTpSlIndicator';
 import type { BuySellData } from '@/hooks/useBuySellSignal';
-import type { OscillatorMatrixData } from '@/hooks/useOscillatorMatrix';
+
 import type { ProEmaData } from '@/hooks/useProEma';
 import type { SupportResistanceResult } from '@/hooks/useSupportResistance';
 import type { WyckoffResult } from '@/hooks/useWyckoff';
@@ -61,7 +61,7 @@ interface TradingChartProps {
   engineData?: EngineData | null;
   tpSlData?: TpSlData | null;
   buySellData?: BuySellData | null;
-  oscillatorData?: OscillatorMatrixData | null;
+  
   proEmaData?: ProEmaData | null;
   srData?: SupportResistanceResult | null;
   wyckoffData?: WyckoffResult | null;
@@ -72,7 +72,7 @@ interface TradingChartProps {
 }
 
 const TradingChart: React.FC<TradingChartProps> = ({
-  candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height = 380, label, scanning, scanLabel, timeframe, onTimeframeChange, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, oscillatorData, proEmaData, srData, wyckoffData, alphaLHData, alphaEventData, onLoadMore,
+  candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height = 380, label, scanning, scanLabel, timeframe, onTimeframeChange, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, proEmaData, srData, wyckoffData, alphaLHData, alphaEventData, onLoadMore,
 }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -1059,30 +1059,6 @@ const TradingChart: React.FC<TradingChartProps> = ({
       });
     }
 
-    // ── Oscillator Matrix Buy/Sell + Reversal Signals on price chart ──
-    if (oscillatorData && enabledIndicators.includes('oscillator')) {
-      // Buy/Sell signals
-      oscillatorData.buySellSignals.forEach(sig => {
-        if (sig.index < 0 || sig.index >= candles.length) return;
-        candleSeries.createPriceLine({
-          price: sig.price,
-          color: sig.type === 'BUY' ? '#4CAF50' : '#F44336',
-          lineWidth: 1, lineStyle: 0, axisLabelVisible: false,
-          title: sig.type === 'BUY' ? '▲ OSC Buy' : '▼ OSC Sell',
-        } as any);
-      });
-
-      // Major reversal signals
-      oscillatorData.reversals.filter(r => r.type === 'majorBuy' || r.type === 'majorSell').slice(-5).forEach(rev => {
-        if (rev.index < 0 || rev.index >= candles.length) return;
-        candleSeries.createPriceLine({
-          price: rev.price,
-          color: rev.type === 'majorBuy' ? '#089981' : '#f23645',
-          lineWidth: 1, lineStyle: 0, axisLabelVisible: false,
-          title: rev.type === 'majorBuy' ? '▲ Rev' : '▼ Rev',
-        } as any);
-      });
-    }
 
     // ── Pro EMA (EMA 20/50/100/200 + Golden/Death Cross) ──
     if (proEmaData && enabledIndicators.includes('pro_ema')) {

@@ -16,7 +16,7 @@ import { useMatrixIndicator } from '@/hooks/useMatrixIndicator';
 import { useEngineIndicator } from '@/hooks/useEngineIndicator';
 import { useTpSlIndicator } from '@/hooks/useTpSlIndicator';
 import { useBuySellSignal } from '@/hooks/useBuySellSignal';
-import { useOscillatorMatrix } from '@/hooks/useOscillatorMatrix';
+
 import { useProEma } from '@/hooks/useProEma';
 import { useSupportResistance } from '@/hooks/useSupportResistance';
 import { useWyckoff } from '@/hooks/useWyckoff';
@@ -48,7 +48,7 @@ const DEFAULT_INDICATORS: IndicatorConfig[] = [
   { id: 'engine', label: 'MS Engine', enabled: false, color: '#FF9800', category: 'Structure' },
   { id: 'tp_sl', label: 'TP/SL Zones', enabled: false, color: '#E91E63', category: 'Risk' },
   { id: 'buy_sell', label: 'Buy/Sell Signal', enabled: false, color: '#4CAF50', category: 'Signal' },
-  { id: 'oscillator', label: 'Oscillator Matrix', enabled: false, color: '#FF5722', category: 'Oscillator' },
+  
   { id: 'pro_ema', label: 'Pro EMA', enabled: false, color: '#FFA726', category: 'Trend' },
   { id: 'support_resistance', label: 'Pro S/R', enabled: false, color: '#00E676', category: 'S/R' },
   { id: 'wyckoff', label: 'Wyckoff', enabled: false, color: '#B388FF', category: 'Structure' },
@@ -83,8 +83,6 @@ const Indicators: React.FC = () => {
   const tpSlData = useTpSlIndicator(marketData.candles, tpSlEnabled && !marketData.loading);
   const buySellEnabled = indicators.find(i => i.id === 'buy_sell')?.enabled ?? false;
   const buySellData = useBuySellSignal(marketData.candles, buySellEnabled && !marketData.loading);
-  const oscillatorEnabled = indicators.find(i => i.id === 'oscillator')?.enabled ?? false;
-  const oscillatorData = useOscillatorMatrix(marketData.candles, oscillatorEnabled && !marketData.loading);
   const proEmaEnabled = indicators.find(i => i.id === 'pro_ema')?.enabled ?? false;
   const proEmaData = useProEma(marketData.candles, proEmaEnabled && !marketData.loading);
   const srEnabled = indicators.find(i => i.id === 'support_resistance')?.enabled ?? false;
@@ -334,53 +332,6 @@ const Indicators: React.FC = () => {
               </div>
             )}
 
-            {/* Oscillator Matrix Dashboard */}
-            {oscillatorEnabled && oscillatorData && (
-              <div className="mt-3 border border-[#2b3139] rounded-lg overflow-hidden">
-                <div className="bg-[#1e2329] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
-                  OSCILLATOR MATRIX
-                </div>
-                <div className="bg-[#161a1e] p-2 space-y-1.5">
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Hyper Wave</span>
-                    <span className={`font-bold ${oscillatorData.lastSig > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {oscillatorData.lastSig.toFixed(1)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Signal</span>
-                    <span className={`font-bold ${oscillatorData.lastSgD > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {oscillatorData.lastSgD.toFixed(1)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Money Flow</span>
-                    <span className={`font-bold ${oscillatorData.lastMfi > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {oscillatorData.lastMfi.toFixed(1)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Confluence</span>
-                    <span className={`font-bold ${
-                      oscillatorData.confluence.bullish ? 'text-emerald-400' :
-                      oscillatorData.confluence.bearish ? 'text-red-400' : 'text-yellow-400'
-                    }`}>
-                      {oscillatorData.confluence.bullish ? 'BULLISH' :
-                       oscillatorData.confluence.bearish ? 'BEARISH' : 'NEUTRAL'}
-                      {' '}({oscillatorData.confluence.score > 0 ? '+' : ''}{oscillatorData.confluence.score})
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Reversals</span>
-                    <span className="text-[#eaecef] font-bold">{oscillatorData.reversals.length}</span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Signals</span>
-                    <span className="text-[#eaecef] font-bold">{oscillatorData.buySellSignals.length}</span>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* Pro EMA Dashboard */}
             {proEmaEnabled && proEmaData && (
@@ -599,7 +550,7 @@ const Indicators: React.FC = () => {
                   engineData={engineData}
                   tpSlData={tpSlData}
                   buySellData={buySellData}
-                  oscillatorData={oscillatorData}
+                  
                   proEmaData={proEmaData}
                   srData={srData}
                   wyckoffData={wyckoffData}
