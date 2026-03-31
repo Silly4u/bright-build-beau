@@ -516,8 +516,59 @@ const Indicators: React.FC = () => {
                         <span className="text-[#eaecef] font-bold">{alphaEventData.zones.length}</span>
                       </div>
                     </div>
+
+            {/* Alpha Pro Dashboard + Config */}
+            {alphaProEnabled && (
+              <div className="mt-3">
+                <AlphaProConfigPanel config={alphaProConfig} onChange={setAlphaProConfig} />
+                {alphaProData && (
+                  <div className="mt-2 border border-[#2b3139] rounded-lg overflow-hidden">
+                    <div className="bg-[#1e2329] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
+                      ALPHA PRO
+                    </div>
+                    <div className="bg-[#161a1e] p-2 space-y-1.5">
+                      <div className="flex justify-between text-[10px] font-mono">
+                        <span className="text-[#5e6673]">Trend</span>
+                        <span className={`font-bold ${
+                          alphaProData.trendStates[alphaProData.trendStates.length - 1]?.bullish ? 'text-emerald-400' :
+                          alphaProData.trendStates[alphaProData.trendStates.length - 1]?.bearish ? 'text-red-400' : 'text-muted-foreground'
+                        }`}>
+                          {alphaProData.trendStates[alphaProData.trendStates.length - 1]?.bullish ? '🟢 BULLISH' :
+                           alphaProData.trendStates[alphaProData.trendStates.length - 1]?.bearish ? '🔴 BEARISH' : '—'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-[10px] font-mono">
+                        <span className="text-[#5e6673]">Zone</span>
+                        <span className={`font-bold ${
+                          alphaProData.trendStates[alphaProData.trendStates.length - 1]?.zone === 'green' ? 'text-emerald-400' :
+                          alphaProData.trendStates[alphaProData.trendStates.length - 1]?.zone === 'red' ? 'text-red-400' :
+                          alphaProData.trendStates[alphaProData.trendStates.length - 1]?.zone === 'blue' ? 'text-blue-400' :
+                          alphaProData.trendStates[alphaProData.trendStates.length - 1]?.zone === 'orange' ? 'text-orange-400' :
+                          alphaProData.trendStates[alphaProData.trendStates.length - 1]?.zone === 'yellow' ? 'text-yellow-400' :
+                          'text-cyan-400'
+                        }`}>
+                          {(alphaProData.trendStates[alphaProData.trendStates.length - 1]?.zone || 'none').toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-[10px] font-mono">
+                        <span className="text-[#5e6673]">Buy Signals</span>
+                        <span className="text-emerald-400 font-bold">{alphaProData.markers.filter(m => m.text.includes('BUY') || (m.shape === 'arrowUp' && m.text === 'Buy')).length}</span>
+                      </div>
+                      <div className="flex justify-between text-[10px] font-mono">
+                        <span className="text-[#5e6673]">Sell Signals</span>
+                        <span className="text-red-400 font-bold">{alphaProData.markers.filter(m => m.text.includes('SELL') || (m.shape === 'arrowDown' && m.text === 'Sell')).length}</span>
+                      </div>
+                      <div className="flex justify-between text-[10px] font-mono">
+                        <span className="text-[#5e6673]">Total Markers</span>
+                        <span className="text-[#eaecef] font-bold">{alphaProData.markers.length}</span>
+                      </div>
+                    </div>
                   </div>
                 )}
+              </div>
+            )}
+          </div>
+          )}
               </div>
             )}
           </div>
