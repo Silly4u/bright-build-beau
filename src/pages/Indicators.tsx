@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useIndicatorPermissions } from '@/hooks/useIndicatorPermissions';
 import Footer from '@/components/Footer';
 import TradingChart from '@/components/indicators/TradingChart';
-import SubIndicators from '@/components/indicators/SubIndicators';
+
 import IndicatorPanel, { IndicatorConfig } from '@/components/indicators/IndicatorPanel';
 import SignalFeed from '@/components/indicators/SignalFeed';
 import { useMarketData, useSignals } from '@/hooks/useMarketData';
