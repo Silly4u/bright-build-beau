@@ -172,7 +172,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
       } else if (didAppendBar && normalizedRange && isFollowingLiveEdgeRef.current) {
         const liveRange = alignRangeToLiveEdge(normalizedRange, candles.length);
         chart.timeScale().setVisibleLogicalRange(liveRange);
-        rsiChart?.timeScale().setVisibleLogicalRange(liveRange);
+        
         visibleRangeRef.current = liveRange;
       }
     }
