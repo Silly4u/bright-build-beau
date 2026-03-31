@@ -1388,6 +1388,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
       });
     }
 
+    chart.subscribeCrosshairMove((param) => {
       if (!param || !param.time) {
       const currentCandles = candlesRef.current;
       const last = currentCandles[currentCandles.length - 1];
