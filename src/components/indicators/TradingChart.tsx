@@ -127,7 +127,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
     if (didReplaceDataset || didPrependHistory) {
       candleSeriesRef.current.setData(chartData);
-      volSeriesRef.current.setData(volumeData);
+      
 
 
       if (didPrependHistory && normalizedRange) {
