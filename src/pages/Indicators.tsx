@@ -94,9 +94,6 @@ const Indicators: React.FC = () => {
   const alphaLHEnabled = indicators.find(i => i.id === 'alpha_lh')?.enabled ?? false;
   const [alphaLHConfig, setAlphaLHConfig] = useState(defaultAlphaLHConfig);
   const alphaLHData = useAlphaLH(marketData.candles, alphaLHEnabled && !marketData.loading, alphaLHConfig);
-  const alphaMPEnabled = indicators.find(i => i.id === 'alpha_mp')?.enabled ?? false;
-  const [alphaMPConfig, setAlphaMPConfig] = useState(defaultAlphaMPConfig);
-  const alphaMPData = useAlphaMP(marketData.candles, alphaMPEnabled && !marketData.loading, alphaMPConfig);
   const alphaEventEnabled = indicators.find(i => i.id === 'alpha_event')?.enabled ?? false;
   const [alphaEventConfig, setAlphaEventConfig] = useState(defaultAlphaEventConfig);
   const alphaEventData = useAlphaEventSignal(marketData.candles, alphaEventEnabled && !marketData.loading, alphaEventConfig);
