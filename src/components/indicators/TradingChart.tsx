@@ -138,7 +138,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
       if (didPrependHistory && normalizedRange) {
         const shiftedRange = shiftLogicalRange(normalizedRange, prependedBars);
         chart.timeScale().setVisibleLogicalRange(shiftedRange);
-        rsiChart?.timeScale().setVisibleLogicalRange(shiftedRange);
+        
         visibleRangeRef.current = shiftedRange;
       } else {
         const initialRange = getInitialLogicalRange(candles.length);
