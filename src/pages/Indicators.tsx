@@ -16,7 +16,7 @@ import { useMatrixIndicator } from '@/hooks/useMatrixIndicator';
 import { useEngineIndicator } from '@/hooks/useEngineIndicator';
 import { useTpSlIndicator } from '@/hooks/useTpSlIndicator';
 import { useBuySellSignal } from '@/hooks/useBuySellSignal';
-import { useOscillatorMatrix } from '@/hooks/useOscillatorMatrix';
+
 import { useProEma } from '@/hooks/useProEma';
 import { useSupportResistance } from '@/hooks/useSupportResistance';
 import { useWyckoff } from '@/hooks/useWyckoff';
