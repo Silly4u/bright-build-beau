@@ -69,6 +69,7 @@ interface TradingChartProps {
   alphaLHData?: AlphaLHResult | null;
   
   alphaEventData?: AlphaEventResult | null;
+  alphaProData?: AlphaProResult | null;
   onLoadMore?: () => void;
 }
 
