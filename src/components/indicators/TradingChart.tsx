@@ -161,9 +161,6 @@ const TradingChart: React.FC<TradingChartProps> = ({
         color: lastCandle.close >= lastCandle.open ? 'rgba(14,203,129,0.20)' : 'rgba(246,70,93,0.20)',
       });
 
-      if (rsiSeriesRef.current && lastRsiPoint) {
-        rsiSeriesRef.current.update(lastRsiPoint);
-      }
 
       if (!initialViewportAppliedRef.current) {
         const initialRange = getInitialLogicalRange(candles.length);
