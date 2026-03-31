@@ -1296,6 +1296,61 @@ const TradingChart: React.FC<TradingChartProps> = ({
       });
     }
 
+    // ── Alpha LH (Liquidity Hunter from engine) ──
+    if (alphaLHData && enabledIndicators.includes('alpha_lh')) {
+      const setSafeDataLH = (series: any, t1: number, v1: number, t2: number, v2: number) => {
+        if (t1 === t2) { series.setData([{ time: t1 as any, value: v2 }]); return; }
+        if (t1 < t2) { series.setData([{ time: t1 as any, value: v1 }, { time: t2 as any, value: v2 }]); return; }
+        series.setData([{ time: t2 as any, value: v2 }, { time: t1 as any, value: v1 }]);
+      };
+
+      // Liquidity zones
+      alphaLHData.zones.forEach(zone => {
+        const isBuy = zone.side === 'buy';
+        const fillColor = isBuy ? 'rgba(38,166,154,0.12)' : 'rgba(239,83,80,0.12)';
+        const startT = Math.floor(zone.startTime / 1000);
+        const endT = Math.floor(zone.endTime / 1000);
+        if (startT >= endT) return;
+
+        const rect = new RectanglePrimitive({
+          p1: { time: startT, price: zone.top },
+          p2: { time: endT, price: zone.bottom },
+          fillColor,
+          borderColor: isBuy ? 'rgba(38,166,154,0.5)' : 'rgba(239,83,80,0.5)',
+          borderWidth: 1,
+        });
+        candleSeries.attachPrimitive(rect);
+      });
+
+      // TP/SL level lines
+      alphaLHData.lines.forEach(line => {
+        const fromT = Math.floor(line.fromTime / 1000);
+        const toT = Math.floor(line.toTime / 1000);
+        const color = line.type === 'sl' || line.type === 'entry-to-sl'
+          ? 'rgba(239,83,80,0.7)'
+          : line.type === 'tp1' ? 'rgba(38,166,154,0.5)'
+          : line.type === 'tp2' ? 'rgba(38,166,154,0.7)'
+          : line.type === 'tp3' ? 'rgba(38,166,154,0.9)'
+          : 'rgba(38,166,154,0.6)';
+        const series = chart.addSeries(LineSeries, {
+          color, lineWidth: 1, lineStyle: 2,
+          priceLineVisible: false, lastValueVisible: false,
+        });
+        setSafeDataLH(series, fromT, line.price, toT, line.price);
+      });
+
+      // Markers (buy, sell, tp, sl, liq grabs)
+      alphaLHData.markers.forEach(m => {
+        allMarkers.push({
+          time: m.time,
+          position: m.position,
+          color: m.color,
+          shape: m.shape,
+          text: m.text || '',
+        });
+      });
+    }
+
     chart.subscribeCrosshairMove((param) => {
       if (!param || !param.time) {
       const currentCandles = candlesRef.current;
