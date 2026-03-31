@@ -71,7 +71,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<any>(null);
-  const volSeriesRef = useRef<any>(null);
+  
   const prevCandlesLenRef = useRef<number>(0);
   const visibleRangeRef = useRef<{ from: number; to: number } | null>(null);
   const candlesRef = useRef<Candle[]>(candles);
@@ -91,7 +91,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
   // Stable series updates: prepend history, append bars, or update the active bar without rebuilding the chart.
   useEffect(() => {
-    if (!chartRef.current || !candleSeriesRef.current || !volSeriesRef.current || candles.length === 0) return;
+    if (!chartRef.current || !candleSeriesRef.current || candles.length === 0) return;
 
     const chart = chartRef.current;
     
@@ -113,11 +113,6 @@ const TradingChart: React.FC<TradingChartProps> = ({
       low: c.low,
       close: c.close,
     }));
-    const volumeData = candles.map((c) => ({
-      time: (c.time / 1000) as any,
-      value: c.volume,
-      color: c.close >= c.open ? 'rgba(14,203,129,0.20)' : 'rgba(246,70,93,0.20)',
-    }));
     const lastCandle = candles[candles.length - 1];
 
     const prependedBars = previousSnapshot
@@ -132,7 +127,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
     if (didReplaceDataset || didPrependHistory) {
       candleSeriesRef.current.setData(chartData);
-      volSeriesRef.current.setData(volumeData);
+      
 
 
       if (didPrependHistory && normalizedRange) {
@@ -154,11 +149,6 @@ const TradingChart: React.FC<TradingChartProps> = ({
         high: lastCandle.high,
         low: lastCandle.low,
         close: lastCandle.close,
-      });
-      volSeriesRef.current.update({
-        time: (lastCandle.time / 1000) as any,
-        value: lastCandle.volume,
-        color: lastCandle.close >= lastCandle.open ? 'rgba(14,203,129,0.20)' : 'rgba(246,70,93,0.20)',
       });
 
 
@@ -327,23 +317,6 @@ const TradingChart: React.FC<TradingChartProps> = ({
     candleSeries.setData(chartData);
     candleSeriesRef.current = candleSeries;
 
-    // ── Volume as histogram overlay (bottom of main chart) ──
-    const volSeries = chart.addSeries(HistogramSeries, {
-      priceLineVisible: false,
-      lastValueVisible: false,
-      priceScaleId: 'volume',
-      priceFormat: { type: 'volume' },
-    });
-    chart.priceScale('volume').applyOptions({
-      scaleMargins: { top: 0.82, bottom: 0 },
-      borderVisible: false,
-    });
-    volSeries.setData(candles.map(c => ({
-      time: (c.time / 1000) as any,
-      value: c.volume,
-      color: c.close >= c.open ? 'rgba(14,203,129,0.20)' : 'rgba(246,70,93,0.20)',
-    })));
-    volSeriesRef.current = volSeries;
     dataSnapshotRef.current = {
       length: candles.length,
       firstTime: candles[0].time,
@@ -1391,7 +1364,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
       try { chart.remove(); } catch {}
       chartRef.current = null;
       candleSeriesRef.current = null;
-      volSeriesRef.current = null;
+      
       dataSnapshotRef.current = null;
       initialViewportAppliedRef.current = false;
     };
