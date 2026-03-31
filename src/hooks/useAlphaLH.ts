@@ -3,7 +3,6 @@ import {
   runAlphaNetLiquidityHunter,
   toLovableSeries,
   defaultConfig,
-  type IndicatorConfig,
   type IndicatorOutput,
 } from '@/lib/alpha-net-liquidity-hunter';
 import type { Candle } from '@/hooks/useMarketData';
