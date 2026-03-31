@@ -56,7 +56,7 @@ const Indicators: React.FC = () => {
   const [activePair, setActivePair] = useState('BTC/USDT');
   const [activeTimeframe, setActiveTimeframe] = useState('H4');
   const [indicators, setIndicators] = useState(DEFAULT_INDICATORS);
-  const [subTab, setSubTab] = useState<'rsi' | 'volume' | 'macd'>('rsi');
+  
   const [botActive, setBotActive] = useState(true);
   const [logs, setLogs] = useState<string[]>([]);
 
