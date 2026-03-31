@@ -531,31 +531,6 @@ const Indicators: React.FC = () => {
               </div>
             )}
 
-            {/* Alpha MP Dashboard + Config */}
-            {alphaMPEnabled && (
-              <div className="mt-3">
-                <AlphaMPConfigPanel config={alphaMPConfig} onChange={setAlphaMPConfig} />
-                {alphaMPData && (
-                  <div className="mt-2 border border-[#2b3139] rounded-lg overflow-hidden">
-                    <div className="bg-[#1e2329] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
-                      ALPHA MP
-                    </div>
-                    <div className="bg-[#161a1e] p-2 space-y-1.5">
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">Mode</span>
-                        <span className="text-[#eaecef] font-bold">{alphaMPData.dashboard.repaintMode ? 'Repaint' : 'Endpoint'}</span>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">Buy Signals</span>
-                        <span className="text-emerald-400 font-bold">{alphaMPData.dashboard.totalBuySignals}</span>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">Sell Signals</span>
-                        <span className="text-red-400 font-bold">{alphaMPData.dashboard.totalSellSignals}</span>
-                      </div>
-                    </div>
-              </div>
-            )}
 
             {/* Alpha Event Dashboard + Config */}
             {alphaEventEnabled && (
