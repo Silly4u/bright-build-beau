@@ -317,23 +317,6 @@ const TradingChart: React.FC<TradingChartProps> = ({
     candleSeries.setData(chartData);
     candleSeriesRef.current = candleSeries;
 
-    // ── Volume as histogram overlay (bottom of main chart) ──
-    const volSeries = chart.addSeries(HistogramSeries, {
-      priceLineVisible: false,
-      lastValueVisible: false,
-      priceScaleId: 'volume',
-      priceFormat: { type: 'volume' },
-    });
-    chart.priceScale('volume').applyOptions({
-      scaleMargins: { top: 0.82, bottom: 0 },
-      borderVisible: false,
-    });
-    volSeries.setData(candles.map(c => ({
-      time: (c.time / 1000) as any,
-      value: c.volume,
-      color: c.close >= c.open ? 'rgba(14,203,129,0.20)' : 'rgba(246,70,93,0.20)',
-    })));
-    volSeriesRef.current = volSeries;
     dataSnapshotRef.current = {
       length: candles.length,
       firstTime: candles[0].time,
