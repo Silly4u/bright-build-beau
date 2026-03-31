@@ -94,7 +94,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
     if (!chartRef.current || !candleSeriesRef.current || !volSeriesRef.current || candles.length === 0) return;
 
     const chart = chartRef.current;
-    const rsiChart = rsiChartRef.current;
+    
     const nextSnapshot: DataSnapshot = {
       length: candles.length,
       firstTime: candles[0].time,
