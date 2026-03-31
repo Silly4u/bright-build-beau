@@ -196,10 +196,8 @@ const TradingChart: React.FC<TradingChartProps> = ({
       }
     }
     // Cleanup
-    [chartRef, rsiChartRef].forEach(ref => {
-      if (ref.current) { try { ref.current.remove(); } catch {} ref.current = null; }
-    });
-    if (!chartContainerRef.current || !rsiContainerRef.current) return;
+    if (chartRef.current) { try { chartRef.current.remove(); } catch {} chartRef.current = null; }
+    if (!chartContainerRef.current) return;
 
     const chartBg = '#0b0e11';
     const gridColor = 'rgba(255,255,255,0.025)';
