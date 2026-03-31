@@ -530,12 +530,6 @@ const Indicators: React.FC = () => {
               )}
             </div>
 
-            {/* Sub-indicator area — Oscillator Matrix only */}
-            {!marketData.loading && marketData.candles.length > 0 && oscillatorData && oscillatorData.oscillator.length > 0 && (
-              <div className="border-t border-[#2b3139]">
-                <SubIndicators candles={marketData.candles} indicators={marketData.indicators} activeTab={subTab} oscillatorData={oscillatorData} />
-              </div>
-            )}
           </div>
 
           {/* ── RIGHT: Signal Feed ── */}
