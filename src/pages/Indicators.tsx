@@ -492,7 +492,7 @@ const Indicators: React.FC = () => {
                   enabledIndicators={enabledIds}
                   height={750}
                   smcAnalysis={smcResult.analysis}
-                  alphaNetData={alphaNet.data}
+                  alphaNetData={null}
                   matrixData={matrixData}
                   engineData={engineData}
                   tpSlData={tpSlData}
