@@ -61,7 +61,7 @@ interface TradingChartProps {
   engineData?: EngineData | null;
   tpSlData?: TpSlData | null;
   buySellData?: BuySellData | null;
-  oscillatorData?: OscillatorMatrixData | null;
+  
   proEmaData?: ProEmaData | null;
   srData?: SupportResistanceResult | null;
   wyckoffData?: WyckoffResult | null;
