@@ -134,7 +134,6 @@ const TradingChart: React.FC<TradingChartProps> = ({
         borderColor,
         timeVisible: true,
         secondsVisible: false,
-        rightOffset: 3,
         barSpacing: 4,
         minBarSpacing: 2,
       },
