@@ -71,7 +71,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candleSeriesRef = useRef<any>(null);
-  const volSeriesRef = useRef<any>(null);
+  
   const prevCandlesLenRef = useRef<number>(0);
   const visibleRangeRef = useRef<{ from: number; to: number } | null>(null);
   const candlesRef = useRef<Candle[]>(candles);
