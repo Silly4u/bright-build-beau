@@ -20,6 +20,7 @@ import type { WyckoffResult } from '@/hooks/useWyckoff';
 import type { AlphaLHResult } from '@/hooks/useAlphaLH';
 
 import type { AlphaEventResult } from '@/hooks/useAlphaEventSignal';
+import type { AlphaProResult } from '@/hooks/useAlphaProSignal';
 import {
   alignRangeToLiveEdge,
   getInitialLogicalRange,
