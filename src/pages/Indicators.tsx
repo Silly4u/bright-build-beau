@@ -10,12 +10,9 @@ import IndicatorPanel, { IndicatorConfig } from '@/components/indicators/Indicat
 import SignalFeed from '@/components/indicators/SignalFeed';
 import { useMarketData, useSignals } from '@/hooks/useMarketData';
 import { useSmcAnalysis } from '@/hooks/useSmcAnalysis';
-import { useAlphaNet } from '@/hooks/useAlphaNet';
-import AlphaNetDashboard from '@/components/indicators/AlphaNetDashboard';
 import { useMatrixIndicator } from '@/hooks/useMatrixIndicator';
 import { useEngineIndicator } from '@/hooks/useEngineIndicator';
 import { useTpSlIndicator } from '@/hooks/useTpSlIndicator';
-import { useBuySellSignal } from '@/hooks/useBuySellSignal';
 
 import { useProEma } from '@/hooks/useProEma';
 import { useSupportResistance } from '@/hooks/useSupportResistance';
@@ -25,8 +22,6 @@ import { useAlphaLH, defaultAlphaLHConfig, type AlphaLHConfig } from '@/hooks/us
 import AlphaLHConfigPanel from '@/components/indicators/AlphaLHConfig';
 import { useAlphaEventSignal, defaultAlphaEventConfig, type AlphaEventConfig } from '@/hooks/useAlphaEventSignal';
 import AlphaEventConfigPanel from '@/components/indicators/AlphaEventConfig';
-import { useAlphaProSignal, defaultAlphaProConfig, type AlphaProConfig } from '@/hooks/useAlphaProSignal';
-import AlphaProConfigPanel from '@/components/indicators/AlphaProConfig';
 
 const PAIRS = [
   { symbol: 'BTC/USDT', label: 'BTC', color: '#F7931A' },
@@ -45,11 +40,9 @@ const TIMEFRAMES = ['M15', 'H1', 'H4', 'D1'];
 
 const DEFAULT_INDICATORS: IndicatorConfig[] = [
   
-  { id: 'alphanet', label: 'AlphaNet AI', enabled: false, color: '#7C3AED', category: 'AI' },
   { id: 'matrix', label: 'Matrix NWE', enabled: false, color: '#00BCD4', category: 'Envelope' },
   { id: 'engine', label: 'MS Engine', enabled: false, color: '#FF9800', category: 'Structure' },
   { id: 'tp_sl', label: 'TP/SL Zones', enabled: false, color: '#E91E63', category: 'Risk' },
-  { id: 'buy_sell', label: 'Buy/Sell Signal', enabled: false, color: '#4CAF50', category: 'Signal' },
   
   { id: 'pro_ema', label: 'Pro EMA', enabled: false, color: '#FFA726', category: 'Trend' },
   { id: 'support_resistance', label: 'Pro S/R', enabled: false, color: '#00E676', category: 'S/R' },
@@ -57,7 +50,6 @@ const DEFAULT_INDICATORS: IndicatorConfig[] = [
   { id: 'alpha_lh', label: 'Alpha LH', enabled: false, color: '#F59E0B', category: 'Liquidity' },
   
   { id: 'alpha_event', label: 'Alpha Event', enabled: false, color: '#E879F9', category: 'Signal' },
-  { id: 'alpha_pro', label: 'Alpha Pro', enabled: false, color: '#06B6D4', category: 'Signal' },
 ];
 
 const Indicators: React.FC = () => {
@@ -76,16 +68,12 @@ const Indicators: React.FC = () => {
   const { signals, loading: signalsLoading } = useSignals();
   const liqHunterEnabled = indicators.find(i => i.id === 'liq_hunter')?.enabled ?? false;
   const smcResult = useSmcAnalysis(marketData.candles, activePair, activeTimeframe, liqHunterEnabled && !marketData.loading);
-  const alphaNetEnabled = indicators.find(i => i.id === 'alphanet')?.enabled ?? false;
-  const alphaNet = useAlphaNet(marketData.candles, alphaNetEnabled && !marketData.loading && marketData.candles.length >= 30);
   const matrixEnabled = indicators.find(i => i.id === 'matrix')?.enabled ?? false;
   const matrixData = useMatrixIndicator(marketData.candles, matrixEnabled && !marketData.loading);
   const engineEnabled = indicators.find(i => i.id === 'engine')?.enabled ?? false;
   const engineData = useEngineIndicator(marketData.candles, engineEnabled && !marketData.loading);
   const tpSlEnabled = indicators.find(i => i.id === 'tp_sl')?.enabled ?? false;
   const tpSlData = useTpSlIndicator(marketData.candles, tpSlEnabled && !marketData.loading);
-  const buySellEnabled = indicators.find(i => i.id === 'buy_sell')?.enabled ?? false;
-  const buySellData = useBuySellSignal(marketData.candles, buySellEnabled && !marketData.loading);
   const proEmaEnabled = indicators.find(i => i.id === 'pro_ema')?.enabled ?? false;
   const proEmaData = useProEma(marketData.candles, proEmaEnabled && !marketData.loading);
   const srEnabled = indicators.find(i => i.id === 'support_resistance')?.enabled ?? false;
@@ -98,9 +86,6 @@ const Indicators: React.FC = () => {
   const alphaEventEnabled = indicators.find(i => i.id === 'alpha_event')?.enabled ?? false;
   const [alphaEventConfig, setAlphaEventConfig] = useState(defaultAlphaEventConfig);
   const alphaEventData = useAlphaEventSignal(marketData.candles, alphaEventEnabled && !marketData.loading, alphaEventConfig);
-  const alphaProEnabled = indicators.find(i => i.id === 'alpha_pro')?.enabled ?? false;
-  const [alphaProConfig, setAlphaProConfig] = useState(defaultAlphaProConfig);
-  const alphaProData = useAlphaProSignal(marketData.candles, alphaProEnabled && !marketData.loading, alphaProConfig);
 
   const trendlines = useMemo(() => {
     if (!engineEnabled || marketData.loading || marketData.candles.length < 30) return { support: null, resistance: null };
@@ -262,12 +247,6 @@ const Indicators: React.FC = () => {
             <p className="text-[9px] text-[#5e6673] mb-3 font-mono">Bật/Tắt để hiển thị lên đồ thị</p>
             <IndicatorPanel indicators={indicators} onToggle={toggleIndicator} />
             
-            {/* AlphaNet AI Dashboard */}
-            {alphaNetEnabled && (
-              <div className="mt-3">
-                <AlphaNetDashboard data={alphaNet.data} loading={alphaNet.loading} error={alphaNet.error} />
-              </div>
-            )}
 
             {/* TP/SL Backtesting Dashboard */}
             {tpSlEnabled && tpSlData && (
@@ -298,45 +277,6 @@ const Indicators: React.FC = () => {
               </div>
             )}
 
-            {/* Buy/Sell Signal Dashboard */}
-            {buySellEnabled && buySellData && (
-              <div className="mt-3 border border-[#2b3139] rounded-lg overflow-hidden">
-                <div className="bg-[#1e2329] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
-                  BUY/SELL SIGNAL
-                </div>
-                <div className="bg-[#161a1e] p-2 space-y-1.5">
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Trend</span>
-                    <span className={`font-bold ${buySellData.currentTrend === 'BULLISH' ? 'text-emerald-400' : buySellData.currentTrend === 'BEARISH' ? 'text-red-400' : 'text-yellow-400'}`}>
-                      {buySellData.currentTrend}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Zone</span>
-                    <span className={`font-bold ${
-                      buySellData.currentZone === 'green' ? 'text-emerald-400' :
-                      buySellData.currentZone === 'red' ? 'text-red-400' :
-                      buySellData.currentZone === 'blue' ? 'text-blue-400' :
-                      buySellData.currentZone === 'orange' ? 'text-orange-400' :
-                      buySellData.currentZone === 'yellow' ? 'text-yellow-400' :
-                      'text-cyan-400'
-                    }`}>
-                      {buySellData.currentZone.toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Last Signal</span>
-                    <span className={`font-bold ${buySellData.currentSignal === 'BUY' ? 'text-emerald-400' : buySellData.currentSignal === 'SELL' ? 'text-red-400' : 'text-muted-foreground'}`}>
-                      {buySellData.currentSignal || '—'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Total Signals</span>
-                    <span className="text-[#eaecef] font-bold">{buySellData.signals.length}</span>
-                  </div>
-                </div>
-              </div>
-            )}
 
 
             {/* Pro EMA Dashboard */}
@@ -517,56 +457,6 @@ const Indicators: React.FC = () => {
                       </div>
                     </div>
 
-            {/* Alpha Pro Dashboard + Config */}
-            {alphaProEnabled && (
-              <div className="mt-3">
-                <AlphaProConfigPanel config={alphaProConfig} onChange={setAlphaProConfig} />
-                {alphaProData && (
-                  <div className="mt-2 border border-[#2b3139] rounded-lg overflow-hidden">
-                    <div className="bg-[#1e2329] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
-                      ALPHA PRO
-                    </div>
-                    <div className="bg-[#161a1e] p-2 space-y-1.5">
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">Trend</span>
-                        <span className={`font-bold ${
-                          alphaProData.trendStates[alphaProData.trendStates.length - 1]?.bullish ? 'text-emerald-400' :
-                          alphaProData.trendStates[alphaProData.trendStates.length - 1]?.bearish ? 'text-red-400' : 'text-muted-foreground'
-                        }`}>
-                          {alphaProData.trendStates[alphaProData.trendStates.length - 1]?.bullish ? '🟢 BULLISH' :
-                           alphaProData.trendStates[alphaProData.trendStates.length - 1]?.bearish ? '🔴 BEARISH' : '—'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">Zone</span>
-                        <span className={`font-bold ${
-                          alphaProData.trendStates[alphaProData.trendStates.length - 1]?.zone === 'green' ? 'text-emerald-400' :
-                          alphaProData.trendStates[alphaProData.trendStates.length - 1]?.zone === 'red' ? 'text-red-400' :
-                          alphaProData.trendStates[alphaProData.trendStates.length - 1]?.zone === 'blue' ? 'text-blue-400' :
-                          alphaProData.trendStates[alphaProData.trendStates.length - 1]?.zone === 'orange' ? 'text-orange-400' :
-                          alphaProData.trendStates[alphaProData.trendStates.length - 1]?.zone === 'yellow' ? 'text-yellow-400' :
-                          'text-cyan-400'
-                        }`}>
-                          {(alphaProData.trendStates[alphaProData.trendStates.length - 1]?.zone || 'none').toUpperCase()}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">Buy Signals</span>
-                        <span className="text-emerald-400 font-bold">{alphaProData.markers.filter(m => m.text.includes('BUY') || (m.shape === 'arrowUp' && m.text === 'Buy')).length}</span>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">Sell Signals</span>
-                        <span className="text-red-400 font-bold">{alphaProData.markers.filter(m => m.text.includes('SELL') || (m.shape === 'arrowDown' && m.text === 'Sell')).length}</span>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">Total Markers</span>
-                        <span className="text-[#eaecef] font-bold">{alphaProData.markers.length}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
           )}
               </div>
@@ -602,11 +492,11 @@ const Indicators: React.FC = () => {
                   enabledIndicators={enabledIds}
                   height={750}
                   smcAnalysis={smcResult.analysis}
-                  alphaNetData={alphaNet.data}
+                  alphaNetData={null}
                   matrixData={matrixData}
                   engineData={engineData}
                   tpSlData={tpSlData}
-                  buySellData={buySellData}
+                  buySellData={null}
                   
                   proEmaData={proEmaData}
                   srData={srData}
@@ -614,7 +504,7 @@ const Indicators: React.FC = () => {
                   alphaLHData={alphaLHData}
                   
                   alphaEventData={alphaEventData}
-                  alphaProData={alphaProData}
+                  alphaProData={null}
                   onLoadMore={fetchOlderCandles}
                 />
               )}
