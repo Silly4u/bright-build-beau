@@ -211,7 +211,7 @@ const Indicators: React.FC = () => {
 
       {/* ═══ 3-PANEL LAYOUT ═══ */}
       <div className="px-1.5 lg:px-3 py-1">
-        <div className={`grid grid-cols-1 ${sidebarOpen ? 'lg:grid-cols-[180px_1fr_300px]' : 'lg:grid-cols-[1fr_300px]'} gap-px min-h-[75vh] bg-[#2b3139] rounded overflow-hidden transition-all duration-300`}>
+        <div className={`grid grid-cols-1 ${sidebarOpen ? 'lg:grid-cols-[180px_1fr]' : 'lg:grid-cols-[1fr]'} gap-px min-h-[75vh] bg-[#2b3139] rounded overflow-hidden transition-all duration-300`}>
 
           {/* ── Collapsed sidebar handle ── */}
           {!sidebarOpen && (
@@ -512,17 +512,6 @@ const Indicators: React.FC = () => {
 
           </div>
 
-          {/* ── RIGHT: Signal Feed ── */}
-          <div className="bg-[#161a1e] p-3 flex flex-col min-h-0">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[10px] font-bold text-[#848e9c] tracking-widest uppercase font-mono">TÍN HIỆU GẦN ĐÂY</h3>
-              <span className="text-[10px] font-mono text-[#5e6673]">{signals.length}</span>
-            </div>
-            <p className="text-[9px] text-[#5e6673] mb-3 font-mono">Click để xem lại vị trí</p>
-            <div className="flex-1 min-h-0 overflow-y-auto">
-              <SignalFeed signals={signals} loading={signalsLoading} />
-            </div>
-          </div>
         </div>
       </div>
 
