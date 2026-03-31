@@ -134,9 +134,6 @@ const TradingChart: React.FC<TradingChartProps> = ({
       candleSeriesRef.current.setData(chartData);
       volSeriesRef.current.setData(volumeData);
 
-      if (rsiSeriesRef.current) {
-        rsiSeriesRef.current.setData(rsiData ?? []);
-      }
 
       if (didPrependHistory && normalizedRange) {
         const shiftedRange = shiftLogicalRange(normalizedRange, prependedBars);
