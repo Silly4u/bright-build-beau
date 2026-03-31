@@ -113,11 +113,6 @@ const TradingChart: React.FC<TradingChartProps> = ({
       low: c.low,
       close: c.close,
     }));
-    const volumeData = candles.map((c) => ({
-      time: (c.time / 1000) as any,
-      value: c.volume,
-      color: c.close >= c.open ? 'rgba(14,203,129,0.20)' : 'rgba(246,70,93,0.20)',
-    }));
     const lastCandle = candles[candles.length - 1];
 
     const prependedBars = previousSnapshot
