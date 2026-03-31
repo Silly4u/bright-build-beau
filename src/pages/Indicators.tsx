@@ -55,7 +55,6 @@ const DEFAULT_INDICATORS: IndicatorConfig[] = [
   { id: 'alpha_lh', label: 'Alpha LH', enabled: false, color: '#F59E0B', category: 'Liquidity' },
   
   { id: 'alpha_event', label: 'Alpha Event', enabled: false, color: '#E879F9', category: 'Signal' },
-  { id: 'alpha_pro', label: 'Alpha Pro', enabled: false, color: '#06B6D4', category: 'Signal' },
 ];
 
 const Indicators: React.FC = () => {
