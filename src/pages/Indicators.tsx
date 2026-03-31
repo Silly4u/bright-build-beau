@@ -514,7 +514,7 @@ const Indicators: React.FC = () => {
                   trendline={trendlines.support}
                   trendlineResistance={trendlines.resistance}
                   enabledIndicators={enabledIds}
-                  height={560}
+                  height={750}
                   smcAnalysis={smcResult.analysis}
                   alphaNetData={alphaNet.data}
                   matrixData={matrixData}
