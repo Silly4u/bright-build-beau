@@ -118,14 +118,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
       value: c.volume,
       color: c.close >= c.open ? 'rgba(14,203,129,0.20)' : 'rgba(246,70,93,0.20)',
     }));
-    const rsiData = indicators?.rsi
-      .map((value, index) => ({
-        time: (candles[index]?.time / 1000) as any,
-        value,
-      }))
-      .filter((point) => typeof point.value === 'number' && !isNaN(point.value));
     const lastCandle = candles[candles.length - 1];
-    const lastRsiPoint = rsiData && rsiData.length > 0 ? rsiData[rsiData.length - 1] : null;
 
     const prependedBars = previousSnapshot
       ? candles.findIndex((candle) => candle.time === previousSnapshot.firstTime)
