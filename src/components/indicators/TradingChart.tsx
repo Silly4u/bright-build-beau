@@ -86,7 +86,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
       volSeriesRef.current.update({
         time: (lastCandle.time / 1000) as any,
         value: lastCandle.volume,
-        color: lastCandle.close >= lastCandle.open ? 'rgba(38,166,154,0.25)' : 'rgba(239,83,80,0.25)',
+        color: lastCandle.close >= lastCandle.open ? 'rgba(14,203,129,0.20)' : 'rgba(246,70,93,0.20)',
       });
     } catch {
       // If update fails (e.g. new candle added), full rebuild will handle it
