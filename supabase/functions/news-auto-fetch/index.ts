@@ -558,12 +558,9 @@ serve(async (req) => {
 
     console.log(`🎯 Picked articles for streams: ${Object.keys(streamPicks).join(", ")}`);
 
-    // 4. Check how many AI images we've generated today
-    const aiImagesCount = await countTodayAiImages(supabase);
-    const maxAiImages = 6;
+    // AI images: no daily cap, Gemini API has its own quota
     let aiImagesGenerated = 0;
 
-    console.log(`🖼️ AI images today: ${aiImagesCount}/${maxAiImages}`);
 
     // 5. Process each stream article: AI rewrite + image
     const insertArticles: any[] = [];
