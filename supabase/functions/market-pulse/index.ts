@@ -193,21 +193,24 @@ serve(async (req) => {
     let imageUrl: string | null = null;
     if (GEMINI_KEY) {
       try {
-        const imgPrompt = `Create a professional cryptocurrency market sentiment thumbnail for Telegram.
-Style: Modern, clean, professional financial infographic style.
-Theme: ${analysis.mood} market sentiment
-Mood: ${analysis.moodDesc}
+        const fngVal = marketData.fngToday;
+        const fngDir = fngChange >= 0 ? "up" : "down";
+        const arrowDir = marketData.btcChange24h > 0 ? "upward green" : "downward red";
+        const imgPrompt = `Create a clean, minimalist cryptocurrency Fear & Greed Index infographic image.
 
-Visual elements:
-- Large circular gauge showing Fear & Greed at ${marketData.fngToday}/100
-- Bitcoin symbol or icon
-- ${marketData.btcChange24h > 0 ? "Up" : "Down"} arrow indicating price movement
-- Professional dark background with subtle grid pattern
-- "UNCLETRADER" watermark text
-- Number "${marketData.fngToday}" prominently displayed
+Layout (centered, dark navy background #0f1629 with very subtle grid lines):
+1. TOP: A large semi-circular gauge meter (speedometer style) with gradient from red (left/fear) through yellow (middle) to blue-green (right/greed). The needle points to ${fngVal}/100.
+2. CENTER: The number "${fngVal}" displayed very large and bold in white, centered below the gauge.
+3. BOTTOM-LEFT: Bitcoin ₿ symbol icon in white/gray.
+4. BOTTOM-CENTER: Text "FEAR & GREED INDEX" in bold white uppercase.
+5. BOTTOM-RIGHT: A ${arrowDir} arrow with "${fngChangeStr}%" text showing the change.
+6. WATERMARK: "ALPHANET" text in subtle gray at bottom-right corner.
 
-Do NOT include: faces, complex charts, too much text
-Aspect ratio: 16:9`;
+Style: Ultra-clean, professional fintech dashboard aesthetic. Minimal elements, high contrast on dark background. No gradients on background, just solid dark navy. The gauge is the hero element.
+Do NOT include: people, faces, complex charts, candlesticks, paragraphs of text, logos other than Bitcoin symbol.
+Aspect ratio: 16:9, 800x450 pixels.`;
+
+
 
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${GEMINI_KEY}`;
         const imgRes = await fetch(apiUrl, {
