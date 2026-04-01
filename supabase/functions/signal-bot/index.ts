@@ -391,23 +391,18 @@ function shouldSendSignal(conditions: ConditionResult[]): boolean {
 
 // ─── TELEGRAM ───
 async function sendTelegram(chatId: string, text: string, messageThreadId?: number) {
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  const TELEGRAM_API_KEY = Deno.env.get("TELEGRAM_API_KEY");
-  if (!LOVABLE_API_KEY || !TELEGRAM_API_KEY) {
-    console.log("Telegram not configured, skipping send");
+  const BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
+  if (!BOT_TOKEN) {
+    console.log("TELEGRAM_BOT_TOKEN not configured, skipping send");
     return;
   }
 
   const payload: any = { chat_id: chatId, text, parse_mode: "HTML" };
   if (messageThreadId) payload.message_thread_id = messageThreadId;
 
-  const res = await fetch("https://connector-gateway.lovable.dev/telegram/sendMessage", {
+  const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "X-Connection-Api-Key": TELEGRAM_API_KEY,
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 
