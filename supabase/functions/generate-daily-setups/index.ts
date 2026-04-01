@@ -7,8 +7,8 @@ const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 const FINNHUB_API_KEY = Deno.env.get("FINNHUB_API_KEY") || "";
 
 const GEMINI_MODELS = [
-  "gemini-2.5-flash-preview-04-17",
-  "gemini-2.0-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.5-flash",
 ];
 
 const TOOL_SCHEMA = {
