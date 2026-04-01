@@ -310,18 +310,6 @@ const AnalysisDetail: React.FC = () => {
               )}
             </div>
 
-            {/* OKX CTA */}
-            <a href="https://www.okx.com/join/UNCLETRADER" target="_blank" rel="noopener noreferrer"
-              className="glass-card rounded-xl p-3 flex items-center gap-3 hover:border-primary/30 transition-all group border border-foreground/5 block">
-              <span className="text-2xl">{isGold ? '🥇' : '🚀'}</span>
-              <div className="flex-1">
-                <div className="text-xs font-bold text-foreground">
-                  {isGold ? 'Giao dịch Vàng trên OKX — Spread siêu thấp' : 'Đăng ký sàn OKX — Giảm 20% phí giao dịch'}
-                </div>
-                <div className="text-[10px] text-muted-foreground">Mở tài khoản miễn phí, ưu đãi dành riêng cho bạn</div>
-              </div>
-              <span className={`${config.accentClass} text-xs group-hover:translate-x-1 transition-transform`}>→</span>
-            </a>
           </div>
         </div>
       </div>
