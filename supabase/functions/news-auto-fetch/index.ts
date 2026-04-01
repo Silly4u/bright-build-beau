@@ -105,11 +105,11 @@ function classifyToStream(title: string, body: string): string {
   return bestStream;
 }
 
-// ─── AI Rewrite in Vietnamese ───
+// ─── AI Rewrite in Vietnamese (via Gemini API) ───
 async function aiRewrite(title: string, body: string, stream: string): Promise<{ title: string; summary: string; full_content: string } | null> {
-  const LOVABLE_KEY = Deno.env.get("LOVABLE_API_KEY");
-  if (!LOVABLE_KEY) {
-    console.error("LOVABLE_API_KEY not set");
+  const GEMINI_KEY = Deno.env.get("GEMINI_API_KEY");
+  if (!GEMINI_KEY) {
+    console.error("GEMINI_API_KEY not set");
     return null;
   }
 
@@ -149,16 +149,14 @@ Trả về theo format JSON:
 CHỈ trả về JSON, không giải thích thêm.`;
 
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
+    
+    const res = await fetch(apiUrl, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.7 },
       }),
     });
 
@@ -168,7 +166,7 @@ CHỈ trả về JSON, không giải thích thêm.`;
     }
 
     const data = await res.json();
-    const content = data.choices?.[0]?.message?.content || "";
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
     
     // Parse JSON from response (handle markdown code blocks)
     const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/) || [null, content];
@@ -191,7 +189,6 @@ CHỈ trả về JSON, không giải thích thêm.`;
       if (fullContentStart > -1) {
         const afterColon = rawJson.indexOf('"', fullContentStart + 15);
         if (afterColon > -1) {
-          // Find the last closing quote before }
           const remaining = rawJson.slice(afterColon + 1);
           const endQuote = remaining.lastIndexOf('"');
           if (endQuote > -1) fullContent = remaining.slice(0, endQuote).replace(/\\n/g, "\n").replace(/\\"/g, '"');
