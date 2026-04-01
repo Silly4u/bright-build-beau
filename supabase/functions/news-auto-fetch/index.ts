@@ -585,12 +585,12 @@ serve(async (req) => {
       // 3. Fall back to diverse Unsplash image based on stream + title
       let imageUrl: string | null = null;
 
-      if ((aiImagesCount + aiImagesGenerated) < maxAiImages) {
+      if (true) { // Always try AI image with Gemini API
         console.log(`🎨 Generating AI image for ${stream}...`);
         imageUrl = await aiGenerateImage(rewritten.title, stream, raw.imageUrl);
         if (imageUrl) {
           aiImagesGenerated++;
-          console.log(`✅ AI image generated for ${stream} (${aiImagesCount + aiImagesGenerated}/${maxAiImages} today)`);
+          console.log(`✅ AI image generated for ${stream} (${aiImagesGenerated} this cycle)`);
         }
       }
 
