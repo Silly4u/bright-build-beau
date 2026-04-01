@@ -363,15 +363,6 @@ const Analysis: React.FC = () => {
                   />
                 )}
                 <AIActionCard ai={btcAI} symbol="₿ BTC/USDT" />
-                <a href="https://www.okx.com/join/UNCLETRADER" target="_blank" rel="noopener noreferrer"
-                  className="glass-card rounded-xl p-3 flex items-center gap-3 hover:border-primary/30 transition-all group border border-foreground/5">
-                  <span className="text-2xl">🚀</span>
-                  <div className="flex-1">
-                    <div className="text-xs font-bold text-foreground">Đăng ký sàn OKX — Giảm 20% phí giao dịch</div>
-                    <div className="text-[10px] text-muted-foreground">Giao dịch BTC với phí thấp nhất thị trường</div>
-                  </div>
-                  <span className="text-primary text-xs group-hover:translate-x-1 transition-transform">→</span>
-                </a>
               </div>
 
               {/* ── GOLD Column ── */}
