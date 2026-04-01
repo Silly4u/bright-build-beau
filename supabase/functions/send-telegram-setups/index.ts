@@ -3,11 +3,10 @@ import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2/cors";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
-const TELEGRAM_API_KEY = Deno.env.get("TELEGRAM_API_KEY")!;
-const TELEGRAM_CHAT_ID = Deno.env.get("TELEGRAM_CHAT_ID") || "-1003722231058";
+const BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN")!;
+const TELEGRAM_CHAT_ID = "-1003722231058";
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
+const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 const MAX_MSG_LENGTH = 3900;
 
 const PROB_MAP: Record<string, string> = {
@@ -119,13 +118,9 @@ Deno.serve(async (req) => {
     // Format and send
     const message = formatSetupMessage(setups, dateDisplay);
 
-    const tgRes = await fetch(`${GATEWAY_URL}/sendMessage`, {
+    const tgRes = await fetch(`${TG_API}/sendMessage`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": TELEGRAM_API_KEY,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         chat_id: TELEGRAM_CHAT_ID,
         text: message,
