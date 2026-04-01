@@ -8,7 +8,6 @@ const corsHeaders = {
 };
 
 const TELEGRAM_CHAT_ID = "-1003722231058";
-const CALENDAR_THREAD_ID = 329;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -19,8 +18,7 @@ serve(async (req) => {
     const BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
     if (!BOT_TOKEN) throw new Error("TELEGRAM_BOT_TOKEN not configured");
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const GEMINI_KEY = Deno.env.get("GEMINI_API_KEY");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -44,7 +42,7 @@ serve(async (req) => {
     const dayStart = `${targetDate}T00:00:00+07:00`;
     const dayEnd = `${targetDate}T23:59:59+07:00`;
 
-    // Query USD events with importance >= 2
+    // Query ALL events with importance >= 2 (not just USD)
     const { data: events, error: fetchErr } = await supabase
       .from("economic_events")
       .select("*")
@@ -55,19 +53,16 @@ serve(async (req) => {
 
     if (fetchErr) throw new Error(`DB error: ${fetchErr.message}`);
 
-    // Filter USD only
-    const usdEvents = (events || []).filter(ev =>
-      ev.flag === "🇺🇸" || ev.country === "Mỹ" || ev.country === "US"
-    );
+    const allEvents = events || [];
 
-    if (usdEvents.length === 0) {
-      return new Response(JSON.stringify({ ok: true, sent: false, reason: "no_usd_events" }), {
+    if (allEvents.length === 0) {
+      return new Response(JSON.stringify({ ok: true, sent: false, reason: "no_events" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const highImpact = usdEvents.filter(e => e.impact === "high");
-    const mediumImpact = usdEvents.filter(e => e.impact === "medium");
+    const highImpact = allEvents.filter(e => e.impact === "high");
+    const mediumImpact = allEvents.filter(e => e.impact === "medium");
 
     // Format date in Vietnamese
     const dateObj = new Date(`${targetDate}T12:00:00+07:00`);
@@ -75,49 +70,42 @@ serve(async (req) => {
     const pad = (n: number) => String(n).padStart(2, "0");
     const vnDate = `${days[dateObj.getDay()]}, ${pad(dateObj.getDate())}/${pad(dateObj.getMonth() + 1)}/${dateObj.getFullYear()}`;
 
-    // ─── Generate AI Thumbnail ───
+    // ─── Generate AI Thumbnail via Gemini API ───
     let imageUrl: string | null = null;
-    try {
-      const imgPrompt = `Create a professional financial news thumbnail for US economic calendar alert.
-Style: Modern financial dashboard aesthetic with dark blue/navy background.
-Include visual elements: US flag icon, calendar icon, clock showing 3PM.
-CRITICAL TEXT ACCURACY: The title text MUST be exactly "LỊCH KINH TẾ MỸ" - note the last word is "MỸ" with tilde accent on the Y, NOT "MÝ" with acute accent.
-Show "${usdEvents.length} sự kiện" and "${highImpact.length} quan trọng" as key stats.
-Date: "${vnDate}"
-Make it look like a premium financial news graphic with subtle gold accents.
-Aspect ratio 16:9, ultra high resolution.`;
+    if (GEMINI_KEY) {
+      try {
+        const imgPrompt = `Create a professional financial news thumbnail.
+Style: Modern financial dashboard aesthetic with dark blue/navy background, subtle tech grid lines, gold accents.
+Include visual elements: globe icon, calendar icon, clock icon connected by dotted arrows in a flow diagram.
+Title text: "LỊCH KINH TẾ QUỐC TẾ" in large bold white font at the top.
+Show date box: "${vnDate}" on the left.
+Show two circular stat badges: "${allEvents.length} sự kiện" (green circle) and "${highImpact.length} quan trọng" (red/orange circle).
+Clean, premium financial infographic style. No busy backgrounds. Aspect ratio 16:9.`;
 
-      const imgRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash-image",
-          messages: [{ role: "user", content: imgPrompt }],
-          modalities: ["image", "text"],
-        }),
-      });
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${GEMINI_KEY}`;
+        const imgRes = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: imgPrompt }] }],
+            generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
+          }),
+        });
 
-      if (imgRes.ok) {
-        const imgData = await imgRes.json();
-        const imgBase64 = imgData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+        if (imgRes.ok) {
+          const imgData = await imgRes.json();
+          const parts = imgData.candidates?.[0]?.content?.parts || [];
+          const imgPart = parts.find((p: any) => p.inlineData);
 
-        if (imgBase64 && imgBase64.startsWith("data:image/")) {
-          const base64Match = imgBase64.match(/^data:image\/(\w+);base64,(.+)$/);
-          if (base64Match) {
-            const ext = base64Match[1] === "jpeg" ? "jpg" : base64Match[1];
-            const rawBase64 = base64Match[2];
-            const bytes = Uint8Array.from(atob(rawBase64), c => c.charCodeAt(0));
+          if (imgPart?.inlineData?.data) {
+            const mimeType = imgPart.inlineData.mimeType || "image/png";
+            const ext = mimeType.includes("jpeg") || mimeType.includes("jpg") ? "jpg" : "png";
+            const bytes = Uint8Array.from(atob(imgPart.inlineData.data), c => c.charCodeAt(0));
             const fileName = `calendar/${targetDate}-daily-summary.${ext}`;
 
             const { error: uploadErr } = await supabase.storage
               .from("news-images")
-              .upload(fileName, bytes, {
-                contentType: `image/${base64Match[1]}`,
-                upsert: true,
-              });
+              .upload(fileName, bytes, { contentType: mimeType, upsert: true });
 
             if (!uploadErr) {
               const { data: urlData } = supabase.storage.from("news-images").getPublicUrl(fileName);
@@ -127,60 +115,76 @@ Aspect ratio 16:9, ultra high resolution.`;
               console.error("Upload error:", uploadErr);
             }
           }
+        } else {
+          console.error("Image gen failed:", imgRes.status);
         }
-      } else {
-        console.error("Image gen failed:", imgRes.status);
+      } catch (imgErr) {
+        console.error("Image generation error:", imgErr);
       }
-    } catch (imgErr) {
-      console.error("Image generation error:", imgErr);
     }
 
-    // ─── Build caption (Markdown for Telegram) ───
-    let caption = `📅 <b>LỊCH KINH TẾ MỸ — ${vnDate}</b>\n`;
-    caption += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+    // ─── Build caption matching the screenshot format ───
+    const formatEventTime = (eventTime: string): string => {
+      const evTime = new Date(eventTime);
+      const vnTime = new Date(evTime.getTime() + 7 * 3600 * 1000);
+      return `${pad(vnTime.getUTCHours())}:${pad(vnTime.getUTCMinutes())}`;
+    };
+
+    let caption = `🗓 <b>LỊCH KINH TẾ — ${vnDate}</b>\n`;
+    caption += `🌍 Tổng: ${allEvents.length} sự kiện | 🔴 Quan trọng: ${highImpact.length} | 🟡 TB: ${mediumImpact.length}\n\n`;
 
     // High impact events
     if (highImpact.length > 0) {
-      caption += `🔴 <b>Sự kiện quan trọng (3 sao):</b>\n`;
+      caption += `🔴 <b>SỰ KIỆN QUAN TRỌNG:</b>\n`;
       for (const ev of highImpact) {
-        const evTime = new Date(ev.event_time);
-        const vnTime = new Date(evTime.getTime() + 7 * 3600 * 1000);
-        const timeStr = `${pad(vnTime.getUTCHours())}:${pad(vnTime.getUTCMinutes())}`;
-        const forecast = ev.estimate ? ` | Dự báo: ${ev.estimate}` : "";
-        const prev = ev.prev ? ` | Kỳ trước: ${ev.prev}` : "";
-        caption += `🕐 <b>${timeStr}</b> — ${ev.event_name}${forecast}${prev}\n`;
+        const timeStr = formatEventTime(ev.event_time);
+        const estimate = ev.estimate ? ` (dự kiến: ${ev.estimate})` : "";
+        caption += `🕐 ${timeStr} | ${ev.flag} ${ev.event_name}${estimate}\n`;
       }
       caption += `\n`;
     }
 
     // Medium impact events
     if (mediumImpact.length > 0) {
-      caption += `🟡 <b>Sự kiện đáng chú ý (2 sao):</b>\n`;
+      caption += `🟡 <b>SỰ KIỆN TRUNG BÌNH:</b>\n`;
       for (const ev of mediumImpact) {
-        const evTime = new Date(ev.event_time);
-        const vnTime = new Date(evTime.getTime() + 7 * 3600 * 1000);
-        const timeStr = `${pad(vnTime.getUTCHours())}:${pad(vnTime.getUTCMinutes())}`;
-        caption += `🕐 ${timeStr} — ${ev.event_name}\n`;
+        const timeStr = formatEventTime(ev.event_time);
+        caption += `🕐 ${timeStr} | ${ev.flag} ${ev.event_name}\n`;
       }
       caption += `\n`;
     }
 
-    caption += `💡 <i>Lưu ý: Các sự kiện có thể gây biến động mạnh trên thị trường. Hãy quản lý rủi ro cẩn thận!</i>\n\n`;
-    caption += `📍 <a href="https://bright-build-beau.lovable.app/lich-kinh-te">Xem chi tiết → AlphaNet Calendar</a>`;
+    caption += `🔗 Xem chi tiết đầy đủ`;
 
     // ─── Send to Telegram ───
     let res: Response;
 
     if (imageUrl) {
+      // Send photo first, then message separately (caption limit 1024)
       res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: TELEGRAM_CHAT_ID,
-          message_thread_id: CALENDAR_THREAD_ID,
           photo: imageUrl,
-          caption: caption.slice(0, 1024),
+          caption: "",
+        }),
+      });
+
+      const photoResult = await res.json();
+      if (!res.ok) {
+        console.error("Photo send error:", JSON.stringify(photoResult));
+      }
+
+      // Send text message
+      res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: caption,
           parse_mode: "HTML",
+          disable_web_page_preview: true,
         }),
       });
     } else {
@@ -189,9 +193,9 @@ Aspect ratio 16:9, ultra high resolution.`;
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: TELEGRAM_CHAT_ID,
-          message_thread_id: CALENDAR_THREAD_ID,
           text: caption,
           parse_mode: "HTML",
+          disable_web_page_preview: true,
         }),
       });
     }
@@ -208,7 +212,7 @@ Aspect ratio 16:9, ultra high resolution.`;
       ok: true,
       sent: true,
       date: targetDate,
-      eventCount: usdEvents.length,
+      eventCount: allEvents.length,
       highImpactCount: highImpact.length,
       mediumImpactCount: mediumImpact.length,
       hasImage: !!imageUrl,
