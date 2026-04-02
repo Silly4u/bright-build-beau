@@ -211,11 +211,13 @@ ${stars}  Mức độ quan trọng: <b>${impLabel}</b>
         }
       }
 
-      // Mark as alerted
-      await supabase
-        .from("economic_events")
-        .update({ telegram_alerted: true })
-        .eq("id", ev.id);
+      // Mark as alerted (skip for test)
+      if (!isTest) {
+        await supabase
+          .from("economic_events")
+          .update({ telegram_alerted: true })
+          .eq("id", ev.id);
+      }
 
       sentCount++;
       console.log(`Alert sent: ${ev.event_name} (in ~${minutesUntil}m)`);
