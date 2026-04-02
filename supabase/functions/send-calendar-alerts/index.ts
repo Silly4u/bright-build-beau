@@ -46,6 +46,7 @@ serve(async (req) => {
       isTest = body?.test_send === true;
     } catch { /* no body */ }
 
+    const now = new Date();
     let events: any[] = [];
 
     if (isTest) {
