@@ -75,15 +75,35 @@ serve(async (req) => {
       ? `\n\n${article.summary.slice(0, 800)}${article.summary.length > 800 ? "..." : ""}`
       : "";
 
+    // Need article id for detail link
+    let articleIdForLink = articleId;
+    if (!articleIdForLink) {
+      // Re-fetch with id
+      const { data: idData } = await supabase
+        .from("news_articles")
+        .select("id")
+        .eq("title", article.title)
+        .eq("published_at", article.published_at)
+        .limit(1)
+        .single();
+      articleIdForLink = idData?.id || null;
+    }
+
+    const SITE_URL = "https://bright-build-beau.lovable.app";
+    const detailLink = articleIdForLink ? `${SITE_URL}/tin-tuc/${articleIdForLink}` : null;
+
     const caption = `${emoji} <b>${badge}${article.title}</b>${summary}
 
-📌 Nguồn: ${article.source}
-🕐 ${new Date(article.published_at).toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh", hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" })}`;
+📌 Nguồn: ${article.source}`;
+
+    // Inline keyboard with "Đọc chi tiết" button
+    const inlineKeyboard = detailLink
+      ? { inline_keyboard: [[{ text: "📖 Đọc chi tiết", url: detailLink }]] }
+      : undefined;
 
     let res: Response;
 
     if (article.image_url) {
-      // Send as photo with caption
       res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -91,12 +111,12 @@ serve(async (req) => {
           chat_id: TELEGRAM_CHAT_ID,
           message_thread_id: NEWS_THREAD_ID,
           photo: article.image_url,
-          caption: caption.slice(0, 1024), // Telegram caption limit
+          caption: caption.slice(0, 1024),
           parse_mode: "HTML",
+          ...(inlineKeyboard && { reply_markup: inlineKeyboard }),
         }),
       });
     } else {
-      // Fallback to text-only
       res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -105,6 +125,7 @@ serve(async (req) => {
           message_thread_id: NEWS_THREAD_ID,
           text: caption,
           parse_mode: "HTML",
+          ...(inlineKeyboard && { reply_markup: inlineKeyboard }),
         }),
       });
     }
