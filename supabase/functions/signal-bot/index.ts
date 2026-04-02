@@ -560,10 +560,19 @@ serve(async (req) => {
               candle_time: candleTime,
             });
 
-            // Send Telegram
+            // Send Telegram (with chart image if available)
             if (telegramChatId) {
               const msg = formatTelegramMessage(sym, timeframe, conditions, candles[n].close, currRSI, currVolRatio, strength);
-              await sendTelegram(telegramChatId, msg, 9);
+              // Find matching chart image for this symbol
+              const symChartImage = chartImage && (
+                (typeof chartImage === 'string' && symbols.length === 1) ? chartImage :
+                (typeof chartImage === 'object' && chartImage[sym]) ? chartImage[sym] : null
+              );
+              if (symChartImage) {
+                await sendTelegramPhoto(telegramChatId, symChartImage, msg, 9);
+              } else {
+                await sendTelegram(telegramChatId, msg, 9);
+              }
             }
 
             results.push({ symbol: sym, strength, conditions: triggeredNames, price: candles[n].close });
