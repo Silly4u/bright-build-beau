@@ -35,10 +35,15 @@ const Analysis: React.FC = () => {
   const [scanLabel, setScanLabel] = useState('');
   const [autoSignal, setAutoSignal] = useState(false);
   const [sendingSignal, setSendingSignal] = useState<string | null>(null);
-  const [commentary, setCommentary] = useState('');
+  const [btcCommentary, setBtcCommentary] = useState('');
+  const [xauCommentary, setXauCommentary] = useState('');
   const [commentaryLoading, setCommentaryLoading] = useState(false);
   const [commentaryFailed, setCommentaryFailed] = useState(false);
   const [commentaryTime, setCommentaryTime] = useState('');
+  const [commentaryDate, setCommentaryDate] = useState('');
+  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState<{ asset: string; commentary: string; commentary_date: string; created_at: string }[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
