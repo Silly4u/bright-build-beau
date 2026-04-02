@@ -90,6 +90,27 @@ const Analysis: React.FC = () => {
   const btcAI = getAIPoints(btcData, 'BTC');
   const goldAI = getAIPoints(goldData, 'XAU');
 
+  // ── Load today's commentary from DB first ──
+  useEffect(() => {
+    const loadToday = async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data } = await supabase
+        .from('market_commentaries')
+        .select('asset, commentary, commentary_date, created_at')
+        .eq('commentary_date', today);
+      if (data && data.length > 0) {
+        const btcRow = data.find(r => r.asset === 'BTC');
+        const xauRow = data.find(r => r.asset === 'XAU');
+        if (btcRow) setBtcCommentary(btcRow.commentary);
+        if (xauRow) setXauCommentary(xauRow.commentary);
+        const latest = data.reduce((a, b) => a.created_at > b.created_at ? a : b);
+        setCommentaryTime(new Date(latest.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }));
+        setCommentaryDate(today);
+      }
+    };
+    loadToday();
+  }, []);
+
   // ── Fetch AI Commentary ──
   const fetchCommentary = useCallback(async () => {
     if (commentaryLoading) return;
@@ -105,28 +126,42 @@ const Analysis: React.FC = () => {
       });
       if (error) throw error;
       if (data.credit_error || data.rate_limited) {
-        setCommentary(data.commentary || '');
         setCommentaryFailed(true);
       } else {
-        setCommentary(data.commentary || '');
+        setBtcCommentary(data.btc_commentary || '');
+        setXauCommentary(data.xau_commentary || '');
         setCommentaryFailed(false);
+        setCommentaryDate(data.commentary_date || new Date().toISOString().slice(0, 10));
       }
       setCommentaryTime(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }));
     } catch (e) {
       console.error('Commentary error:', e);
-      setCommentary('⚠️ Không thể tạo nhận định lúc này. Vui lòng thử lại sau.');
       setCommentaryFailed(true);
     } finally {
       setCommentaryLoading(false);
     }
   }, [btcAI, goldAI, btcPrice, goldPrice, dxy.value, dxy.changePercent, btcTimeframe, goldTimeframe, commentaryLoading]);
 
-  // Auto-fetch commentary when AI points are ready (only once, don't retry on failure)
+  // Auto-fetch commentary when AI points are ready & no existing commentary
   useEffect(() => {
-    if ((btcAI || goldAI) && !commentary && !commentaryLoading && !commentaryFailed) {
+    if ((btcAI || goldAI) && !btcCommentary && !xauCommentary && !commentaryLoading && !commentaryFailed) {
       fetchCommentary();
     }
   }, [btcAI, goldAI]);
+
+  // ── Load history ──
+  const loadHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    const today = new Date().toISOString().slice(0, 10);
+    const { data } = await supabase
+      .from('market_commentaries')
+      .select('asset, commentary, commentary_date, created_at')
+      .lt('commentary_date', today)
+      .order('commentary_date', { ascending: false })
+      .limit(20);
+    setHistory(data || []);
+    setHistoryLoading(false);
+  }, []);
 
   // ── Compute trendlines from candle data ──
   const btcTrendlines = useMemo(() => computeDualTrendlines(btcData.candles), [btcData.candles]);
