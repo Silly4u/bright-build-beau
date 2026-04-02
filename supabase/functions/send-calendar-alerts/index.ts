@@ -39,26 +39,47 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Check for test mode
+    let isTest = false;
+    try {
+      const body = await req.json();
+      isTest = body?.test_send === true;
+    } catch { /* no body */ }
+
     const now = new Date();
-    // Window: events happening in 9-11 minutes from now
-    const minTime = new Date(now.getTime() + 9 * 60 * 1000);
-    const maxTime = new Date(now.getTime() + 11 * 60 * 1000);
+    let events: any[] = [];
 
-    console.log(`Checking alerts: ${minTime.toISOString()} → ${maxTime.toISOString()}`);
+    if (isTest) {
+      // Send a sample test alert
+      events = [{
+        id: "test",
+        event_name: "Bảng Lương Phi Nông Nghiệp (NFP) (Tháng 3)",
+        event_time: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+        impact: "high",
+        flag: "🇺🇸",
+        estimate: "140K",
+        prev: "151K",
+      }];
+    } else {
+      const minTime = new Date(now.getTime() + 9 * 60 * 1000);
+      const maxTime = new Date(now.getTime() + 11 * 60 * 1000);
 
-    // Only 3-star (high impact) events, not yet alerted
-    const { data: events, error: fetchErr } = await supabase
-      .from("economic_events")
-      .select("*")
-      .eq("impact", "high")
-      .eq("telegram_alerted", false)
-      .gte("event_time", minTime.toISOString())
-      .lte("event_time", maxTime.toISOString())
-      .order("event_time", { ascending: true });
+      console.log(`Checking alerts: ${minTime.toISOString()} → ${maxTime.toISOString()}`);
 
-    if (fetchErr) throw new Error(`DB error: ${fetchErr.message}`);
+      const { data, error: fetchErr } = await supabase
+        .from("economic_events")
+        .select("*")
+        .eq("impact", "high")
+        .eq("telegram_alerted", false)
+        .gte("event_time", minTime.toISOString())
+        .lte("event_time", maxTime.toISOString())
+        .order("event_time", { ascending: true });
 
-    if (!events || events.length === 0) {
+      if (fetchErr) throw new Error(`DB error: ${fetchErr.message}`);
+      events = data || [];
+    }
+
+    if (events.length === 0) {
       return new Response(
         JSON.stringify({ ok: true, sent: 0, reason: "no_upcoming_events" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -190,11 +211,13 @@ ${stars}  Mức độ quan trọng: <b>${impLabel}</b>
         }
       }
 
-      // Mark as alerted
-      await supabase
-        .from("economic_events")
-        .update({ telegram_alerted: true })
-        .eq("id", ev.id);
+      // Mark as alerted (skip for test)
+      if (!isTest) {
+        await supabase
+          .from("economic_events")
+          .update({ telegram_alerted: true })
+          .eq("id", ev.id);
+      }
 
       sentCount++;
       console.log(`Alert sent: ${ev.event_name} (in ~${minutesUntil}m)`);
