@@ -565,6 +565,22 @@ serve(async (req) => {
       if (isDuplicate(a.title)) continue;
       allRawArticles.push({ title: a.title, body: a.description, imageUrl: a.imageUrl, source: "CoinTelegraph" });
     }
+    for (const a of theBlockRss) {
+      if (isDuplicate(a.title)) continue;
+      allRawArticles.push({ title: a.title, body: a.description, imageUrl: a.imageUrl, source: "The Block" });
+    }
+    for (const a of bitcoinMagRss) {
+      if (isDuplicate(a.title)) continue;
+      allRawArticles.push({ title: a.title, body: a.description, imageUrl: a.imageUrl, source: "Bitcoin Magazine" });
+    }
+    for (const a of dlNewsRss) {
+      if (isDuplicate(a.title)) continue;
+      allRawArticles.push({ title: a.title, body: a.description, imageUrl: a.imageUrl, source: "DL News" });
+    }
+    for (const a of blockworksRss) {
+      if (isDuplicate(a.title)) continue;
+      allRawArticles.push({ title: a.title, body: a.description, imageUrl: a.imageUrl, source: "Blockworks" });
+    }
 
     console.log(`✅ After dedup: ${allRawArticles.length} unique articles`);
 
