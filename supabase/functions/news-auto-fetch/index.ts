@@ -515,15 +515,19 @@ serve(async (req) => {
     console.log(`🔍 Found ${recentTitles.size} recent articles for dedup`);
 
     // 1. Fetch raw news from multiple sources in parallel
-    const [ccNews, trendingCoins, coinDeskRss, decryptRss, cointelegraphRss] = await Promise.all([
+    const [ccNews, trendingCoins, coinDeskRss, decryptRss, cointelegraphRss, theBlockRss, bitcoinMagRss, dlNewsRss, blockworksRss] = await Promise.all([
       fetchCryptoCompareNews(),
       fetchCoinGeckoTrending(),
       fetchRSS("https://www.coindesk.com/arc/outboundfeeds/rss/"),
       fetchRSS("https://decrypt.co/feed"),
       fetchRSS("https://cointelegraph.com/rss"),
+      fetchRSS("https://www.theblock.co/rss.xml"),
+      fetchRSS("https://bitcoinmagazine.com/.rss/full/"),
+      fetchRSS("https://www.dlnews.com/arc/outboundfeeds/rss/"),
+      fetchRSS("https://blockworks.co/feed"),
     ]);
 
-    console.log(`📰 Fetched: CC=${ccNews.length}, CoinDesk=${coinDeskRss.length}, Decrypt=${decryptRss.length}, CT=${cointelegraphRss.length}`);
+    console.log(`📰 Fetched: CC=${ccNews.length}, CoinDesk=${coinDeskRss.length}, Decrypt=${decryptRss.length}, CT=${cointelegraphRss.length}, TheBlock=${theBlockRss.length}, BtcMag=${bitcoinMagRss.length}, DLNews=${dlNewsRss.length}, Blockworks=${blockworksRss.length}`);
 
     // 2. Normalize all articles
     const allRawArticles: Array<{title: string; body: string; imageUrl: string | null; source: string}> = [];
