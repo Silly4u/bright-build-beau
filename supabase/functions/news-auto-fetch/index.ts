@@ -531,11 +531,10 @@ serve(async (req) => {
     // Helper: check if article is duplicate
     const isDuplicate = (title: string): boolean => {
       const lower = title.toLowerCase().trim();
-      if (recentTitles.has(lower)) return true;
-      // Fuzzy check: extract phrase fingerprint and compare
-      const phrase = lower.replace(/[^a-zàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ0-9\s]/g, "")
-        .split(/\s+/).filter(w => w.length > 2).slice(0, 5).join(" ");
-      if (phrase && recentPhrases.has(phrase)) return true;
+      // Check against original English titles stored in DB
+      if (recentOriginalTitles.has(lower)) return true;
+      // Also check against Vietnamese titles (in case original_title wasn't stored)
+      if (recentViTitles.has(lower)) return true;
       return false;
     };
 
