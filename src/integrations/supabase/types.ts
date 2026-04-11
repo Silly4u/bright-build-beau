@@ -191,6 +191,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_published: boolean
+          original_title: string | null
           published_at: string
           source: string
           stream: string
@@ -206,6 +207,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_published?: boolean
+          original_title?: string | null
           published_at?: string
           source?: string
           stream?: string
@@ -221,6 +223,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_published?: boolean
+          original_title?: string | null
           published_at?: string
           source?: string
           stream?: string
