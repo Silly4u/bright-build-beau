@@ -496,23 +496,19 @@ serve(async (req) => {
     const since48h = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
     const { data: recentArticles } = await supabase
       .from("news_articles")
-      .select("title, source")
+      .select("title, source, original_title")
       .gte("created_at", since48h);
     
-    const recentTitles = new Set(
-      (recentArticles || []).map((a: any) => a.title?.toLowerCase().trim())
-    );
-    // Also extract key phrases for fuzzy matching
-    const recentPhrases = new Set(
-      (recentArticles || []).map((a: any) => {
-        const t = a.title?.toLowerCase().trim() || "";
-        // Extract first 5 significant words as a fingerprint
-        return t.replace(/[^a-zàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ0-9\s]/g, "")
-          .split(/\s+/).filter(w => w.length > 2).slice(0, 5).join(" ");
-      })
-    );
+    // Build dedup sets from BOTH original English titles and rewritten Vietnamese titles
+    const recentOriginalTitles = new Set<string>();
+    const recentViTitles = new Set<string>();
+    
+    for (const a of (recentArticles || [])) {
+      if (a.original_title) recentOriginalTitles.add(a.original_title.toLowerCase().trim());
+      if (a.title) recentViTitles.add(a.title.toLowerCase().trim());
+    }
 
-    console.log(`🔍 Found ${recentTitles.size} recent articles for dedup`);
+    console.log(`🔍 Found ${recentOriginalTitles.size} original titles + ${recentViTitles.size} VI titles for dedup`);
 
     // 1. Fetch raw news from multiple sources in parallel
     const [ccNews, trendingCoins, coinDeskRss, decryptRss, cointelegraphRss, theBlockRss, bitcoinMagRss, dlNewsRss, blockworksRss] = await Promise.all([
