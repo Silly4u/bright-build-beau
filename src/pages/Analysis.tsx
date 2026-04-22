@@ -25,7 +25,7 @@ const SIGNAL_COLORS: Record<string, { bg: string; border: string; text: string; 
   info: { bg: 'bg-blue-500/10', border: 'border-blue-500/25', text: 'text-blue-300', dot: 'bg-blue-400', label: 'INFO' },
 };
 
-const ENABLED_INDICATORS = ['bb_squeeze', 'breakout', 'breakdown', 'confluence', 'momentum', 'vol_spike', 'rsi_div', 'sup_bounce', 'macd_cross'];
+const ENABLED_INDICATORS = ['bb_squeeze', 'breakout', 'breakdown', 'confluence', 'momentum', 'vol_spike', 'rsi_div', 'sup_bounce', 'macd_cross', 'prev_week_fib'];
 
 const Analysis: React.FC = () => {
   const navigate = useNavigate();
