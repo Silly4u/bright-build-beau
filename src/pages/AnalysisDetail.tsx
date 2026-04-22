@@ -255,13 +255,13 @@ const AnalysisDetail: React.FC = () => {
             }`}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">📊 DXY — Chỉ số USD</span>
-                <span className={`text-sm font-bold font-mono ${dxy.change > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                  {dxy.loading ? '...' : dxy.value.toFixed(2)}
+                <span className={`text-sm font-bold font-mono ${(dxy.change ?? 0) > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                  {dxy.loading || dxy.value == null ? '...' : dxy.value.toFixed(2)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className={`text-[10px] font-mono ${dxy.change > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                  {dxy.change > 0 ? '↑' : '↓'} {Math.abs(dxy.changePercent).toFixed(2)}%
+                <span className={`text-[10px] font-mono ${(dxy.change ?? 0) > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                  {(dxy.change ?? 0) > 0 ? '↑' : '↓'} {Math.abs(dxy.changePercent ?? 0).toFixed(2)}%
                 </span>
                 <span className="text-[9px] text-muted-foreground/60">
                   {dxy.change > 0 ? 'DXY↑ → BTC & Vàng chịu áp lực' : 'DXY↓ → BTC & Vàng hưởng lợi'}
