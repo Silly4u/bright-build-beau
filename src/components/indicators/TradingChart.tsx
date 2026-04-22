@@ -1557,6 +1557,76 @@ const TradingChart: React.FC<TradingChartProps> = ({
       });
     }
 
+    // ── Fibonacci Tuần Cũ (Previous Week Fibonacci) ──
+    // Group nến theo tuần ISO (Mon 00:00 UTC), lấy High/Low của tuần TRƯỚC,
+    // vẽ các mức Fib 0 / 0.236 / 0.382 / 0.5 / 0.618 / 0.786 / 1, kéo dài sang tuần hiện tại.
+    if (enabledIndicators.includes('prev_week_fib') && candles.length > 0) {
+      const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+      // Anchor về Thứ Hai 00:00 UTC: epoch 1970-01-05 (Mon) = 345600000 ms
+      const MONDAY_EPOCH_MS = 4 * 24 * 60 * 60 * 1000;
+      const weekStart = (t: number) =>
+        Math.floor((t - MONDAY_EPOCH_MS) / WEEK_MS) * WEEK_MS + MONDAY_EPOCH_MS;
+
+      const weeks = new Map<number, { high: number; low: number; start: number; end: number; firstOpen: number; lastClose: number }>();
+      for (const c of candles) {
+        const ws = weekStart(c.time);
+        const w = weeks.get(ws);
+        if (!w) {
+          weeks.set(ws, { high: c.high, low: c.low, start: ws, end: ws + WEEK_MS, firstOpen: c.open, lastClose: c.close });
+        } else {
+          if (c.high > w.high) w.high = c.high;
+          if (c.low < w.low) w.low = c.low;
+          w.lastClose = c.close;
+        }
+      }
+
+      const sortedWeekStarts = Array.from(weeks.keys()).sort((a, b) => a - b);
+      const lastCandleTime = candles[candles.length - 1].time;
+      const currentWeekStart = weekStart(lastCandleTime);
+
+      const prevWeekStarts = sortedWeekStarts.filter(ws => ws < currentWeekStart);
+      const prevWeekKey = prevWeekStarts[prevWeekStarts.length - 1];
+      const prevWeek = prevWeekKey != null ? weeks.get(prevWeekKey) : null;
+
+      if (prevWeek && prevWeek.high > prevWeek.low) {
+        const range = prevWeek.high - prevWeek.low;
+        const isUpTrend = prevWeek.lastClose >= prevWeek.firstOpen;
+
+        const fibLevels: { ratio: number; color: string; width: 1 | 2; style: 0 | 1 | 2 }[] = [
+          { ratio: 0,     color: 'rgba(255,213,79,0.85)', width: 2, style: 0 },
+          { ratio: 0.236, color: 'rgba(255,213,79,0.45)', width: 1, style: 2 },
+          { ratio: 0.382, color: 'rgba(255,213,79,0.55)', width: 1, style: 2 },
+          { ratio: 0.5,   color: 'rgba(255,213,79,0.70)', width: 1, style: 0 },
+          { ratio: 0.618, color: 'rgba(255,213,79,0.75)', width: 1, style: 0 },
+          { ratio: 0.786, color: 'rgba(255,213,79,0.55)', width: 1, style: 2 },
+          { ratio: 1,     color: 'rgba(255,213,79,0.85)', width: 2, style: 0 },
+        ];
+
+        const startSec = (prevWeek.start / 1000) as any;
+        const endSec = (Math.max(currentWeekStart + WEEK_MS, lastCandleTime) / 1000) as any;
+
+        fibLevels.forEach(({ ratio, color, width, style }) => {
+          // Up trend: 0 ở Low, 1 ở High. Down trend: ngược lại.
+          const price = isUpTrend
+            ? prevWeek.low + range * ratio
+            : prevWeek.high - range * ratio;
+
+          const ls = chart.addSeries(LineSeries, {
+            color,
+            lineWidth: width,
+            lineStyle: style,
+            priceLineVisible: false,
+            lastValueVisible: true,
+            title: `Fib ${ratio.toFixed(3).replace(/\.?0+$/, '')}`,
+          });
+          ls.setData([
+            { time: startSec, value: price },
+            { time: endSec, value: price },
+          ]);
+        });
+      }
+    }
+
     chart.subscribeCrosshairMove((param) => {
       if (!param || !param.time) {
       const currentCandles = candlesRef.current;
