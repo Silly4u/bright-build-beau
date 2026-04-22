@@ -34,8 +34,20 @@ const SYMBOL_CONFIG: Record<string, { pair: string; label: string; icon: string;
 
 const AnalysisDetail: React.FC = () => {
   const { symbol } = useParams<{ symbol: string }>();
+  const navigate = useNavigate();
   const config = SYMBOL_CONFIG[symbol || ''] || SYMBOL_CONFIG.btc;
   const isGold = symbol === 'xau';
+
+  // Map watchlist pair → URL slug (only btc/xau have detail pages today; others fallback to btc)
+  const PAIR_TO_SLUG: Record<string, string> = {
+    'BTC/USDT': 'btc',
+    'XAU/USDT': 'xau',
+  };
+  const handleWatchlistSelect = (pair: string) => {
+    const slug = PAIR_TO_SLUG[pair];
+    if (slug && slug !== symbol) navigate(`/phan-tich/${slug}`);
+  };
+
 
   const [timeframe, setTimeframe] = useState('H4');
   const [scanning, setScanning] = useState(false);
