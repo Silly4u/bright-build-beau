@@ -99,26 +99,9 @@ const ChartPeriodBar: React.FC<ChartPeriodBarProps> = ({ activeTf, onSelect, rig
   const activeQuickLabel = QUICK_INTERVALS.find(q => q.tf === activeTf)?.label ?? activeTf ?? '';
 
   return (
-    <div className={`flex items-center justify-between gap-2 px-3 py-1.5 bg-[#0b0e11] border-t border-white/5 ${className || ''}`}>
-      {/* Left: quick period buttons */}
-      <div className="flex items-center gap-0.5 overflow-x-auto">
-        {PERIODS.map(p => (
-          <button
-            key={p.id}
-            onClick={() => onSelect?.(p.tf, p.id)}
-            className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold transition-all whitespace-nowrap ${
-              activePeriodId === p.id
-                ? 'bg-[#fcd535]/15 text-[#fcd535]'
-                : 'text-[#848e9c] hover:text-[#eaecef] hover:bg-white/5'
-            }`}
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
-
+    <div className={`flex items-center justify-end gap-2 px-3 py-1.5 bg-[#0b0e11] border-t border-white/5 ${className || ''}`}>
       {/* Right: quick intervals + dropdown + UTC */}
-      <div className="flex items-center gap-1.5 ml-3 shrink-0">
+      <div className="flex items-center gap-1.5 shrink-0">
         <div className="hidden md:flex items-center gap-0.5">
           {QUICK_INTERVALS.map(q => (
             <button
