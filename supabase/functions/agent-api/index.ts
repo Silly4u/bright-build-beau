@@ -17,7 +17,7 @@ function error(msg: string, status = 400) {
   return json({ error: msg }, status);
 }
 
-const VALID_RESOURCES = ["news", "signals", "events"] as const;
+const VALID_RESOURCES = ["news", "signals", "events", "commentaries", "setups"] as const;
 type ResourceName = typeof VALID_RESOURCES[number];
 
 function resourceToTable(resource: string): string | null {
@@ -25,6 +25,8 @@ function resourceToTable(resource: string): string | null {
     case "news": case "news_articles": return "news_articles";
     case "signals": case "signal": return "signals";
     case "events": case "event": case "economic_events": return "economic_events";
+    case "commentaries": case "commentary": case "market_commentaries": return "market_commentaries";
+    case "setups": case "setup": case "daily_setups": return "daily_setups";
     default: return null;
   }
 }
@@ -35,6 +37,8 @@ function normalizeResource(resource: string): ResourceName | null {
   if (table === "news_articles") return "news";
   if (table === "signals") return "signals";
   if (table === "economic_events") return "events";
+  if (table === "market_commentaries") return "commentaries";
+  if (table === "daily_setups") return "setups";
   return null;
 }
 
