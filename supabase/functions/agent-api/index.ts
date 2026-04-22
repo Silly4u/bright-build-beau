@@ -17,7 +17,7 @@ function error(msg: string, status = 400) {
   return json({ error: msg }, status);
 }
 
-const VALID_RESOURCES = ["news", "signals", "events"] as const;
+const VALID_RESOURCES = ["news", "signals", "events", "commentaries", "setups"] as const;
 type ResourceName = typeof VALID_RESOURCES[number];
 
 function resourceToTable(resource: string): string | null {
@@ -25,6 +25,8 @@ function resourceToTable(resource: string): string | null {
     case "news": case "news_articles": return "news_articles";
     case "signals": case "signal": return "signals";
     case "events": case "event": case "economic_events": return "economic_events";
+    case "commentaries": case "commentary": case "market_commentaries": return "market_commentaries";
+    case "setups": case "setup": case "daily_setups": return "daily_setups";
     default: return null;
   }
 }
@@ -35,6 +37,8 @@ function normalizeResource(resource: string): ResourceName | null {
   if (table === "news_articles") return "news";
   if (table === "signals") return "signals";
   if (table === "economic_events") return "events";
+  if (table === "market_commentaries") return "commentaries";
+  if (table === "daily_setups") return "setups";
   return null;
 }
 
@@ -247,6 +251,137 @@ async function handleEvents(method: string, ctx: Ctx) {
   }
 
   return error("Method not allowed", 405);
+}
+
+// --- MARKET COMMENTARIES (nhận định BTC/XAU) ---
+async function handleCommentaries(method: string, ctx: Ctx) {
+  const { supabase, body, params } = ctx;
+
+  if (method === "GET") {
+    const limit = parseInt(params.get("limit") || "20");
+    const asset = params.get("asset");
+    const date = params.get("date");
+    let q = supabase
+      .from("market_commentaries")
+      .select("*", { count: "exact" })
+      .order("commentary_date", { ascending: false })
+      .limit(limit);
+    if (asset) q = q.eq("asset", asset);
+    if (date) q = q.eq("commentary_date", date);
+    const { data, error: e, count } = await q;
+    if (e) return error(e.message, 500);
+    return json({ data, count });
+  }
+
+  if (method === "POST") {
+    if (!body?.asset || !body?.commentary)
+      return error("asset and commentary required");
+    if (!["BTC", "XAU"].includes(body.asset))
+      return error("asset must be BTC or XAU");
+    const { data, error: e } = await supabase.from("market_commentaries").upsert({
+      asset: body.asset,
+      commentary: body.commentary,
+      commentary_date: body.commentary_date || new Date().toISOString().slice(0, 10),
+      market_data: body.market_data || {},
+    }, { onConflict: "asset,commentary_date" }).select().single();
+    if (e) return error(e.message, 500);
+    return json({ data }, 201);
+  }
+
+  if (method === "PUT" || method === "PATCH") {
+    const id = params.get("id");
+    if (!id) return error("id param required");
+    const { data, error: e } = await supabase
+      .from("market_commentaries").update(body).eq("id", id).select().single();
+    if (e) return error(e.message, 500);
+    return json({ data });
+  }
+
+  if (method === "DELETE") {
+    const id = params.get("id");
+    if (!id) return error("id param required");
+    const { error: e } = await supabase.from("market_commentaries").delete().eq("id", id);
+    if (e) return error(e.message, 500);
+    return json({ ok: true });
+  }
+
+  return error("Method not allowed", 405);
+}
+
+// --- DAILY SETUPS ---
+async function handleSetups(method: string, ctx: Ctx) {
+  const { supabase, body, params } = ctx;
+
+  if (method === "GET") {
+    const limit = parseInt(params.get("limit") || "20");
+    const asset = params.get("asset");
+    const date = params.get("date");
+    let q = supabase
+      .from("daily_setups")
+      .select("*", { count: "exact" })
+      .order("setup_date", { ascending: false })
+      .limit(limit);
+    if (asset) q = q.eq("asset", asset);
+    if (date) q = q.eq("setup_date", date);
+    const { data, error: e, count } = await q;
+    if (e) return error(e.message, 500);
+    return json({ data, count });
+  }
+
+  if (method === "POST") {
+    if (!body?.asset || !body?.setup_date)
+      return error("asset and setup_date required");
+    const { data, error: e } = await supabase.from("daily_setups").insert({
+      asset: body.asset,
+      setup_date: body.setup_date,
+      scenarios: body.scenarios || [],
+      ai_summary: body.ai_summary || null,
+      market_context: body.market_context || null,
+      current_price: body.current_price ?? null,
+      price_change_24h: body.price_change_24h ?? null,
+    }).select().single();
+    if (e) return error(e.message, 500);
+    return json({ data }, 201);
+  }
+
+  if (method === "PUT" || method === "PATCH") {
+    const id = params.get("id");
+    if (!id) return error("id param required");
+    const { data, error: e } = await supabase
+      .from("daily_setups").update(body).eq("id", id).select().single();
+    if (e) return error(e.message, 500);
+    return json({ data });
+  }
+
+  if (method === "DELETE") {
+    const id = params.get("id");
+    if (!id) return error("id param required");
+    const { error: e } = await supabase.from("daily_setups").delete().eq("id", id);
+    if (e) return error(e.message, 500);
+    return json({ ok: true });
+  }
+
+  return error("Method not allowed", 405);
+}
+
+// --- TRIGGER: chạy lại bài nhận định sáng ngay lập tức ---
+async function handleTriggerCommentary() {
+  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+  const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/daily-market-commentary`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      body: JSON.stringify({ source: "agent-api" }),
+    });
+    const data = await res.json();
+    return json({ triggered: true, status: res.status, result: data });
+  } catch (e) {
+    return error(`Trigger failed: ${e instanceof Error ? e.message : "unknown"}`, 500);
+  }
 }
 
 // --- USERS ---
@@ -687,6 +822,13 @@ Deno.serve(async (req) => {
       return handleSignals(req.method, ctx);
     case "events":
       return handleEvents(req.method, ctx);
+    case "commentaries":
+      return handleCommentaries(req.method, ctx);
+    case "setups":
+      return handleSetups(req.method, ctx);
+    case "trigger-commentary":
+      if (req.method !== "POST") return error("POST only", 405);
+      return handleTriggerCommentary();
     case "users":
       return handleUsers(req.method, ctx);
     case "context":
@@ -706,19 +848,23 @@ Deno.serve(async (req) => {
     default:
       return json({
         endpoints: {
-          "GET/POST/PUT/DELETE /news": "Quản lý tin tức (?id=...&limit=...&offset=...)",
+          "GET/POST/PUT/DELETE /news": "Tin tức (?id=...&limit=...&offset=...)",
           "GET/POST /signals": "Tín hiệu trading (?symbol=...&limit=...)",
           "GET/POST/PUT/DELETE /events": "Sự kiện kinh tế (?impact=...&id=...)",
+          "GET/POST/PUT/DELETE /commentaries": "Nhận định BTC/XAU (?asset=BTC|XAU&date=YYYY-MM-DD&id=...)",
+          "GET/POST/PUT/DELETE /setups": "Daily setups (?asset=...&date=...&id=...)",
+          "POST /trigger-commentary": "Chạy lại bài nhận định sáng ngay",
           "GET/PUT /users": "Profiles (?user_id=...&limit=...)",
           "POST /users?action=assign_role": "Gán role {user_id, role}",
           "DELETE /users?action=remove_role": "Xoá role {user_id, role}",
-          "GET /context": "App context: signals, news, events, stats, user info",
+          "GET /context": "App context: signals, news, events, stats",
           "POST /review": "Review content {resource, id?, data?, mode}",
           "POST /preview-edit": "Preview changes {resource, id?, changes}",
           "POST /apply-edit": "Apply changes {resource, id, changes}",
           "GET /health": "Health check",
         },
-        auth: "Header x-agent-key hoặc Authorization: Bearer <admin_jwt>",
+        auth: "Header x-agent-key: <AGENT_API_KEY> (hoặc Authorization: Bearer <admin_jwt>)",
+        base_url: "https://epcvcvpplnmmlaxrzcby.supabase.co/functions/v1/agent-api",
       });
   }
 });
