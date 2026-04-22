@@ -50,6 +50,7 @@ const DEFAULT_INDICATORS: IndicatorConfig[] = [
   { id: 'alpha_lh', label: 'Alpha LH', enabled: false, color: '#F59E0B', category: 'Liquidity', note: 'Hoạt động tốt ở khung M15 trở xuống.' },
   
   { id: 'alpha_event', label: 'Alpha Event', enabled: false, color: '#E879F9', category: 'Signal' },
+  { id: 'prev_week_fib', label: 'Fib Tuần Cũ', enabled: false, color: '#FFD54F', category: 'Fibonacci', note: 'Tự vẽ Fibonacci theo High/Low của tuần trước, cập nhật mỗi tuần.' },
 ];
 
 const Indicators: React.FC = () => {
