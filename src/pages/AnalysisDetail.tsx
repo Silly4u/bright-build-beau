@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import ChartWatchlist from '@/components/analysis/ChartWatchlist';
+import ChartPeriodBar from '@/components/analysis/ChartPeriodBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TradingChart from '@/components/indicators/TradingChart';
@@ -32,8 +34,20 @@ const SYMBOL_CONFIG: Record<string, { pair: string; label: string; icon: string;
 
 const AnalysisDetail: React.FC = () => {
   const { symbol } = useParams<{ symbol: string }>();
+  const navigate = useNavigate();
   const config = SYMBOL_CONFIG[symbol || ''] || SYMBOL_CONFIG.btc;
   const isGold = symbol === 'xau';
+
+  // Map watchlist pair → URL slug (only btc/xau have detail pages today; others fallback to btc)
+  const PAIR_TO_SLUG: Record<string, string> = {
+    'BTC/USDT': 'btc',
+    'XAU/USDT': 'xau',
+  };
+  const handleWatchlistSelect = (pair: string) => {
+    const slug = PAIR_TO_SLUG[pair];
+    if (slug && slug !== symbol) navigate(`/phan-tich/${slug}`);
+  };
+
 
   const [timeframe, setTimeframe] = useState('H4');
   const [scanning, setScanning] = useState(false);
@@ -162,21 +176,35 @@ const AnalysisDetail: React.FC = () => {
                 <span className="text-destructive text-sm">⚠️ {data.error}</span>
               </div>
             ) : (
-              <TradingChart
-                key={`${config.pair}-${timeframe}`}
-                candles={data.candles}
-                indicators={data.indicators}
-                zones={data.zones}
-                trendline={trendlines.support}
-                trendlineResistance={trendlines.resistance}
-                enabledIndicators={ENABLED_INDICATORS}
-                height={500}
-                label={config.label}
-                scanning={scanning}
-                scanLabel={scanLabel}
-                timeframe={timeframe}
-                onTimeframeChange={setTimeframe}
-              />
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-2">
+                <div className="bg-[#0b0e11] border border-white/5 rounded-md overflow-hidden flex flex-col min-w-0">
+                  <TradingChart
+                    key={`${config.pair}-${timeframe}`}
+                    candles={data.candles}
+                    indicators={data.indicators}
+                    zones={data.zones}
+                    trendline={trendlines.support}
+                    trendlineResistance={trendlines.resistance}
+                    enabledIndicators={ENABLED_INDICATORS}
+                    height={500}
+                    label={config.label}
+                    scanning={scanning}
+                    scanLabel={scanLabel}
+                    timeframe={timeframe}
+                    onTimeframeChange={setTimeframe}
+                  />
+                  <ChartPeriodBar
+                    activeTf={timeframe}
+                    onSelect={(tf) => setTimeframe(tf)}
+                    rightLabel={new Date().toUTCString().slice(17, 25) + ' UTC'}
+                  />
+                </div>
+                <ChartWatchlist
+                  activePair={config.pair}
+                  onSelect={handleWatchlistSelect}
+                  className="h-[540px]"
+                />
+              </div>
             )}
 
             {/* AI Action Card - Full Width */}
