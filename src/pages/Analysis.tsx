@@ -29,6 +29,7 @@ const ENABLED_INDICATORS = ['bb_squeeze', 'breakout', 'breakdown', 'confluence',
 
 const Analysis: React.FC = () => {
   const navigate = useNavigate();
+  const [activeAsset, setActiveAsset] = useState<'BTC' | 'XAU'>('BTC');
   const [btcTimeframe, setBtcTimeframe] = useState('H4');
   const [goldTimeframe, setGoldTimeframe] = useState('H4');
   const [logs, setLogs] = useState<string[]>([]);
@@ -395,106 +396,128 @@ const Analysis: React.FC = () => {
 
           {/* ── LEFT: Charts + Commentary ── */}
           <div className="space-y-3 min-w-0">
-            {/* Charts grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {/* Asset tabs */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveAsset('BTC')}
+                className={`px-3 py-1.5 rounded-md text-xs font-bold font-mono transition-all border ${
+                  activeAsset === 'BTC'
+                    ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                    : 'bg-foreground/5 border-foreground/10 text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                ₿ BTC/USDT
+              </button>
+              <button
+                onClick={() => setActiveAsset('XAU')}
+                className={`px-3 py-1.5 rounded-md text-xs font-bold font-mono transition-all border ${
+                  activeAsset === 'XAU'
+                    ? 'bg-yellow-500/15 border-yellow-500/40 text-yellow-300'
+                    : 'bg-foreground/5 border-foreground/10 text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                🥇 XAU/USD
+              </button>
+              <div className="flex-1" />
+              <button
+                onClick={() => navigate(activeAsset === 'BTC' ? '/phan-tich/btc' : '/phan-tich/xau')}
+                className="text-[10px] text-muted-foreground hover:text-primary transition-colors font-mono"
+              >
+                Xem chi tiết →
+              </button>
+            </div>
 
-              {/* ── BTC Column ── */}
-              <div className="space-y-2 min-w-0">
-                <div
-                  className="cursor-pointer bg-[#0b0e11] border border-white/5 rounded-md overflow-hidden flex flex-col"
-                  onClick={() => navigate('/phan-tich/btc')}
-                  title="Nhấp để xem chi tiết BTC/USDT"
-                  ref={btcChartRef}
-                >
-                  {btcData.loading ? (
-                    <div className="flex items-center justify-center h-[300px]">
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                        <span className="text-xs text-muted-foreground font-mono">Loading BTC/USDT...</span>
+            {/* Single chart panel */}
+            <div className="space-y-2 min-w-0">
+              {activeAsset === 'BTC' ? (
+                <>
+                  <div
+                    className="bg-[#0b0e11] border border-white/5 rounded-md overflow-hidden flex flex-col"
+                    ref={btcChartRef}
+                  >
+                    {btcData.loading ? (
+                      <div className="flex items-center justify-center h-[440px]">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                          <span className="text-xs text-muted-foreground font-mono">Loading BTC/USDT...</span>
+                        </div>
                       </div>
-                    </div>
-                  ) : btcData.error ? (
-                    <div className="flex items-center justify-center h-[300px]">
-                      <span className="text-destructive text-sm">⚠️ {btcData.error}</span>
-                    </div>
-                  ) : (
-                    <>
-                      <TradingChart
-                        key={`btc-${btcTimeframe}`}
-                        candles={btcData.candles}
-                        indicators={btcData.indicators}
-                        zones={btcData.zones}
-                        trendline={btcTrendlines.support}
-                        trendlineResistance={btcTrendlines.resistance}
-                        enabledIndicators={ENABLED_INDICATORS}
-                        height={280}
-                        label="₿ BTC/USDT · Binance"
-                        scanning={scanning}
-                        scanLabel={scanLabel}
-                        timeframe={btcTimeframe}
-                        onTimeframeChange={setBtcTimeframe}
-                      />
-                      <div onClick={(e) => e.stopPropagation()}>
+                    ) : btcData.error ? (
+                      <div className="flex items-center justify-center h-[440px]">
+                        <span className="text-destructive text-sm">⚠️ {btcData.error}</span>
+                      </div>
+                    ) : (
+                      <>
+                        <TradingChart
+                          key={`btc-${btcTimeframe}`}
+                          candles={btcData.candles}
+                          indicators={btcData.indicators}
+                          zones={btcData.zones}
+                          trendline={btcTrendlines.support}
+                          trendlineResistance={btcTrendlines.resistance}
+                          enabledIndicators={ENABLED_INDICATORS}
+                          height={440}
+                          label="₿ BTC/USDT · Binance"
+                          scanning={scanning}
+                          scanLabel={scanLabel}
+                          timeframe={btcTimeframe}
+                          onTimeframeChange={setBtcTimeframe}
+                        />
                         <ChartPeriodBar
                           activeTf={btcTimeframe}
                           onSelect={(tf) => setBtcTimeframe(tf)}
                           rightLabel={new Date().toUTCString().slice(17, 25) + ' UTC'}
                         />
+                      </>
+                    )}
+                  </div>
+                  <AIActionCard ai={btcAI} symbol="₿ BTC/USDT" />
+                </>
+              ) : (
+                <>
+                  <div
+                    className="bg-[#0b0e11] border border-white/5 rounded-md overflow-hidden flex flex-col"
+                    ref={goldChartRef}
+                  >
+                    {goldData.loading ? (
+                      <div className="flex items-center justify-center h-[440px]">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                          <span className="text-xs text-muted-foreground font-mono">Loading XAU/USD...</span>
+                        </div>
                       </div>
-                    </>
-                  )}
-                </div>
-                <AIActionCard ai={btcAI} symbol="₿ BTC/USDT" />
-              </div>
-
-              {/* ── GOLD Column ── */}
-              <div className="space-y-2 min-w-0">
-                <div
-                  className="cursor-pointer bg-[#0b0e11] border border-white/5 rounded-md overflow-hidden flex flex-col"
-                  onClick={() => navigate('/phan-tich/xau')}
-                  title="Nhấp để xem chi tiết XAU/USD"
-                  ref={goldChartRef}
-                >
-                  {goldData.loading ? (
-                    <div className="flex items-center justify-center h-[300px]">
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
-                        <span className="text-xs text-muted-foreground font-mono">Loading XAU/USD...</span>
+                    ) : goldData.error ? (
+                      <div className="flex items-center justify-center h-[440px]">
+                        <span className="text-destructive text-sm">⚠️ {goldData.error}</span>
                       </div>
-                    </div>
-                  ) : goldData.error ? (
-                    <div className="flex items-center justify-center h-[300px]">
-                      <span className="text-destructive text-sm">⚠️ {goldData.error}</span>
-                    </div>
-                  ) : (
-                    <>
-                      <TradingChart
-                        key={`gold-${goldTimeframe}`}
-                        candles={goldData.candles}
-                        indicators={goldData.indicators}
-                        zones={goldData.zones}
-                        trendline={goldTrendlines.support}
-                        trendlineResistance={goldTrendlines.resistance}
-                        enabledIndicators={ENABLED_INDICATORS}
-                        height={280}
-                        label="🥇 XAU/USD (Gold)"
-                        scanning={scanning}
-                        scanLabel={scanLabel}
-                        timeframe={goldTimeframe}
-                        onTimeframeChange={setGoldTimeframe}
-                      />
-                      <div onClick={(e) => e.stopPropagation()}>
+                    ) : (
+                      <>
+                        <TradingChart
+                          key={`gold-${goldTimeframe}`}
+                          candles={goldData.candles}
+                          indicators={goldData.indicators}
+                          zones={goldData.zones}
+                          trendline={goldTrendlines.support}
+                          trendlineResistance={goldTrendlines.resistance}
+                          enabledIndicators={ENABLED_INDICATORS}
+                          height={440}
+                          label="🥇 XAU/USD (Gold)"
+                          scanning={scanning}
+                          scanLabel={scanLabel}
+                          timeframe={goldTimeframe}
+                          onTimeframeChange={setGoldTimeframe}
+                        />
                         <ChartPeriodBar
                           activeTf={goldTimeframe}
                           onSelect={(tf) => setGoldTimeframe(tf)}
                           rightLabel={new Date().toUTCString().slice(17, 25) + ' UTC'}
                         />
-                      </div>
-                    </>
-                  )}
-                </div>
-                <AIActionCard ai={goldAI} symbol="🥇 XAU/USD" isGold />
-              </div>
+                      </>
+                    )}
+                  </div>
+                  <AIActionCard ai={goldAI} symbol="🥇 XAU/USD" isGold />
+                </>
+              )}
             </div>
 
             {/* ── AI MARKET COMMENTARY ── */}
