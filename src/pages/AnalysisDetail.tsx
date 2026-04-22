@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import ChartWatchlist from '@/components/analysis/ChartWatchlist';
 import ChartPeriodBar from '@/components/analysis/ChartPeriodBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -176,8 +175,8 @@ const AnalysisDetail: React.FC = () => {
                 <span className="text-destructive text-sm">⚠️ {data.error}</span>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-2">
-                <div className="bg-[#0b0e11] border border-white/5 rounded-md overflow-hidden flex flex-col min-w-0">
+              <div className="bg-[#0b0e11] border border-white/5 rounded-md overflow-hidden flex flex-col min-w-0">
+                <div className="flex flex-col">
                   <TradingChart
                     key={`${config.pair}-${timeframe}`}
                     candles={data.candles}

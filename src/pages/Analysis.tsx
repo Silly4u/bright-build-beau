@@ -4,7 +4,6 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TradingChart from '@/components/indicators/TradingChart';
 import SignalFeed from '@/components/indicators/SignalFeed';
-import ChartWatchlist from '@/components/analysis/ChartWatchlist';
 import ChartPeriodBar from '@/components/analysis/ChartPeriodBar';
 import { useMarketData, useSignals } from '@/hooks/useMarketData';
 import { useSmartSignals } from '@/hooks/useSmartSignal';
@@ -397,7 +396,7 @@ const Analysis: React.FC = () => {
           {/* ── LEFT: Charts + Commentary ── */}
           <div className="space-y-3 min-w-0">
             {/* Charts grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_220px] gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
 
               {/* ── BTC Column ── */}
               <div className="space-y-2 min-w-0">
@@ -496,15 +495,6 @@ const Analysis: React.FC = () => {
                 </div>
                 <AIActionCard ai={goldAI} symbol="🥇 XAU/USD" isGold />
               </div>
-
-              {/* ── Watchlist Column ── */}
-              <ChartWatchlist
-                onSelect={(pair) => {
-                  if (pair === 'BTC/USDT') navigate('/phan-tich/btc');
-                  else if (pair === 'XAU/USDT') navigate('/phan-tich/xau');
-                }}
-                className="h-[360px] lg:h-auto lg:max-h-[340px]"
-              />
             </div>
 
             {/* ── AI MARKET COMMENTARY ── */}
