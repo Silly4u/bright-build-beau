@@ -146,12 +146,14 @@ const Analysis: React.FC = () => {
     }
   }, [btcAI, goldAI, btcPrice, goldPrice, dxy.value, dxy.changePercent, btcTimeframe, goldTimeframe, commentaryLoading]);
 
-  // Auto-fetch commentary when AI points are ready & no existing commentary
+  // Auto-fetch commentary when AI points are ready.
+  // Re-fetch if any asset is missing its commentary once its AI data arrives.
   useEffect(() => {
-    if ((btcAI || goldAI) && !btcCommentary && !xauCommentary && !commentaryLoading && !commentaryFailed) {
-      fetchCommentary();
-    }
-  }, [btcAI, goldAI]);
+    if (commentaryLoading || commentaryFailed) return;
+    const btcMissing = !!btcAI && !btcCommentary;
+    const goldMissing = !!goldAI && !xauCommentary;
+    if (btcMissing || goldMissing) fetchCommentary();
+  }, [btcAI, goldAI, btcCommentary, xauCommentary]);
 
   // ── Load history ──
   const loadHistory = useCallback(async () => {
