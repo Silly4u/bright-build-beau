@@ -822,6 +822,13 @@ Deno.serve(async (req) => {
       return handleSignals(req.method, ctx);
     case "events":
       return handleEvents(req.method, ctx);
+    case "commentaries":
+      return handleCommentaries(req.method, ctx);
+    case "setups":
+      return handleSetups(req.method, ctx);
+    case "trigger-commentary":
+      if (req.method !== "POST") return error("POST only", 405);
+      return handleTriggerCommentary();
     case "users":
       return handleUsers(req.method, ctx);
     case "context":
@@ -841,19 +848,23 @@ Deno.serve(async (req) => {
     default:
       return json({
         endpoints: {
-          "GET/POST/PUT/DELETE /news": "Quản lý tin tức (?id=...&limit=...&offset=...)",
+          "GET/POST/PUT/DELETE /news": "Tin tức (?id=...&limit=...&offset=...)",
           "GET/POST /signals": "Tín hiệu trading (?symbol=...&limit=...)",
           "GET/POST/PUT/DELETE /events": "Sự kiện kinh tế (?impact=...&id=...)",
+          "GET/POST/PUT/DELETE /commentaries": "Nhận định BTC/XAU (?asset=BTC|XAU&date=YYYY-MM-DD&id=...)",
+          "GET/POST/PUT/DELETE /setups": "Daily setups (?asset=...&date=...&id=...)",
+          "POST /trigger-commentary": "Chạy lại bài nhận định sáng ngay",
           "GET/PUT /users": "Profiles (?user_id=...&limit=...)",
           "POST /users?action=assign_role": "Gán role {user_id, role}",
           "DELETE /users?action=remove_role": "Xoá role {user_id, role}",
-          "GET /context": "App context: signals, news, events, stats, user info",
+          "GET /context": "App context: signals, news, events, stats",
           "POST /review": "Review content {resource, id?, data?, mode}",
           "POST /preview-edit": "Preview changes {resource, id?, changes}",
           "POST /apply-edit": "Apply changes {resource, id, changes}",
           "GET /health": "Health check",
         },
-        auth: "Header x-agent-key hoặc Authorization: Bearer <admin_jwt>",
+        auth: "Header x-agent-key: <AGENT_API_KEY> (hoặc Authorization: Bearer <admin_jwt>)",
+        base_url: "https://epcvcvpplnmmlaxrzcby.supabase.co/functions/v1/agent-api",
       });
   }
 });
