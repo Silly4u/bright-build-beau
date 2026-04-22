@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import ChartWatchlist from '@/components/analysis/ChartWatchlist';
 import ChartPeriodBar from '@/components/analysis/ChartPeriodBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -176,33 +175,26 @@ const AnalysisDetail: React.FC = () => {
                 <span className="text-destructive text-sm">⚠️ {data.error}</span>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-2">
-                <div className="bg-[#0b0e11] border border-white/5 rounded-md overflow-hidden flex flex-col min-w-0">
-                  <TradingChart
-                    key={`${config.pair}-${timeframe}`}
-                    candles={data.candles}
-                    indicators={data.indicators}
-                    zones={data.zones}
-                    trendline={trendlines.support}
-                    trendlineResistance={trendlines.resistance}
-                    enabledIndicators={ENABLED_INDICATORS}
-                    height={500}
-                    label={config.label}
-                    scanning={scanning}
-                    scanLabel={scanLabel}
-                    timeframe={timeframe}
-                    onTimeframeChange={setTimeframe}
-                  />
-                  <ChartPeriodBar
-                    activeTf={timeframe}
-                    onSelect={(tf) => setTimeframe(tf)}
-                    rightLabel={new Date().toUTCString().slice(17, 25) + ' UTC'}
-                  />
-                </div>
-                <ChartWatchlist
-                  activePair={config.pair}
-                  onSelect={handleWatchlistSelect}
-                  className="h-[540px]"
+              <div className="bg-[#0b0e11] border border-white/5 rounded-md overflow-hidden flex flex-col min-w-0">
+                <TradingChart
+                  key={`${config.pair}-${timeframe}`}
+                  candles={data.candles}
+                  indicators={data.indicators}
+                  zones={data.zones}
+                  trendline={trendlines.support}
+                  trendlineResistance={trendlines.resistance}
+                  enabledIndicators={ENABLED_INDICATORS}
+                  height={500}
+                  label={config.label}
+                  scanning={scanning}
+                  scanLabel={scanLabel}
+                  timeframe={timeframe}
+                  onTimeframeChange={setTimeframe}
+                />
+                <ChartPeriodBar
+                  activeTf={timeframe}
+                  onSelect={(tf) => setTimeframe(tf)}
+                  rightLabel={new Date().toUTCString().slice(17, 25) + ' UTC'}
                 />
               </div>
             )}
