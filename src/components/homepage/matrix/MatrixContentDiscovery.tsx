@@ -1,7 +1,74 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowRight, Calendar, Newspaper, ChevronDown } from 'lucide-react';
+import { ArrowRight, Calendar, Newspaper, ChevronDown, AlertCircle } from 'lucide-react';
+
+const Stars: React.FC<{ count: number }> = ({ count }) => (
+  <span className="inline-flex gap-px" aria-label={`${count} sao`}>
+    {[1, 2, 3].map(i => (
+      <span key={i} className={`text-[10px] leading-none ${i <= count ? (count === 3 ? 'text-neon-red' : 'text-yellow-400') : 'text-white/15'}`}>★</span>
+    ))}
+  </span>
+);
+
+function useCountdown(target: string): { label: string; soon: boolean; live: boolean; past: boolean } {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const diff = new Date(target).getTime() - now;
+  if (diff <= -30 * 60 * 1000) return { label: 'đã ra', soon: false, live: false, past: true };
+  if (diff <= 0) return { label: 'ĐANG DIỄN RA', soon: true, live: true, past: false };
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  const label = h > 0 ? `${h}g ${m}p` : m > 0 ? `${m}p ${s}s` : `${s}s`;
+  return { label, soon: diff <= 30 * 60 * 1000, live: false, past: false };
+}
+
+const EventRow: React.FC<{ ev: EconEvent; isLast: boolean }> = ({ ev, isLast }) => {
+  const t = new Date(ev.event_time);
+  const timeStr = t.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  const dateStr = t.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+  const stars = ev.impact === 'high' ? 3 : 2;
+  const cd = useCountdown(ev.event_time);
+
+  return (
+    <Link
+      to="/lich-kinh-te"
+      className={`block p-3 hover:bg-white/5 transition-colors relative ${isLast ? '' : 'border-b border-white/5'} ${cd.live ? 'bg-neon-red/10' : cd.soon ? 'bg-yellow-400/[0.04]' : ''}`}
+    >
+      {cd.soon && !cd.past && (
+        <span className="absolute left-0 top-0 bottom-0 w-[2px] bg-neon-red animate-pulse" />
+      )}
+      <div className="flex justify-between items-start gap-2 mb-1">
+        <span className="font-mono text-[10px] text-muted-foreground">
+          {timeStr} • {dateStr}
+        </span>
+        <div className="flex items-center gap-1.5">
+          {cd.soon && !cd.past && (
+            <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase font-bold text-neon-red">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-red opacity-75" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-neon-red" />
+              </span>
+              {cd.label}
+            </span>
+          )}
+          {!cd.soon && !cd.past && (
+            <span className="font-mono text-[9px] text-muted-foreground/60">{cd.label}</span>
+          )}
+          <Stars count={stars} />
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-base">{ev.flag}</span>
+        <span className={`text-sm line-clamp-2 leading-tight ${cd.past ? 'text-muted-foreground/60' : 'text-foreground'}`}>{ev.event_name}</span>
+      </div>
+    </Link>
+  );
+};
 
 interface NewsItem {
   id: string;
@@ -155,33 +222,9 @@ const MatrixContentDiscovery: React.FC = () => {
               [...Array(3)].map((_, i) => (
                 <div key={i} className="h-16 bg-white/5 animate-pulse border-b border-white/5" />
               ))}
-            {events.map((e, i) => {
-              const t = new Date(e.event_time);
-              const timeStr = t.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-              const dateStr = t.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
-              const impactColor =
-                e.impact === 'high' ? 'text-neon-red border-neon-red/30 bg-neon-red/5' : 'text-cyan-brand border-cyan-brand/30 bg-cyan-brand/5';
-              return (
-                <Link
-                  key={e.id}
-                  to="/lich-kinh-te"
-                  className={`block p-3 hover:bg-white/5 transition-colors ${i < events.length - 1 ? 'border-b border-white/5' : ''}`}
-                >
-                  <div className="flex justify-between items-start gap-2 mb-1">
-                    <span className="font-mono text-[10px] text-muted-foreground">
-                      {timeStr} • {dateStr}
-                    </span>
-                    <span className={`font-mono text-[9px] uppercase border px-1.5 py-0.5 ${impactColor}`}>
-                      {e.impact}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">{e.flag}</span>
-                    <span className="text-sm text-foreground line-clamp-2 leading-tight">{e.event_name}</span>
-                  </div>
-                </Link>
-              );
-            })}
+            {events.map((e, i) => (
+              <EventRow key={e.id} ev={e} isLast={i === events.length - 1} />
+            ))}
           </div>
         </div>
       </div>
