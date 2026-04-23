@@ -29,7 +29,13 @@ const ENABLED_INDICATORS = ['bb_squeeze', 'breakout', 'breakdown', 'confluence',
 
 const Analysis: React.FC = () => {
   const navigate = useNavigate();
-  const [activeAsset, setActiveAsset] = useState<'BTC' | 'XAU'>('BTC');
+  // Read ?asset=BTC|XAU from URL so screenshot service / deep-links open the right tab.
+  const initialAsset = ((): 'BTC' | 'XAU' => {
+    if (typeof window === 'undefined') return 'BTC';
+    const p = new URLSearchParams(window.location.search).get('asset')?.toUpperCase();
+    return p === 'XAU' ? 'XAU' : 'BTC';
+  })();
+  const [activeAsset, setActiveAsset] = useState<'BTC' | 'XAU'>(initialAsset);
   const [btcTimeframe, setBtcTimeframe] = useState('H4');
   const [goldTimeframe, setGoldTimeframe] = useState('H4');
   const [logs, setLogs] = useState<string[]>([]);
