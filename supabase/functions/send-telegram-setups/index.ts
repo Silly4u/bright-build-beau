@@ -53,62 +53,86 @@ function formatAssetCaption(setup: any, dateDisplay: string): string {
 }
 
 /**
- * Build a Microlink.io screenshot URL that captures the live /phan-tich page
- * with the right asset tab pre-selected via ?asset=XAU|BTC.
- * Microlink: free 1000 req/day, no API key needed for basic screenshots.
+ * Call Microlink to capture ONLY the chart container, return the screenshot URL on Microlink CDN.
+ * Returns null on failure.
  */
-function buildChartScreenshotUrl(asset: string): string {
+async function fetchChartScreenshotUrl(asset: string): Promise<string | null> {
   const target = `${SITE_BASE}/phan-tich?asset=${asset}`;
+  const elementId = asset === "XAU" ? "#chart-xau" : "#chart-btc";
   const params = new URLSearchParams({
     url: target,
     screenshot: "true",
     meta: "false",
-    embed: "screenshot.url",
+    element: elementId,
     "viewport.width": "1440",
     "viewport.height": "900",
     "viewport.deviceScaleFactor": "2",
-    waitForTimeout: "6000", // allow chart + indicators to render
+    waitForSelector: elementId,
+    waitForTimeout: "8000",
     overlay: "false",
   });
-  return `https://api.microlink.io/?${params.toString()}`;
+  const apiUrl = `https://api.microlink.io/?${params.toString()}`;
+
+  try {
+    const res = await fetch(apiUrl);
+    const json = await res.json();
+    if (json?.status !== "success" || !json?.data?.screenshot?.url) {
+      console.error(`[${asset}] Microlink returned no screenshot:`, JSON.stringify(json).slice(0, 500));
+      return null;
+    }
+    return json.data.screenshot.url as string;
+  } catch (e: any) {
+    console.error(`[${asset}] Microlink fetch error:`, e.message);
+    return null;
+  }
 }
 
-/** Send one Telegram photo with caption. Returns message_id. */
+/**
+ * Download the screenshot bytes ourselves and upload to Telegram via multipart/form-data.
+ * Telegram-by-URL fails for Microlink CDN (slow/redirected), so server-side upload is required.
+ */
 async function sendTelegramPhoto(asset: string, caption: string): Promise<number> {
-  const photoUrl = buildChartScreenshotUrl(asset);
-  console.log(`[${asset}] Photo URL: ${photoUrl}`);
+  const screenshotUrl = await fetchChartScreenshotUrl(asset);
+  console.log(`[${asset}] Screenshot URL:`, screenshotUrl);
 
-  const res = await fetch(`${TG_API}/sendPhoto`, {
+  if (screenshotUrl) {
+    try {
+      const imgRes = await fetch(screenshotUrl);
+      if (!imgRes.ok) throw new Error(`Image download failed: ${imgRes.status}`);
+      const imgBlob = await imgRes.blob();
+
+      const form = new FormData();
+      form.append("chat_id", TELEGRAM_CHAT_ID);
+      form.append("caption", caption);
+      form.append("parse_mode", "HTML");
+      form.append("photo", imgBlob, `${asset.toLowerCase()}-chart.png`);
+
+      const tgRes = await fetch(`${TG_API}/sendPhoto`, { method: "POST", body: form });
+      const tgData = await tgRes.json();
+      if (tgRes.ok && tgData.ok) {
+        return tgData.result.message_id;
+      }
+      console.error(`[${asset}] sendPhoto multipart failed:`, JSON.stringify(tgData));
+    } catch (e: any) {
+      console.error(`[${asset}] Photo upload error:`, e.message);
+    }
+  }
+
+  // Fallback: text-only message
+  console.log(`[${asset}] Falling back to text message`);
+  const msgRes = await fetch(`${TG_API}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       chat_id: TELEGRAM_CHAT_ID,
-      photo: photoUrl,
-      caption,
+      text: caption,
       parse_mode: "HTML",
+      disable_web_page_preview: true,
     }),
   });
-
-  const data = await res.json();
-  if (!res.ok || !data.ok) {
-    // Fallback: send as plain text if photo upload fails (e.g. Microlink slow / 429)
-    console.error(`[${asset}] sendPhoto failed, falling back to sendMessage:`, JSON.stringify(data));
-    const msgRes = await fetch(`${TG_API}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: caption,
-        parse_mode: "HTML",
-        disable_web_page_preview: true,
-      }),
-    });
-    const msgData = await msgRes.json();
-    if (!msgRes.ok) throw new Error(`Telegram error: ${JSON.stringify(msgData)}`);
-    return msgData.result?.message_id;
-  }
-
-  return data.result?.message_id;
+  const msgData = await msgRes.json();
+  if (!msgRes.ok) throw new Error(`Telegram error: ${JSON.stringify(msgData)}`);
+  return msgData.result?.message_id;
 }
 
 Deno.serve(async (req) => {

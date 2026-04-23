@@ -440,6 +440,8 @@ const Analysis: React.FC = () => {
               {activeAsset === 'BTC' ? (
                 <>
                   <div
+                    id="chart-btc"
+                    data-screenshot-target="btc"
                     className="bg-[#0b0e11] border border-white/5 rounded-md overflow-hidden flex flex-col"
                     ref={btcChartRef}
                   >
@@ -484,6 +486,8 @@ const Analysis: React.FC = () => {
               ) : (
                 <>
                   <div
+                    id="chart-xau"
+                    data-screenshot-target="xau"
                     className="bg-[#0b0e11] border border-white/5 rounded-md overflow-hidden flex flex-col"
                     ref={goldChartRef}
                   >
