@@ -14,8 +14,36 @@ const DATE_FILTERS = [
   { label: 'Hôm nay', value: 'today' },
   { label: 'Ngày mai', value: 'tomorrow' },
   { label: 'Tuần này', value: 'week' },
-  { label: 'Tuần sau', value: 'nextweek' },
 ];
+
+// Trả về ngày VN (GMT+7) dạng "YYYY-MM-DD" cho một mốc thời gian bất kỳ
+function vnDateKey(d: Date): string {
+  const vn = new Date(d.getTime() + 7 * 3600 * 1000);
+  return `${vn.getUTCFullYear()}-${String(vn.getUTCMonth() + 1).padStart(2, '0')}-${String(vn.getUTCDate()).padStart(2, '0')}`;
+}
+
+// Trả về key ngày VN cộng/trừ N ngày so với "hôm nay" theo giờ VN
+function vnDateKeyOffset(base: Date, offsetDays: number): string {
+  const vn = new Date(base.getTime() + 7 * 3600 * 1000);
+  vn.setUTCDate(vn.getUTCDate() + offsetDays);
+  return `${vn.getUTCFullYear()}-${String(vn.getUTCMonth() + 1).padStart(2, '0')}-${String(vn.getUTCDate()).padStart(2, '0')}`;
+}
+
+// Tuần này theo giờ VN: từ Thứ 2 đến Chủ Nhật, trả về mảng 7 keys "YYYY-MM-DD"
+function vnWeekKeys(base: Date): string[] {
+  const vn = new Date(base.getTime() + 7 * 3600 * 1000);
+  // getUTCDay: 0=CN..6=T7. Đưa về Thứ 2 = đầu tuần
+  const day = vn.getUTCDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  vn.setUTCDate(vn.getUTCDate() + diffToMonday);
+  const keys: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(vn);
+    d.setUTCDate(vn.getUTCDate() + i);
+    keys.push(`${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`);
+  }
+  return keys;
+}
 
 function formatEventTime(timeStr: string): { date: string; time: string; fullDate: string } {
   const d = new Date(timeStr);
@@ -84,29 +112,19 @@ const EconomicCalendar: React.FC = () => {
   };
 
   const now = new Date();
+  const todayKey = vnDateKeyOffset(now, 0);
+  const yesterdayKey = vnDateKeyOffset(now, -1);
+  const tomorrowKey = vnDateKeyOffset(now, 1);
+  const weekKeys = vnWeekKeys(now);
+
   const filteredEvents = events.filter(ev => {
     if (!impactFilter.includes(ev.impact)) return false;
     if (searchQuery && !ev.event_name.toLowerCase().includes(searchQuery.toLowerCase()) && !ev.country.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    const evDate = new Date(ev.event_time);
-    if (dateFilter === 'yesterday') {
-      const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
-      return evDate.toDateString() === yesterday.toDateString();
-    }
-    if (dateFilter === 'today') return evDate.toDateString() === now.toDateString();
-    if (dateFilter === 'tomorrow') {
-      const tomorrow = new Date(now); tomorrow.setDate(now.getDate() + 1);
-      return evDate.toDateString() === tomorrow.toDateString();
-    }
-    if (dateFilter === 'week') {
-      const start = new Date(now); start.setDate(now.getDate() - now.getDay() + 1); start.setHours(0,0,0,0);
-      const end = new Date(start); end.setDate(start.getDate() + 6); end.setHours(23,59,59,999);
-      return evDate >= start && evDate <= end;
-    }
-    if (dateFilter === 'nextweek') {
-      const start = new Date(now); start.setDate(now.getDate() - now.getDay() + 8); start.setHours(0,0,0,0);
-      const end = new Date(start); end.setDate(start.getDate() + 6); end.setHours(23,59,59,999);
-      return evDate >= start && evDate <= end;
-    }
+    const evKey = vnDateKey(new Date(ev.event_time));
+    if (dateFilter === 'yesterday') return evKey === yesterdayKey;
+    if (dateFilter === 'today') return evKey === todayKey;
+    if (dateFilter === 'tomorrow') return evKey === tomorrowKey;
+    if (dateFilter === 'week') return weekKeys.includes(evKey);
     return true;
   });
 
