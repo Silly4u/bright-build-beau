@@ -50,6 +50,7 @@ const PAIRS = [
 const TIMEFRAMES = ['M15', 'H1', 'H4', 'D1'];
 
 const DEFAULT_INDICATORS: IndicatorConfig[] = [
+  { id: 'bb_squeeze', label: 'Bollinger Bands', enabled: true, color: '#26A69A', category: 'Volatility', note: 'BB(20,2) — dải trên/dưới + đường giữa SMA20.' },
   { id: 'matrix', label: 'Matrix NWE', enabled: false, color: '#00BCD4', category: 'Envelope' },
   { id: 'engine', label: 'MS Engine', enabled: false, color: '#FF9800', category: 'Structure' },
   { id: 'tp_sl', label: 'TP/SL Zones', enabled: false, color: '#E91E63', category: 'Risk' },
