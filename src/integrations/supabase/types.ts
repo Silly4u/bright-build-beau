@@ -128,6 +128,42 @@ export type Database = {
         }
         Relationships: []
       }
+      indicator_alerts: {
+        Row: {
+          channels: string[]
+          created_at: string
+          id: string
+          is_active: boolean
+          last_fired_at: string | null
+          pair: string
+          timeframe: string
+          trigger_type: string
+          user_id: string
+        }
+        Insert: {
+          channels?: string[]
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_fired_at?: string | null
+          pair: string
+          timeframe: string
+          trigger_type: string
+          user_id: string
+        }
+        Update: {
+          channels?: string[]
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_fired_at?: string | null
+          pair?: string
+          timeframe?: string
+          trigger_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       indicator_permissions: {
         Row: {
           created_at: string
@@ -148,6 +184,42 @@ export type Database = {
           granted_by?: string | null
           id?: string
           indicator_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      indicator_presets: {
+        Row: {
+          created_at: string
+          enabled_indicators: string[]
+          id: string
+          is_default: boolean
+          name: string
+          pair: string
+          timeframe: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled_indicators?: string[]
+          id?: string
+          is_default?: boolean
+          name: string
+          pair: string
+          timeframe: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled_indicators?: string[]
+          id?: string
+          is_default?: boolean
+          name?: string
+          pair?: string
+          timeframe?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
