@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useSignals } from '@/hooks/useMarketData';
 
 const MatrixSignalStream: React.FC = () => {
