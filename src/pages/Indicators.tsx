@@ -255,11 +255,11 @@ const Indicators: React.FC = () => {
 
           <div className="w-px h-5 bg-[#2b3139]" />
 
-          {/* Timeframe */}
+          {/* Timeframe — quick buttons + full dropdown (TradingView-style) */}
           <div className="flex items-center gap-1">
             {TIMEFRAMES.map(tf => (
               <button key={tf} onClick={() => setActiveTimeframe(tf)}
-                className={`px-2.5 py-1.5 rounded font-mono font-bold text-[11px] transition-all ${
+                className={`hidden sm:inline-flex px-2.5 py-1.5 rounded font-mono font-bold text-[11px] transition-all ${
                   activeTimeframe === tf
                     ? 'bg-[#fcd535]/10 text-[#fcd535]'
                     : 'text-[#848e9c] hover:text-[#eaecef] hover:bg-[#2b3139]'
@@ -267,6 +267,7 @@ const Indicators: React.FC = () => {
                 {tf}
               </button>
             ))}
+            <TimeframeSelector activeTf={activeTimeframe} onSelect={setActiveTimeframe} />
           </div>
 
           <div className="w-px h-5 bg-[#2b3139] hidden md:block" />
