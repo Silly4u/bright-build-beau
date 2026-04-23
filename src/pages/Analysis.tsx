@@ -391,7 +391,8 @@ const Analysis: React.FC = () => {
 
           <div className="flex-1" />
 
-          {/* Scan + Screenshot */}
+          {/* Streak + Scan + Screenshot */}
+          <StreakBadge />
           <button onClick={triggerScan}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-primary border border-primary/20 hover:bg-primary/10 transition-all text-[10px] font-bold">
             🔄 Phân tích lại
@@ -400,6 +401,11 @@ const Analysis: React.FC = () => {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all">
             📸
           </button>
+        </div>
+
+        {/* ── MORNING BRIEF BANNER ── */}
+        <div className="mt-3">
+          <MorningBriefBanner />
         </div>
       </div>
 
