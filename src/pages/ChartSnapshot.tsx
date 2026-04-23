@@ -67,7 +67,7 @@ const ChartSnapshot: React.FC = () => {
           candles={data.candles}
           indicators={data.indicators}
           zones={data.zones}
-          signals={signals.map((s) => ({ time: s.time, type: s.type === 'sell' ? 'sell' : 'buy' }))}
+          signals={signals.map((s: any) => ({ time: Number(s.time), type: s.type === 'sell' ? 'sell' as const : 'buy' as const }))}
           enabledIndicators={ENABLED_INDICATORS}
           height={620}
           label={label}
