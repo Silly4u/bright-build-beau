@@ -391,7 +391,8 @@ const Analysis: React.FC = () => {
 
           <div className="flex-1" />
 
-          {/* Scan + Screenshot */}
+          {/* Streak + Scan + Screenshot */}
+          <StreakBadge />
           <button onClick={triggerScan}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-primary border border-primary/20 hover:bg-primary/10 transition-all text-[10px] font-bold">
             🔄 Phân tích lại
@@ -400,6 +401,11 @@ const Analysis: React.FC = () => {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-all">
             📸
           </button>
+        </div>
+
+        {/* ── MORNING BRIEF BANNER ── */}
+        <div className="mt-3">
+          <MorningBriefBanner />
         </div>
       </div>
 
@@ -645,10 +651,25 @@ const Analysis: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* ── POSITION CALC + TRADE JOURNAL ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              <PositionCalculator />
+              <TradeJournal />
+            </div>
           </div>
 
-          {/* ── RIGHT SIDEBAR: Signal Feed + System Log ── */}
+          {/* ── RIGHT SIDEBAR: Watchlist + Events + Alerts + Signal Feed ── */}
           <div className="space-y-3">
+            {/* Watchlist */}
+            <Watchlist />
+
+            {/* Event Reminders */}
+            <EventReminders />
+
+            {/* Price Alerts */}
+            <PriceAlerts />
+
             {/* Signal Feed */}
             <div className="glass-card rounded-xl border border-foreground/5 overflow-hidden">
               <div className="px-3 py-2 border-b border-foreground/5 flex items-center justify-between">
