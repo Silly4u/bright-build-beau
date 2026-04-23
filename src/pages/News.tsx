@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Link } from 'react-router-dom';
 import { useNewsData } from '@/hooks/useNewsData';
+import { useBookmarks, useReadHistory } from '@/hooks/useNewsLocal';
+import NewsSidebar from '@/components/news/NewsSidebar';
+import BookmarkButton from '@/components/news/BookmarkButton';
+import ReactionBar from '@/components/news/ReactionBar';
 
 interface NewsStream {
   id: string;
@@ -24,6 +28,8 @@ const NEWS_STREAMS: NewsStream[] = [
   { id: 'event', label: 'Sự Kiện', icon: '📅', description: 'Mainnet, Halving, xả token, Airdrop', sources: 'CoinMarketCal · CoinGecko', color: 'text-amber-400', borderColor: 'border-amber-400/40', bgColor: 'bg-amber-400/10', ctaLink: 'https://www.okx.com/join/UNCLETRADER', ctaLabel: '💰 Trade OKX -20% phí' },
   { id: 'sentiment', label: 'Tâm Lý', icon: '📊', description: 'Fear & Greed, Long/Short, thanh lý, social buzz', sources: 'Alternative.me · CoinGecko', color: 'text-emerald-400', borderColor: 'border-emerald-400/40', bgColor: 'bg-emerald-400/10', ctaLink: 'https://t.me/UNCLETRADER', ctaLabel: '📊 Phân tích Tâm Lý' },
 ];
+
+const SAVED_TAB = 'saved';
 
 const UNSPLASH_POOLS: Record<string, string[]> = {
   hot: ['photo-1518546305927-5a555bb7020d', 'photo-1639762681485-074b7f938ba0', 'photo-1622630998477-20aa696ecb05', 'photo-1605792657660-596af9009e82', 'photo-1642104704074-907c0698cbd9'],
@@ -52,14 +58,16 @@ function formatDate(dateStr: string): string {
   return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-function parseBullets(summary: string): string[] {
-  return summary.split('\n').map(l => l.trim()).filter(Boolean).map(l => l.replace(/^[•\-*]\s*/, ''));
-}
-
 const News: React.FC = () => {
   const [activeStream, setActiveStream] = useState('hot');
   const [tickerIndex, setTickerIndex] = useState(0);
-  const { articles, market, loading } = useNewsData(activeStream);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [timeFilter, setTimeFilter] = useState<'all' | '1h' | '24h' | '7d'>('all');
+  const [sourceFilter, setSourceFilter] = useState<string>('all');
+
+  const { articles, market, loading } = useNewsData(activeStream === SAVED_TAB ? 'all' : activeStream);
+  const { bookmarks } = useBookmarks();
+  const { isRead } = useReadHistory();
 
   // Ticker auto-rotate
   const hotArticles = articles.filter(a => a.stream === 'hot').slice(0, 5);
@@ -71,7 +79,46 @@ const News: React.FC = () => {
     return () => clearInterval(timer);
   }, [hotArticles.length]);
 
-  const activeStreamData = NEWS_STREAMS.find(s => s.id === activeStream);
+  // Sources for filter
+  const availableSources = useMemo(() => {
+    const set = new Set<string>();
+    articles.forEach(a => a.source && set.add(a.source));
+    return Array.from(set);
+  }, [articles]);
+
+  // Filtered articles
+  const displayedArticles = useMemo(() => {
+    let list = articles;
+
+    if (activeStream === SAVED_TAB) {
+      const ids = new Set(bookmarks.map(b => b.id));
+      list = articles.filter(a => ids.has(a.id));
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(a =>
+        a.title.toLowerCase().includes(q) ||
+        a.summary?.toLowerCase().includes(q) ||
+        a.source.toLowerCase().includes(q)
+      );
+    }
+
+    if (timeFilter !== 'all') {
+      const cutoff = Date.now() - (
+        timeFilter === '1h' ? 3600_000 :
+        timeFilter === '24h' ? 86400_000 :
+        7 * 86400_000
+      );
+      list = list.filter(a => new Date(a.published_at).getTime() >= cutoff);
+    }
+
+    if (sourceFilter !== 'all') {
+      list = list.filter(a => a.source === sourceFilter);
+    }
+
+    return list;
+  }, [articles, activeStream, bookmarks, searchQuery, timeFilter, sourceFilter]);
 
   return (
     <main className="min-h-screen bg-[#0b1120] grain-overlay">
@@ -140,8 +187,8 @@ const News: React.FC = () => {
         </div>
       </section>
 
-      {/* Stream Tabs */}
-      <section className="pb-4 px-6 lg:px-8">
+      {/* Stream Tabs + Bookmark tab */}
+      <section className="pb-3 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             {NEWS_STREAMS.map(stream => (
@@ -155,6 +202,68 @@ const News: React.FC = () => {
                 <span>{stream.label}</span>
               </button>
             ))}
+            <button
+              onClick={() => setActiveStream(SAVED_TAB)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-300 border ${
+                activeStream === SAVED_TAB
+                  ? 'bg-amber-400/10 text-amber-400 border-amber-400/40 font-bold'
+                  : 'text-muted-foreground border-transparent hover:bg-white/5'
+              }`}
+            >
+              <span>📌</span>
+              <span>Đã lưu</span>
+              {bookmarks.length > 0 && (
+                <span className="text-[10px] font-mono bg-white/10 rounded-full px-1.5 py-0.5">{bookmarks.length}</span>
+              )}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Search + Filter Bar */}
+      <section className="pb-4 px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row gap-2">
+            <div className="flex-1 relative">
+              <svg viewBox="0 0 24 24" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60 fill-none stroke-current stroke-2">
+                <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" strokeLinecap="round" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Tìm kiếm tin tức, coin, nguồn..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full bg-[#0d1526] border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-cyan-400/40 outline-none"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground text-sm"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            <select
+              value={timeFilter}
+              onChange={e => setTimeFilter(e.target.value as typeof timeFilter)}
+              className="bg-[#0d1526] border border-white/5 rounded-xl px-3 py-2.5 text-xs text-foreground focus:border-cyan-400/40 outline-none cursor-pointer"
+            >
+              <option value="all">⏱ Tất cả</option>
+              <option value="1h">1 giờ qua</option>
+              <option value="24h">24 giờ qua</option>
+              <option value="7d">7 ngày qua</option>
+            </select>
+            <select
+              value={sourceFilter}
+              onChange={e => setSourceFilter(e.target.value)}
+              className="bg-[#0d1526] border border-white/5 rounded-xl px-3 py-2.5 text-xs text-foreground focus:border-cyan-400/40 outline-none cursor-pointer"
+            >
+              <option value="all">📡 Tất cả nguồn</option>
+              {availableSources.map(src => (
+                <option key={src} value={src}>{src}</option>
+              ))}
+            </select>
           </div>
         </div>
       </section>
@@ -180,76 +289,95 @@ const News: React.FC = () => {
         </section>
       )}
 
-      {/* Article Grid */}
-      <section className="py-6 px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          {loading ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-[#0d1526] border border-white/5 rounded-2xl h-80 animate-pulse" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {articles.map(article => {
-                const stream = NEWS_STREAMS.find(s => s.id === article.stream);
-                const bullets = parseBullets(article.summary || '');
-                const imgUrl = article.image_url || getImageUrl(article.id, article.stream);
+      {/* Main Content + Sidebar */}
+      <section className="pb-12 px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+          {/* Article Grid */}
+          <div>
+            {loading ? (
+              <div className="grid md:grid-cols-2 gap-5">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="bg-[#0d1526] border border-white/5 rounded-2xl h-80 animate-pulse" />
+                ))}
+              </div>
+            ) : displayedArticles.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="text-5xl mb-4">{activeStream === SAVED_TAB ? '📌' : '📰'}</div>
+                <h3 className="font-display font-bold text-xl text-foreground mb-2">
+                  {activeStream === SAVED_TAB
+                    ? 'Chưa có tin nào được lưu'
+                    : searchQuery ? 'Không tìm thấy tin phù hợp' : 'Chưa có tin tức'}
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  {activeStream === SAVED_TAB
+                    ? 'Nhấn icon 🔖 trên các bài viết để lưu lại'
+                    : searchQuery ? 'Thử từ khoá khác hoặc bỏ bộ lọc' : 'Đang cập nhật...'}
+                </p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-5">
+                {displayedArticles.map(article => {
+                  const stream = NEWS_STREAMS.find(s => s.id === article.stream);
+                  const imgUrl = article.image_url || getImageUrl(article.id, article.stream);
+                  const read = isRead(article.id);
 
-                return (
-                  <div key={article.id} className="bg-[#0d1526] border border-white/5 rounded-2xl overflow-hidden flex flex-col hover:border-white/10 transition-all group">
-                    {/* Hero Image */}
-                    <div className="relative h-40 overflow-hidden">
-                      <img src={imgUrl} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0d1526] to-transparent" />
-                      <div className="absolute bottom-2 left-3 flex gap-1.5">
-                        {article.badge && (
-                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${article.badge_color || ''}`}>
-                            {article.badge}
+                  return (
+                    <div key={article.id} className={`bg-[#0d1526] border rounded-2xl overflow-hidden flex flex-col transition-all group relative ${
+                      read ? 'border-white/5 opacity-75' : 'border-white/5 hover:border-cyan-400/20'
+                    }`}>
+                      {/* Hero Image */}
+                      <div className="relative h-40 overflow-hidden">
+                        <img src={imgUrl} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0d1526] to-transparent" />
+                        <div className="absolute top-2 right-2">
+                          <BookmarkButton id={article.id} title={article.title} stream={article.stream} />
+                        </div>
+                        {read && (
+                          <div className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded-full bg-black/60 text-emerald-400 border border-emerald-400/30">
+                            ✓ ĐÃ ĐỌC
+                          </div>
+                        )}
+                        <div className="absolute bottom-2 left-3 flex gap-1.5">
+                          {article.badge && (
+                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${article.badge_color || ''}`}>
+                              {article.badge}
+                            </span>
+                          )}
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${stream?.borderColor} ${stream?.color} ${stream?.bgColor}`}>
+                            {article.source}
                           </span>
-                        )}
-                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${stream?.borderColor} ${stream?.color} ${stream?.bgColor}`}>
-                          {article.source}
-                        </span>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-4 flex-1 flex flex-col">
+                        <h3 className="text-sm font-semibold text-foreground line-clamp-2 leading-snug mb-1.5">
+                          {article.title}
+                        </h3>
+                        <span className="text-[10px] text-muted-foreground/60 mb-3">{formatDate(article.published_at)}</span>
+
+                        <div className="mb-3">
+                          <ReactionBar articleId={article.id} compact />
+                        </div>
+
+                        <div className="space-y-2 mt-auto">
+                          <Link to={`/tin-tuc/${article.id}?stream=${article.stream}`}
+                            className="w-full block text-center text-[11px] font-bold py-2 px-4 rounded-xl border border-white/10 text-foreground hover:border-cyan-400/40 hover:text-cyan-400 transition-all">
+                            📖 Đọc chi tiết
+                          </Link>
+                        </div>
                       </div>
                     </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
-                    {/* Content */}
-                    <div className="p-4 flex-1 flex flex-col">
-                      <h3 className="text-sm font-semibold text-foreground line-clamp-2 leading-snug mb-1.5">
-                        {article.title}
-                      </h3>
-                      <span className="text-[10px] text-muted-foreground/60 mb-3">{formatDate(article.published_at)}</span>
-
-
-
-
-                      <div className="space-y-2 mt-auto">
-                        <Link to={`/tin-tuc/${article.id}?stream=${article.stream}`}
-                          className="w-full block text-center text-[11px] font-bold py-2 px-4 rounded-xl border border-white/10 text-foreground hover:border-cyan-400/40 hover:text-cyan-400 transition-all">
-                          📖 Đọc chi tiết
-                        </Link>
-                        {stream && (
-                          <a href={stream.ctaLink} target="_blank" rel="noopener noreferrer"
-                            className={`w-full block text-center text-[10px] font-bold py-2 px-4 rounded-xl border ${stream.borderColor} ${stream.color} hover:${stream.bgColor} transition-all`}>
-                            {stream.ctaLabel}
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {!loading && articles.length === 0 && (
-            <div className="text-center py-20">
-              <div className="text-5xl mb-4">📰</div>
-              <h3 className="font-display font-bold text-xl text-foreground mb-2">Chưa có tin tức</h3>
-              <p className="text-muted-foreground">Đang cập nhật tin tức cho luồng này...</p>
-            </div>
-          )}
+          {/* Sidebar */}
+          <div className="hidden lg:block">
+            <NewsSidebar />
+          </div>
         </div>
       </section>
 
