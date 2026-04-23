@@ -17,7 +17,7 @@ const MatrixSignalStream: React.FC = () => {
           SIGNAL_STREAM
         </h3>
         <Link
-          to="/analysis"
+          to="/phan-tich"
           className="font-mono text-[10px] text-muted-foreground hover:text-uv uppercase tracking-widest"
         >
           {signals.length} TÍN HIỆU →
@@ -38,7 +38,7 @@ const MatrixSignalStream: React.FC = () => {
           return (
             <Link
               key={s.id}
-              to="/analysis"
+              to="/phan-tich"
               className={`block border-l-2 ${
                 buy ? 'border-neon-green bg-neon-green/[0.03] hover:bg-neon-green/[0.08]' : 'border-neon-red bg-neon-red/[0.03] hover:bg-neon-red/[0.08]'
               } pl-3 py-2 font-mono transition-colors`}
