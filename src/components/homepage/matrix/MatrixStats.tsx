@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Stat {
@@ -7,6 +8,7 @@ interface Stat {
   suffix: string;
   format: 'number' | 'percent';
   borderColor: string;
+  to: string;
 }
 
 function useCountUp(target: number, duration = 1500): number {
