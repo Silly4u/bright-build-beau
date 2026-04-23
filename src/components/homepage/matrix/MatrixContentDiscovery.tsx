@@ -196,9 +196,10 @@ const MatrixContentDiscovery: React.FC = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[1px] bg-white/5 p-[1px]">
           {HOW_STEPS.map((step, i) => (
-            <div
+            <Link
               key={step.num}
-              className="bg-[#0D0F16] p-6 hover:bg-[#161A26] transition-colors group relative"
+              to={step.to}
+              className="bg-[#0D0F16] p-6 hover:bg-[#161A26] transition-colors group relative block"
             >
               <div
                 className={`font-mono text-5xl font-bold mb-4 ${
@@ -207,9 +208,9 @@ const MatrixContentDiscovery: React.FC = () => {
               >
                 {step.num}
               </div>
-              <h3 className="font-bold text-foreground text-sm mb-2 tracking-wider">{step.title}</h3>
+              <h3 className="font-bold text-foreground text-sm mb-2 tracking-wider group-hover:text-cyan-brand transition-colors">{step.title}</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">{step.desc}</p>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
