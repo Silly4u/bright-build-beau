@@ -210,15 +210,22 @@ CRITICAL RULES:
 Content:
 ${markdown}`;
 
+  const parseContent = (content: string): any[] | null => {
+    try { const r = JSON.parse(content); if (Array.isArray(r)) return r; } catch { /* */ }
+    const fence = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fence) { try { return JSON.parse(fence[1].trim()); } catch { /* */ } }
+    const arr = content.match(/\[[\s\S]*\]/);
+    if (arr) { try { return JSON.parse(arr[0]); } catch { /* */ } }
+    return null;
+  };
+
+  // Try Lovable AI Gateway first
   for (const model of models) {
-    console.log(`Trying model: ${model}`);
+    console.log(`Trying model (Lovable): ${model}`);
     try {
       const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
+        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           model,
           messages: [
@@ -228,37 +235,59 @@ ${markdown}`;
           temperature: 0.05,
         }),
       });
-
       if (!res.ok) {
-        console.error(`Model ${model} failed: ${res.status} - ${await res.text()}`);
+        console.error(`Lovable ${model} failed: ${res.status} - ${await res.text()}`);
         continue;
       }
-
       const data = await res.json();
       const content = data.choices?.[0]?.message?.content || "";
-
-      let events: any[];
-      try {
-        events = JSON.parse(content);
-      } catch {
-        const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
-        if (jsonMatch) {
-          events = JSON.parse(jsonMatch[1].trim());
-        } else {
-          const arrayMatch = content.match(/\[[\s\S]*\]/);
-          if (arrayMatch) events = JSON.parse(arrayMatch[0]);
-          else { console.error(`Model ${model}: could not parse JSON`); continue; }
-        }
-      }
-
-      if (Array.isArray(events) && events.length > 0) {
-        console.log(`Model ${model} extracted ${events.length} events`);
+      const events = parseContent(content);
+      if (events && events.length > 0) {
+        console.log(`Lovable ${model} extracted ${events.length} events`);
         return events;
       }
     } catch (e) {
-      console.error(`Model ${model} error:`, e);
+      console.error(`Lovable ${model} error:`, e);
     }
   }
+
+  // ─── FALLBACK: Direct Google Gemini API ───
+  const geminiKey = Deno.env.get("GEMINI_API_KEY");
+  if (geminiKey) {
+    const geminiModels = ["gemini-2.5-flash", "gemini-2.0-flash"];
+    for (const gm of geminiModels) {
+      console.log(`Trying Gemini direct: ${gm}`);
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${gm}:generateContent?key=${geminiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+              generationConfig: { temperature: 0.05, responseMimeType: "application/json" },
+            }),
+          }
+        );
+        if (!res.ok) {
+          console.error(`Gemini ${gm} failed: ${res.status} - ${await res.text()}`);
+          continue;
+        }
+        const data = await res.json();
+        const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        const events = parseContent(content);
+        if (events && events.length > 0) {
+          console.log(`Gemini ${gm} extracted ${events.length} events`);
+          return events;
+        }
+      } catch (e) {
+        console.error(`Gemini ${gm} error:`, e);
+      }
+    }
+  } else {
+    console.warn("GEMINI_API_KEY not set, skipping direct fallback");
+  }
+
   return null;
 }
 
