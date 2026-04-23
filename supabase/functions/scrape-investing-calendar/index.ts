@@ -322,19 +322,48 @@ ${list}
 
 Respond ONLY with JSON array of {"index": number, "importance": 1|2|3} for each. No explanation.`;
 
+  // Helper: try Lovable then Gemini direct
+  const callAI = async (): Promise<string | null> => {
+    try {
+      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0,
+        }),
+      });
+      if (res.ok) {
+        const d = await res.json();
+        return d.choices?.[0]?.message?.content || null;
+      }
+      console.warn("Validate Lovable failed:", res.status);
+    } catch (e) { console.warn("Validate Lovable err:", e); }
+
+    const gKey = Deno.env.get("GEMINI_API_KEY");
+    if (!gKey) return null;
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${gKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0, responseMimeType: "application/json" },
+          }),
+        }
+      );
+      if (!res.ok) { console.warn("Validate Gemini failed:", res.status); return null; }
+      const d = await res.json();
+      return d.candidates?.[0]?.content?.parts?.[0]?.text || null;
+    } catch (e) { console.warn("Validate Gemini err:", e); return null; }
+  };
+
   try {
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0,
-      }),
-    });
-    if (!res.ok) { console.warn("Validate pass failed:", res.status); return events; }
-    const data = await res.json();
-    const content = data.choices?.[0]?.message?.content || "";
+    const content = await callAI();
+    if (!content) return events;
 
     let decisions: { index: number; importance: number }[];
     try { decisions = JSON.parse(content); }
