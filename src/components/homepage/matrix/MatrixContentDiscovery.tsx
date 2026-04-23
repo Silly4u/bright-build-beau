@@ -162,9 +162,10 @@ const MatrixContentDiscovery: React.FC = () => {
               const impactColor =
                 e.impact === 'high' ? 'text-neon-red border-neon-red/30 bg-neon-red/5' : 'text-cyan-brand border-cyan-brand/30 bg-cyan-brand/5';
               return (
-                <div
+                <Link
                   key={e.id}
-                  className={`p-3 hover:bg-white/5 transition-colors ${i < events.length - 1 ? 'border-b border-white/5' : ''}`}
+                  to="/economic-calendar"
+                  className={`block p-3 hover:bg-white/5 transition-colors ${i < events.length - 1 ? 'border-b border-white/5' : ''}`}
                 >
                   <div className="flex justify-between items-start gap-2 mb-1">
                     <span className="font-mono text-[10px] text-muted-foreground">
@@ -178,7 +179,7 @@ const MatrixContentDiscovery: React.FC = () => {
                     <span className="text-base">{e.flag}</span>
                     <span className="text-sm text-foreground line-clamp-2 leading-tight">{e.event_name}</span>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
