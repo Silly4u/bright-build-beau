@@ -16,7 +16,12 @@ const MatrixSignalStream: React.FC = () => {
           <div className="size-2 bg-uv shadow-[0_0_8px_#D926A9]" />
           SIGNAL_STREAM
         </h3>
-        <span className="font-mono text-[10px] text-muted-foreground">{signals.length} TÍN HIỆU</span>
+        <Link
+          to="/analysis"
+          className="font-mono text-[10px] text-muted-foreground hover:text-uv uppercase tracking-widest"
+        >
+          {signals.length} TÍN HIỆU →
+        </Link>
       </div>
       <div className="p-3 lg:p-4 flex flex-col gap-2 max-h-[280px] overflow-y-auto">
         {loading && [...Array(3)].map((_, i) => (
