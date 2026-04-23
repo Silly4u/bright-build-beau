@@ -12,6 +12,13 @@ import { supabase } from '@/integrations/supabase/client';
 import html2canvas from 'html2canvas';
 import { computeDualTrendlines } from '@/lib/computeTrendline';
 import { Sparkles, RefreshCw, History } from 'lucide-react';
+import MorningBriefBanner from '@/components/analysis/MorningBriefBanner';
+import StreakBadge from '@/components/analysis/StreakBadge';
+import EventReminders from '@/components/analysis/EventReminders';
+import Watchlist from '@/components/analysis/Watchlist';
+import PositionCalculator from '@/components/analysis/PositionCalculator';
+import TradeJournal from '@/components/analysis/TradeJournal';
+import PriceAlerts from '@/components/analysis/PriceAlerts';
 
 const TIMEFRAMES = ['M5', 'M15', 'M30', 'H1', 'H4', 'D1', 'W1'];
 
