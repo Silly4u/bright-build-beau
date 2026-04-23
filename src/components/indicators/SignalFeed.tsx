@@ -54,7 +54,7 @@ const SignalFeed: React.FC<SignalFeedProps> = ({ signals, loading, onSignalClick
             className={`w-full text-left p-3 rounded-lg border ${style.bg} hover:bg-white/5 transition-all group`}
           >
             <div className="flex items-center justify-between mb-1.5">
-              <span className="font-mono text-[10px] text-muted-foreground">[{time}]</span>
+              <span className="font-mono text-[10px] text-muted-foreground">[{time} • {date}]</span>
               <span className="text-[10px] font-bold text-muted-foreground/50">{signal.timeframe}</span>
             </div>
             <div className="flex items-center gap-2 mb-1.5">
