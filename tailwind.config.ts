@@ -64,6 +64,10 @@ export default {
         gold: {
           brand: "#F59E0B",
         },
+        // Matrix neon palette
+        uv: "#D926A9",
+        "neon-green": "#00FF9D",
+        "neon-red": "#FF003C",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

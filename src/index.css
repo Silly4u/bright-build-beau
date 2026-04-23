@@ -303,3 +303,19 @@ body {
 .ticker-track:hover {
   animation-play-state: paused;
 }
+
+/* ─── Matrix neon background grid ─────────────────────────── */
+.matrix-grid-bg {
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.matrix-glow-cyan {
+  background: radial-gradient(circle at center, rgba(0, 240, 255, 0.10) 0%, transparent 60%);
+  filter: blur(80px);
+}
+.matrix-glow-uv {
+  background: radial-gradient(circle at center, rgba(217, 38, 169, 0.10) 0%, transparent 60%);
+  filter: blur(80px);
+}
