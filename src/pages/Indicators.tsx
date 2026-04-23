@@ -29,6 +29,7 @@ import LayoutPresets from '@/components/indicators/LayoutPresets';
 import ShareSnapshot from '@/components/indicators/ShareSnapshot';
 import TriggerAlertsPanel from '@/components/indicators/TriggerAlertsPanel';
 import PinnedMiniCharts from '@/components/indicators/PinnedMiniCharts';
+import TimeframeSelector from '@/components/indicators/TimeframeSelector';
 import MultiChartGrid from '@/components/indicators/MultiChartGrid';
 import { computeIndicatorVotes, aggregateStrength } from '@/lib/indicatorVotes';
 import { useIndicatorTriggers, type TriggerType } from '@/hooks/useIndicatorTriggers';
