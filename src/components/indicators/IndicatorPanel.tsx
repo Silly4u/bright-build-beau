@@ -1,4 +1,5 @@
 import React from 'react';
+import IndicatorTooltip from './IndicatorTooltip';
 
 export interface IndicatorConfig {
   id: string;
