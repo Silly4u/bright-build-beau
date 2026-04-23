@@ -57,7 +57,9 @@ function formatAssetCaption(setup: any, dateDisplay: string): string {
  * Returns null on failure.
  */
 async function fetchChartScreenshotUrl(asset: string, attempt = 1): Promise<string | null> {
-  const target = `${SITE_BASE}/phan-tich?asset=${asset}`;
+  // Use the lightweight /chart-snapshot route — no header/footer/news/ticker —
+  // so Microlink can render in well under its 27s navigation timeout.
+  const target = `${SITE_BASE}/chart-snapshot?asset=${asset}&tf=H4`;
   const elementId = asset === "XAU" ? "#chart-xau" : "#chart-btc";
   const params = new URLSearchParams({
     url: target,
@@ -65,14 +67,12 @@ async function fetchChartScreenshotUrl(asset: string, attempt = 1): Promise<stri
     meta: "false",
     embed: "screenshot.url",
     element: elementId,
-    "viewport.width": "1440",
-    "viewport.height": "900",
+    "viewport.width": "1280",
+    "viewport.height": "760",
     "viewport.deviceScaleFactor": "2",
-    waitForSelector: elementId,
-    waitForTimeout: "12000",
-    waitUntil: "networkidle0",
+    waitForSelector: "#snapshot-ready",
+    waitForTimeout: "2000",
     overlay: "false",
-    timeout: "55000",
   });
   const apiUrl = `https://api.microlink.io/?${params.toString()}`;
   console.log(`[${asset}] Microlink attempt ${attempt}: ${apiUrl}`);
