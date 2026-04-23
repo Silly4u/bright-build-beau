@@ -67,8 +67,8 @@ const MatrixStats: React.FC = () => {
 
   const stats: Stat[] = [
     { label: 'NODE_USERS', value: counts.users, suffix: '', format: 'number', borderColor: 'border-cyan-brand', to: '/services' },
-    { label: 'SIGNALS_FIRED', value: counts.signals, suffix: '', format: 'number', borderColor: 'border-uv', to: '/analysis' },
-    { label: 'WIN_RATE', value: counts.winRate, suffix: '%', format: 'percent', borderColor: 'border-neon-green', to: '/analysis' },
+    { label: 'SIGNALS_FIRED', value: counts.signals, suffix: '', format: 'number', borderColor: 'border-uv', to: '/phan-tich' },
+    { label: 'WIN_RATE', value: counts.winRate, suffix: '%', format: 'percent', borderColor: 'border-neon-green', to: '/phan-tich' },
   ];
 
   return (

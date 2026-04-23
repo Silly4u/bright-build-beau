@@ -25,7 +25,7 @@ const HOW_STEPS = [
   { num: '01', title: 'ĐĂNG KÝ TÀI KHOẢN', desc: 'Tạo tài khoản miễn phí trong 30 giây. Truy cập ngay vào platform.', to: '/auth' },
   { num: '02', title: 'KẾT NỐI TELEGRAM', desc: 'Tham gia kênh VIP để nhận tín hiệu real-time và phân tích chuyên sâu.', to: '/services' },
   { num: '03', title: 'NHẬN TÍN HIỆU', desc: 'AI phân tích 24/7 và gửi setup chính xác đến bạn ngay khi cơ hội xuất hiện.', to: '/indicators' },
-  { num: '04', title: 'GIAO DỊCH AN TOÀN', desc: 'Theo dõi performance, quản lý risk, và scale lệnh có hệ thống.', to: '/analysis' },
+  { num: '04', title: 'GIAO DỊCH AN TOÀN', desc: 'Theo dõi performance, quản lý risk, và scale lệnh có hệ thống.', to: '/phan-tich' },
 ];
 
 const FAQS = [
@@ -86,7 +86,7 @@ const MatrixContentDiscovery: React.FC = () => {
               TIN_NÓNG
             </h2>
             <Link
-              to="/news"
+              to="/tin-tuc"
               className="font-mono text-[10px] text-muted-foreground hover:text-cyan-brand uppercase tracking-widest flex items-center gap-1"
             >
               XEM TẤT CẢ <ArrowRight className="w-3 h-3" />
@@ -100,7 +100,7 @@ const MatrixContentDiscovery: React.FC = () => {
             {news.map(n => (
               <Link
                 key={n.id}
-                to={`/news/${n.id}`}
+                to={`/tin-tuc/${n.id}`}
                 className="group bg-[#0D0F16] border border-white/10 hover:border-cyan-brand/40 transition-all overflow-hidden flex flex-col"
               >
                 {n.image_url && (
@@ -144,7 +144,7 @@ const MatrixContentDiscovery: React.FC = () => {
               SỰ_KIỆN_SẮP_TỚI
             </h2>
             <Link
-              to="/economic-calendar"
+              to="/lich-kinh-te"
               className="font-mono text-[10px] text-muted-foreground hover:text-uv uppercase tracking-widest flex items-center gap-1"
             >
               LỊCH ĐẦY ĐỦ <ArrowRight className="w-3 h-3" />
@@ -164,7 +164,7 @@ const MatrixContentDiscovery: React.FC = () => {
               return (
                 <Link
                   key={e.id}
-                  to="/economic-calendar"
+                  to="/lich-kinh-te"
                   className={`block p-3 hover:bg-white/5 transition-colors ${i < events.length - 1 ? 'border-b border-white/5' : ''}`}
                 >
                   <div className="flex justify-between items-start gap-2 mb-1">
