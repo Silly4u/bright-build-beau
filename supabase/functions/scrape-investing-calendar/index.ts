@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -197,12 +197,12 @@ importance=1 (LOW):
 - Credit card spending, vehicle sales
 
 CRITICAL RULES:
-- Times are GMT+7 (Vietnam timezone)
+- Times in source may be EST/EDT (ForexFactory uses ET). CONVERT to GMT+7 (Vietnam) before output. ET → GMT+7: add 11 hours during EST (Nov-Mar), add 12 hours during EDT (Mar-Nov). If timezone unclear, assume input is already GMT+7 from vn.investing.
 - Date must be ${dateHint} unless content explicitly shows a different date
-- Use 2-letter country code (US, JP, EU, UK, AU, CA, CH, NZ, CN, DE, FR, IT, ES, KR, IN, BR, MX, SG, HK, ID, TH, MY, PH, VN, ZA, TR, RU, NL, BE, AT, PT, GR, IE, FI, NO, SE, DK, PL, CZ, HU, RO, IL, SA)
-- name: Vietnamese exactly as shown
+- Use 2-letter country code (US, JP, EU, UK, AU, CA, CH, NZ, CN, DE, FR, IT, ES, KR, IN, BR, MX, SG, HK, ID, TH, MY, PH, VN, ZA, TR, RU, NL, BE, AT, PT, GR, IE, FI, NO, SE, DK, PL, CZ, HU, RO, IL, SA). ForexFactory uses currency codes — map: USD→US, EUR→EU (or DE/FR if specified), GBP→UK, JPY→JP, AUD→AU, CAD→CA, CHF→CH, NZD→NZ, CNY→CN.
+- name: TRANSLATE to Vietnamese if source is English. Keep concise, professional tone. e.g. "Non-Farm Payrolls" → "Bảng Lương Phi Nông Nghiệp", "CPI y/y" → "CPI (Năm trên năm)".
 - actual/forecast/previous: string or null (preserve % and units)
-- EXCLUDE holidays, ads, navigation links
+- EXCLUDE holidays, ads, navigation links, "Tentative" timed items with no data
 - BE STRICT WITH IMPORTANCE — when in doubt, use lower tier`;
 
   const userPrompt = `Extract ALL economic events from this calendar content. Default date: ${dateHint}.
@@ -219,42 +219,10 @@ ${markdown}`;
     return null;
   };
 
-  // Try Lovable AI Gateway first
-  for (const model of models) {
-    console.log(`Trying model (Lovable): ${model}`);
-    try {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-          ],
-          temperature: 0.05,
-        }),
-      });
-      if (!res.ok) {
-        console.error(`Lovable ${model} failed: ${res.status} - ${await res.text()}`);
-        continue;
-      }
-      const data = await res.json();
-      const content = data.choices?.[0]?.message?.content || "";
-      const events = parseContent(content);
-      if (events && events.length > 0) {
-        console.log(`Lovable ${model} extracted ${events.length} events`);
-        return events;
-      }
-    } catch (e) {
-      console.error(`Lovable ${model} error:`, e);
-    }
-  }
-
-  // ─── FALLBACK: Direct Google Gemini API ───
+  // ─── Try Gemini direct FIRST (Lovable AI often rate-limited / out of credits) ───
   const geminiKey = Deno.env.get("GEMINI_API_KEY");
   if (geminiKey) {
-    const geminiModels = ["gemini-2.5-flash", "gemini-2.0-flash"];
+    const geminiModels = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
     for (const gm of geminiModels) {
       console.log(`Trying Gemini direct: ${gm}`);
       try {
@@ -270,7 +238,7 @@ ${markdown}`;
           }
         );
         if (!res.ok) {
-          console.error(`Gemini ${gm} failed: ${res.status} - ${await res.text()}`);
+          console.error(`Gemini ${gm} failed: ${res.status} - ${(await res.text()).slice(0, 200)}`);
           continue;
         }
         const data = await res.json();
@@ -284,8 +252,38 @@ ${markdown}`;
         console.error(`Gemini ${gm} error:`, e);
       }
     }
-  } else {
-    console.warn("GEMINI_API_KEY not set, skipping direct fallback");
+  }
+
+  // ─── FALLBACK: Lovable AI Gateway ───
+  for (const model of models) {
+    console.log(`Trying model (Lovable fallback): ${model}`);
+    try {
+      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          temperature: 0.05,
+        }),
+      });
+      if (!res.ok) {
+        console.error(`Lovable ${model} failed: ${res.status}`);
+        continue;
+      }
+      const data = await res.json();
+      const content = data.choices?.[0]?.message?.content || "";
+      const events = parseContent(content);
+      if (events && events.length > 0) {
+        console.log(`Lovable ${model} extracted ${events.length} events`);
+        return events;
+      }
+    } catch (e) {
+      console.error(`Lovable ${model} error:`, e);
+    }
   }
 
   return null;
@@ -408,11 +406,11 @@ serve(async (req) => {
 
     // Mode: 'today' (default), 'week' (Mon-Sun current week), '3day' (yesterday/today/tomorrow)
     let mode = "today";
-    let targetUrl = "https://vn.investing.com/economic-calendar/";
+    let customUrl: string | null = null;
     try {
       const body = await req.json();
       if (body?.mode) mode = body.mode;
-      if (body?.url) targetUrl = body.url;
+      if (body?.url) customUrl = body.url;
     } catch { /* default */ }
 
     // Compute today in VN time (GMT+7) for date hint
@@ -420,28 +418,81 @@ serve(async (req) => {
     const vnNow = new Date(nowUtc.getTime() + 7 * 3600 * 1000);
     const vnToday = `${vnNow.getUTCFullYear()}-${String(vnNow.getUTCMonth() + 1).padStart(2, "0")}-${String(vnNow.getUTCDate()).padStart(2, "0")}`;
 
-    console.log(`Mode: ${mode}, target: ${targetUrl}, vnToday: ${vnToday}`);
+    // ─── Build list of (url, dateHint) pairs to scrape ───
+    // forexfactory.com supports ?day=mmmddd.YYYY for any single date and renders full HTML (Jina-friendly)
+    const ffMonth = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+    const ffDayUrl = (d: Date) => {
+      const m = ffMonth[d.getUTCMonth()];
+      const day = String(d.getUTCDate()).padStart(2, "0");
+      const y = d.getUTCFullYear();
+      return `https://www.forexfactory.com/calendar?day=${m}${day}.${y}`;
+    };
+    const fmtVnKey = (d: Date) => `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,"0")}-${String(d.getUTCDate()).padStart(2,"0")}`;
 
-    // Fetch via Jina Reader
-    const markdown = await fetchViaJina(targetUrl);
-    console.log("Markdown length:", markdown.length);
-
-    if (markdown.length < 5000) {
-      throw new Error(`Content too short (${markdown.length} chars), likely blocked`);
+    const targets: { url: string; dateHint: string }[] = [];
+    if (customUrl) {
+      targets.push({ url: customUrl, dateHint: vnToday });
+    } else if (mode === "today") {
+      targets.push({ url: "https://vn.investing.com/economic-calendar/", dateHint: vnToday });
+    } else if (mode === "3day") {
+      for (const offset of [-1, 0, 1]) {
+        const d = new Date(vnNow); d.setUTCDate(vnNow.getUTCDate() + offset);
+        targets.push({ url: ffDayUrl(d), dateHint: fmtVnKey(d) });
+      }
+    } else if (mode === "week") {
+      // Monday → Sunday in VN time
+      const dow = vnNow.getUTCDay(); // 0=Sun..6=Sat
+      const diffToMonday = dow === 0 ? -6 : 1 - dow;
+      const monday = new Date(vnNow); monday.setUTCDate(vnNow.getUTCDate() + diffToMonday);
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday); d.setUTCDate(monday.getUTCDate() + i);
+        targets.push({ url: ffDayUrl(d), dateHint: fmtVnKey(d) });
+      }
+    } else {
+      targets.push({ url: "https://vn.investing.com/economic-calendar/", dateHint: vnToday });
     }
 
-    // Trim to events portion (skip nav, keep table area)
-    const tableStart = markdown.indexOf("Thời Gian Hiện Tại");
-    const trimmed = tableStart > 0 ? markdown.slice(tableStart, tableStart + 50000) : markdown.slice(0, 50000);
+    console.log(`Mode: ${mode}, vnToday: ${vnToday}, targets: ${targets.length}`);
 
-    // AI extraction
     const MODELS = [
       "google/gemini-2.5-flash",
       "google/gemini-2.5-flash-lite",
       "openai/gpt-5-nano",
     ];
-    let events = await extractWithAI(trimmed, LOVABLE_API_KEY, MODELS, vnToday);
-    if (!events) throw new Error("All AI models failed to extract events");
+
+    // Process all targets in PARALLEL (Jina + Gemini direct support concurrent calls)
+    const results = await Promise.all(targets.map(async (t) => {
+      try {
+        console.log(`Fetching: ${t.url} (date=${t.dateHint})`);
+        const md = await fetchViaJina(t.url);
+        console.log(`  → ${t.dateHint}: markdown length ${md.length}`);
+        if (md.length < 3000) { console.warn(`  → ${t.dateHint}: too short, skip`); return []; }
+
+        const candidates = [
+          md.indexOf("Thời Gian Hiện Tại"),
+          md.indexOf("Time"),
+          md.indexOf("Currency"),
+        ].filter(i => i > 0);
+        const tableStart = candidates.length ? Math.min(...candidates) : 0;
+        const trimmed = md.slice(tableStart, tableStart + 50000);
+
+        const partial = await extractWithAI(trimmed, LOVABLE_API_KEY, MODELS, t.dateHint);
+        if (partial && partial.length > 0) {
+          for (const ev of partial) if (!ev.date) ev.date = t.dateHint;
+          console.log(`  → ${t.dateHint}: +${partial.length} events`);
+          return partial;
+        }
+        return [];
+      } catch (e) {
+        console.error(`Target ${t.url} failed:`, e instanceof Error ? e.message : e);
+        return [];
+      }
+    }));
+
+    let events: any[] = results.flat();
+
+    if (events.length === 0) throw new Error("No events extracted from any target");
+    console.log(`Total events extracted: ${events.length}`);
 
     // ─── Second pass: validate HIGH importance ───
     events = await validateImportance(events, LOVABLE_API_KEY);
