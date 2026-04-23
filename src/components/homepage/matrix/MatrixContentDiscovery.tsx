@@ -222,33 +222,9 @@ const MatrixContentDiscovery: React.FC = () => {
               [...Array(3)].map((_, i) => (
                 <div key={i} className="h-16 bg-white/5 animate-pulse border-b border-white/5" />
               ))}
-            {events.map((e, i) => {
-              const t = new Date(e.event_time);
-              const timeStr = t.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-              const dateStr = t.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
-              const impactColor =
-                e.impact === 'high' ? 'text-neon-red border-neon-red/30 bg-neon-red/5' : 'text-cyan-brand border-cyan-brand/30 bg-cyan-brand/5';
-              return (
-                <Link
-                  key={e.id}
-                  to="/lich-kinh-te"
-                  className={`block p-3 hover:bg-white/5 transition-colors ${i < events.length - 1 ? 'border-b border-white/5' : ''}`}
-                >
-                  <div className="flex justify-between items-start gap-2 mb-1">
-                    <span className="font-mono text-[10px] text-muted-foreground">
-                      {timeStr} • {dateStr}
-                    </span>
-                    <span className={`font-mono text-[9px] uppercase border px-1.5 py-0.5 ${impactColor}`}>
-                      {e.impact}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">{e.flag}</span>
-                    <span className="text-sm text-foreground line-clamp-2 leading-tight">{e.event_name}</span>
-                  </div>
-                </Link>
-              );
-            })}
+            {events.map((e, i) => (
+              <EventRow key={e.id} ev={e} isLast={i === events.length - 1} />
+            ))}
           </div>
         </div>
       </div>
