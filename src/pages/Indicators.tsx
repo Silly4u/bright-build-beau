@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import Header from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIndicatorPermissions } from '@/hooks/useIndicatorPermissions';
@@ -18,10 +18,20 @@ import { useProEma } from '@/hooks/useProEma';
 import { useSupportResistance } from '@/hooks/useSupportResistance';
 import { useWyckoff } from '@/hooks/useWyckoff';
 import { computeDualTrendlines } from '@/lib/computeTrendline';
-import { useAlphaLH, defaultAlphaLHConfig, type AlphaLHConfig } from '@/hooks/useAlphaLH';
+import { useAlphaLH, defaultAlphaLHConfig } from '@/hooks/useAlphaLH';
 import AlphaLHConfigPanel from '@/components/indicators/AlphaLHConfig';
-import { useAlphaEventSignal, defaultAlphaEventConfig, type AlphaEventConfig } from '@/hooks/useAlphaEventSignal';
+import { useAlphaEventSignal, defaultAlphaEventConfig } from '@/hooks/useAlphaEventSignal';
 import AlphaEventConfigPanel from '@/components/indicators/AlphaEventConfig';
+
+import IndicatorStrengthMeter from '@/components/indicators/IndicatorStrengthMeter';
+import AIConfluenceCard from '@/components/indicators/AIConfluenceCard';
+import LayoutPresets from '@/components/indicators/LayoutPresets';
+import ShareSnapshot from '@/components/indicators/ShareSnapshot';
+import TriggerAlertsPanel from '@/components/indicators/TriggerAlertsPanel';
+import PinnedMiniCharts from '@/components/indicators/PinnedMiniCharts';
+import MultiChartGrid from '@/components/indicators/MultiChartGrid';
+import { computeIndicatorVotes, aggregateStrength } from '@/lib/indicatorVotes';
+import { useIndicatorTriggers, type TriggerType } from '@/hooks/useIndicatorTriggers';
 
 const PAIRS = [
   { symbol: 'BTC/USDT', label: 'BTC', color: '#F7931A' },
@@ -39,16 +49,13 @@ const PAIRS = [
 const TIMEFRAMES = ['M15', 'H1', 'H4', 'D1'];
 
 const DEFAULT_INDICATORS: IndicatorConfig[] = [
-  
   { id: 'matrix', label: 'Matrix NWE', enabled: false, color: '#00BCD4', category: 'Envelope' },
   { id: 'engine', label: 'MS Engine', enabled: false, color: '#FF9800', category: 'Structure' },
   { id: 'tp_sl', label: 'TP/SL Zones', enabled: false, color: '#E91E63', category: 'Risk' },
-  
   { id: 'pro_ema', label: 'Pro EMA', enabled: false, color: '#FFA726', category: 'Trend' },
   { id: 'support_resistance', label: 'Pro S/R', enabled: false, color: '#00E676', category: 'S/R' },
   { id: 'wyckoff', label: 'Wyckoff', enabled: false, color: '#B388FF', category: 'Structure' },
   { id: 'alpha_lh', label: 'Alpha LH', enabled: false, color: '#F59E0B', category: 'Liquidity', note: 'Hoạt động tốt ở khung M15 trở xuống.' },
-  
   { id: 'alpha_event', label: 'Alpha Event', enabled: false, color: '#E879F9', category: 'Signal' },
   { id: 'prev_week_fib', label: 'Fib Tuần Cũ', enabled: false, color: '#FFD54F', category: 'Fibonacci', note: 'Tự vẽ Fibonacci theo High/Low của tuần trước, cập nhật mỗi tuần.' },
 ];
@@ -56,13 +63,26 @@ const DEFAULT_INDICATORS: IndicatorConfig[] = [
 const Indicators: React.FC = () => {
   const { user } = useAuth();
   const { hasAccess, loading: permLoading } = useIndicatorPermissions();
-  const [activePair, setActivePair] = useState('BTC/USDT');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // ── Initialise state from URL share-link if present ──
+  const initialPair = searchParams.get('pair') && PAIRS.find(p => p.symbol === searchParams.get('pair'))
+    ? (searchParams.get('pair') as string)
+    : 'BTC/USDT';
+  const initialTf = searchParams.get('tf') && TIMEFRAMES.includes(searchParams.get('tf') as string)
+    ? (searchParams.get('tf') as string)
+    : 'H4';
+  const initialIndIds = (searchParams.get('ind') || '').split(',').filter(Boolean);
+
+  const [activeView, setActiveView] = useState<'single' | 'multi'>('single');
+  const [activePair, setActivePair] = useState(initialPair);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTimeframe, setActiveTimeframe] = useState('H4');
-  const [indicators, setIndicators] = useState(DEFAULT_INDICATORS);
-  
-  const [botActive, setBotActive] = useState(true);
+  const [activeTimeframe, setActiveTimeframe] = useState(initialTf);
+  const [indicators, setIndicators] = useState<IndicatorConfig[]>(
+    DEFAULT_INDICATORS.map(i => ({ ...i, enabled: initialIndIds.includes(i.id) || i.enabled })),
+  );
   const [logs, setLogs] = useState<string[]>([]);
+  const [watchedTriggers, setWatchedTriggers] = useState<TriggerType[]>([]);
 
   const marketData = useMarketData(activePair, activeTimeframe);
   const { fetchOlderCandles } = marketData;
@@ -105,6 +125,38 @@ const Indicators: React.FC = () => {
   const prevCandle = marketData.candles[marketData.candles.length - 2];
   const priceChange = prevCandle ? ((livePrice - prevCandle.close) / prevCandle.close * 100) : 0;
 
+  // ── Strength Meter votes ──
+  const votes = useMemo(
+    () => computeIndicatorVotes({
+      enabledIds,
+      proEmaData,
+      srData,
+      wyckoffData,
+      alphaLHData,
+      alphaEventData,
+      matrixData,
+      engineData,
+      tpSlData,
+      smcAnalysis: smcResult.analysis,
+      livePrice,
+    }),
+    [enabledIds, proEmaData, srData, wyckoffData, alphaLHData, alphaEventData, matrixData, engineData, tpSlData, smcResult.analysis, livePrice],
+  );
+  const strengthScore = useMemo(() => aggregateStrength(votes), [votes]);
+
+  // ── Trigger Alerts ──
+  useIndicatorTriggers({
+    enabled: watchedTriggers.length > 0 && !marketData.loading,
+    pair: activePair,
+    timeframe: activeTimeframe,
+    candles: marketData.candles,
+    proEmaData,
+    wyckoffData,
+    alphaLHData,
+    alphaEventData,
+    watchedTriggers,
+  });
+
   useEffect(() => {
     if (!marketData.loading && marketData.candles.length > 0) {
       const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
@@ -115,12 +167,22 @@ const Indicators: React.FC = () => {
     }
   }, [marketData.loading, activePair, activeTimeframe]);
 
-  // Filter indicators by permission (if logged in, check permissions; if guest, show all)
-  const accessibleIndicators = indicators.map(ind => ({
-    ...ind,
-    enabled: ind.enabled && (user ? hasAccess(ind.id) : true),
-    locked: user ? !hasAccess(ind.id) : false,
-  }));
+  // Sync URL params (debounced via deps) so refresh keeps state
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    params.set('pair', activePair);
+    params.set('tf', activeTimeframe);
+    if (enabledIds.length) params.set('ind', enabledIds.join(','));
+    else params.delete('ind');
+    setSearchParams(params, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activePair, activeTimeframe, enabledIds.join(',')]);
+
+  const handleLoadPreset = (preset: { pair: string; timeframe: string; enabled_indicators: string[] }) => {
+    setActivePair(preset.pair);
+    setActiveTimeframe(preset.timeframe);
+    setIndicators(prev => prev.map(i => ({ ...i, enabled: preset.enabled_indicators.includes(i.id) })));
+  };
 
   return (
     <main className="min-h-screen bg-[#0b0e11]">
@@ -129,7 +191,7 @@ const Indicators: React.FC = () => {
       {/* ═══ BINANCE-STYLE TOP BAR ═══ */}
       <div className="pt-24 px-1.5 lg:px-3">
         <div className="bg-[#161a1e] border-b border-[#2b3139] px-3 py-2 flex flex-wrap items-center gap-2 text-xs">
-          {/* Symbol + Price block */}
+          {/* Symbol + Price */}
           <div className="flex items-center gap-3 pr-4 border-r border-[#2b3139]">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: `${activePairInfo.color}20` }}>
@@ -207,12 +269,43 @@ const Indicators: React.FC = () => {
             ))}
           </div>
 
+          <div className="w-px h-5 bg-[#2b3139] hidden md:block" />
+
+          {/* View tabs + Share */}
+          <div className="flex items-center gap-1.5 ml-auto">
+            <div className="flex items-center gap-1 bg-[#0b0e11] border border-[#2b3139] rounded p-0.5">
+              <button
+                onClick={() => setActiveView('single')}
+                className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold transition-all ${
+                  activeView === 'single' ? 'bg-[#fcd535] text-[#0b0e11]' : 'text-[#848e9c] hover:text-[#eaecef]'
+                }`}
+              >
+                📊 Single
+              </button>
+              <button
+                onClick={() => setActiveView('multi')}
+                className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold transition-all ${
+                  activeView === 'multi' ? 'bg-[#fcd535] text-[#0b0e11]' : 'text-[#848e9c] hover:text-[#eaecef]'
+                }`}
+              >
+                🎯 Multi-chart
+              </button>
+            </div>
+            <ShareSnapshot pair={activePair} timeframe={activeTimeframe} enabledIndicators={enabledIds} />
+          </div>
         </div>
       </div>
 
+      {/* ═══ MULTI-CHART VIEW ═══ */}
+      {activeView === 'multi' ? (
+        <div className="px-1.5 lg:px-3 py-3">
+          <MultiChartGrid />
+        </div>
+      ) : (
+        <>
       {/* ═══ 3-PANEL LAYOUT ═══ */}
       <div className="px-1.5 lg:px-3 py-1">
-        <div className={`grid grid-cols-1 ${sidebarOpen ? 'lg:grid-cols-[180px_1fr_300px]' : 'lg:grid-cols-[1fr_300px]'} gap-px min-h-[75vh] bg-[#2b3139] rounded overflow-hidden transition-all duration-300`}>
+        <div className={`grid grid-cols-1 ${sidebarOpen ? 'lg:grid-cols-[210px_1fr_320px]' : 'lg:grid-cols-[1fr_320px]'} gap-px min-h-[75vh] bg-[#2b3139] rounded overflow-hidden transition-all duration-300`}>
 
           {/* ── Collapsed sidebar handle ── */}
           {!sidebarOpen && (
@@ -227,10 +320,10 @@ const Indicators: React.FC = () => {
             </button>
           )}
 
-          {/* ── LEFT: Indicator Checklist ── */}
+          {/* ── LEFT: Indicator Checklist + Presets + Pin ── */}
           {sidebarOpen && (
-          <div className="bg-[#161a1e] p-3 relative">
-            <div className="flex items-center justify-between mb-3">
+          <div className="bg-[#161a1e] p-3 relative space-y-3 overflow-y-auto max-h-[calc(100vh-180px)]">
+            <div className="flex items-center justify-between">
               <h3 className="text-[10px] font-bold text-[#848e9c] tracking-widest uppercase font-mono">CHỈ BÁO</h3>
               <div className="flex items-center gap-2">
                 <span className="text-[9px] font-mono text-[#5e6673]">{enabledIds.length}/{indicators.length}</span>
@@ -245,13 +338,27 @@ const Indicators: React.FC = () => {
                 </button>
               </div>
             </div>
-            <p className="text-[9px] text-[#5e6673] mb-3 font-mono">Bật/Tắt để hiển thị lên đồ thị</p>
+            <p className="text-[9px] text-[#5e6673] font-mono -mt-2">Bật/Tắt + hover ⓘ để xem hướng dẫn</p>
             <IndicatorPanel indicators={indicators} onToggle={toggleIndicator} />
-            
+
+            {/* Layout Presets (login required) */}
+            <LayoutPresets
+              currentPair={activePair}
+              currentTimeframe={activeTimeframe}
+              enabledIndicators={enabledIds}
+              onLoad={handleLoadPreset}
+            />
+
+            {/* Pinned mini-charts */}
+            <PinnedMiniCharts
+              activePair={activePair}
+              onSelect={setActivePair}
+              availablePairs={PAIRS.map(p => p.symbol)}
+            />
 
             {/* TP/SL Backtesting Dashboard */}
             {tpSlEnabled && tpSlData && (
-              <div className="mt-3 border border-[#2b3139] rounded-lg overflow-hidden">
+              <div className="border border-[#2b3139] rounded-lg overflow-hidden">
                 <div className="bg-[#1e2329] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
                   BACKTESTING
                 </div>
@@ -278,11 +385,9 @@ const Indicators: React.FC = () => {
               </div>
             )}
 
-
-
             {/* Pro EMA Dashboard */}
             {proEmaEnabled && proEmaData && (
-              <div className="mt-3 border border-[#2b3139] rounded-lg overflow-hidden">
+              <div className="border border-[#2b3139] rounded-lg overflow-hidden">
                 <div className="bg-[#1e2329] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
                   PRO EMA
                 </div>
@@ -319,7 +424,7 @@ const Indicators: React.FC = () => {
 
             {/* Pro Support/Resistance Dashboard */}
             {srEnabled && srData && (
-              <div className="mt-3 border border-[#2b3139] rounded-lg overflow-hidden">
+              <div className="border border-[#2b3139] rounded-lg overflow-hidden">
                 <div className="bg-[#1e2329] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
                   PRO S/R
                 </div>
@@ -340,21 +445,13 @@ const Indicators: React.FC = () => {
                     <span className="text-[#5e6673]">S/R Zones</span>
                     <span className="text-[#eaecef] font-bold">{srData.channels.length}</span>
                   </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Signals</span>
-                    <span className="text-[#eaecef] font-bold">{srData.signals.length}</span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Broken</span>
-                    <span className="text-[#eaecef] font-bold">{srData.broken.length}</span>
-                  </div>
                 </div>
               </div>
             )}
 
             {/* Wyckoff Dashboard */}
             {wyckoffEnabled && wyckoffData && (
-              <div className="mt-3 border border-[#2b3139] rounded-lg overflow-hidden">
+              <div className="border border-[#2b3139] rounded-lg overflow-hidden">
                 <div className="bg-[#1e2329] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
                   WYCKOFF
                 </div>
@@ -372,32 +469,16 @@ const Indicators: React.FC = () => {
                     </span>
                   </div>
                   <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Boxes</span>
-                    <span className="text-[#eaecef] font-bold">{wyckoffData.boxes.length}</span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
                     <span className="text-[#5e6673]">Events</span>
                     <span className="text-[#eaecef] font-bold">{wyckoffData.events.length}</span>
                   </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Signals</span>
-                    <span className="text-[#eaecef] font-bold">{wyckoffData.signals.length}</span>
-                  </div>
-                  {wyckoffData.events.length > 0 && (
-                    <div className="flex justify-between text-[10px] font-mono">
-                      <span className="text-[#5e6673]">Last Event</span>
-                      <span className={`font-bold ${wyckoffData.events[wyckoffData.events.length - 1].type === 'accumulation' ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {wyckoffData.events[wyckoffData.events.length - 1].label}
-                      </span>
-                    </div>
-                  )}
                 </div>
               </div>
             )}
 
             {/* Alpha LH Dashboard + Config */}
             {alphaLHEnabled && (
-              <div className="mt-3">
+              <div>
                 <AlphaLHConfigPanel config={alphaLHConfig} onChange={setAlphaLHConfig} />
                 {alphaLHData && (
                   <div className="mt-2 border border-[#2b3139] rounded-lg overflow-hidden">
@@ -408,14 +489,6 @@ const Indicators: React.FC = () => {
                       <div className="flex justify-between text-[10px] font-mono">
                         <span className="text-[#5e6673]">Total Entries</span>
                         <span className="text-[#eaecef] font-bold">{alphaLHData.stats.totalEntries}</span>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">TP1 / TP2 / TP3</span>
-                        <span className="text-emerald-400 font-bold">{alphaLHData.stats.tp1Count} / {alphaLHData.stats.tp2Count} / {alphaLHData.stats.tp3Count}</span>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">Losses</span>
-                        <span className="text-red-400 font-bold">{alphaLHData.stats.losses}</span>
                       </div>
                       <div className="flex justify-between text-[10px] font-mono">
                         <span className="text-[#5e6673]">Winrate</span>
@@ -429,44 +502,17 @@ const Indicators: React.FC = () => {
               </div>
             )}
 
-
             {/* Alpha Event Dashboard + Config */}
             {alphaEventEnabled && (
-              <div className="mt-3">
+              <div>
                 <AlphaEventConfigPanel config={alphaEventConfig} onChange={setAlphaEventConfig} />
-                {alphaEventData && (
-                  <div className="mt-2 border border-[#2b3139] rounded-lg overflow-hidden">
-                    <div className="bg-[#1e2329] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
-                      ALPHA EVENT
-                    </div>
-                    <div className="bg-[#161a1e] p-2 space-y-1.5">
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">Buy Signals</span>
-                        <span className="text-emerald-400 font-bold">{alphaEventData.markers.filter(m => m.shape === 'arrowUp' && m.text.startsWith('Buy')).length}</span>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">Sell Signals</span>
-                        <span className="text-red-400 font-bold">{alphaEventData.markers.filter(m => m.shape === 'arrowDown' && m.text.startsWith('Sell')).length}</span>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">TP Hits</span>
-                        <span className="text-[#d69094] font-bold">{alphaEventData.markers.filter(m => m.text === 'TP').length}</span>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">Active Zones</span>
-                        <span className="text-[#eaecef] font-bold">{alphaEventData.zones.length}</span>
-                      </div>
-                    </div>
-
-          </div>
-          )}
               </div>
             )}
           </div>
           )}
-          <div className="bg-[#0b0e11] overflow-hidden flex flex-col">
 
-            {/* Main chart */}
+          {/* ── CENTER: Main Chart ── */}
+          <div className="bg-[#0b0e11] overflow-hidden flex flex-col">
             <div className="flex-1">
               {marketData.loading ? (
                 <div className="flex items-center justify-center h-[560px] bg-[#0b0e11]">
@@ -498,30 +544,38 @@ const Indicators: React.FC = () => {
                   engineData={engineData}
                   tpSlData={tpSlData}
                   buySellData={null}
-                  
                   proEmaData={proEmaData}
                   srData={srData}
                   wyckoffData={wyckoffData}
                   alphaLHData={alphaLHData}
-                  
                   alphaEventData={alphaEventData}
                   alphaProData={null}
                   onLoadMore={fetchOlderCandles}
                 />
               )}
             </div>
-
           </div>
 
-          {/* ── RIGHT: Signal Feed ── */}
-          <div className="bg-[#161a1e] p-3 flex flex-col min-h-0">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[10px] font-bold text-[#848e9c] tracking-widest uppercase font-mono">TÍN HIỆU GẦN ĐÂY</h3>
-              <span className="text-[10px] font-mono text-[#5e6673]">{signals.length}</span>
-            </div>
-            <p className="text-[9px] text-[#5e6673] mb-3 font-mono">Click để xem lại vị trí</p>
-            <div className="flex-1 min-h-0 overflow-y-auto">
-              <SignalFeed signals={signals} loading={signalsLoading} maxItems={5} />
+          {/* ── RIGHT: Strength Meter + AI Confluence + Triggers + Signals ── */}
+          <div className="bg-[#161a1e] p-3 flex flex-col min-h-0 space-y-3 overflow-y-auto max-h-[calc(100vh-180px)]">
+            <IndicatorStrengthMeter votes={votes} />
+            <AIConfluenceCard
+              pair={activePair}
+              timeframe={activeTimeframe}
+              livePrice={livePrice}
+              votes={votes}
+              strengthScore={strengthScore}
+            />
+            <TriggerAlertsPanel watched={watchedTriggers} onChange={setWatchedTriggers} />
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-[10px] font-bold text-[#848e9c] tracking-widest uppercase font-mono">TÍN HIỆU GẦN ĐÂY</h3>
+                <span className="text-[10px] font-mono text-[#5e6673]">{signals.length}</span>
+              </div>
+              <div className="min-h-0">
+                <SignalFeed signals={signals} loading={signalsLoading} maxItems={5} />
+              </div>
             </div>
           </div>
         </div>
@@ -577,13 +631,9 @@ const Indicators: React.FC = () => {
             )}
           </div>
         )}
-
-        {smcResult.error && (
-          <div className="mt-1 bg-[#f6465d]/5 border border-[#f6465d]/20 rounded px-4 py-2 text-[10px] font-mono text-[#f6465d]">
-            ⚠️ AI Error: {smcResult.error}
-          </div>
-        )}
       </div>
+        </>
+      )}
 
       <Footer />
     </main>
