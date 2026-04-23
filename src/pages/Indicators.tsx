@@ -30,6 +30,7 @@ import ShareSnapshot from '@/components/indicators/ShareSnapshot';
 import TriggerAlertsPanel from '@/components/indicators/TriggerAlertsPanel';
 import PinnedMiniCharts from '@/components/indicators/PinnedMiniCharts';
 import TimeframeSelector from '@/components/indicators/TimeframeSelector';
+import PairSelector from '@/components/indicators/PairSelector';
 import MultiChartGrid from '@/components/indicators/MultiChartGrid';
 import { computeIndicatorVotes, aggregateStrength } from '@/lib/indicatorVotes';
 import { useIndicatorTriggers, type TriggerType } from '@/hooks/useIndicatorTriggers';
@@ -238,32 +239,12 @@ const Indicators: React.FC = () => {
             </div>
           </div>
 
-          {/* Coin pair selector — TradingView-style pills with coin dot */}
-          <div className="flex items-center">
-            <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
-              {PAIRS.map(p => {
-                const isActive = activePair === p.symbol;
-                return (
-                  <button
-                    key={p.symbol}
-                    onClick={() => setActivePair(p.symbol)}
-                    className={`group flex items-center gap-1.5 px-2.5 py-1.5 rounded-full font-mono font-bold transition-all text-[11px] whitespace-nowrap border ${
-                      isActive
-                        ? 'bg-[#fcd535]/10 border-[#fcd535]/40 text-[#fcd535]'
-                        : 'bg-[#1e2329] border-[#2b3139] text-[#eaecef] hover:border-[#fcd535]/30 hover:text-[#fcd535]'
-                    }`}
-                    title={p.symbol}
-                  >
-                    <span
-                      className="w-2 h-2 rounded-full ring-1 ring-black/40 shrink-0"
-                      style={{ backgroundColor: p.color }}
-                    />
-                    <span>{p.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          {/* Coin pair selector — dropdown with arrow (TradingView-style) */}
+          <PairSelector
+            pairs={PAIRS}
+            activePair={activePair}
+            onSelect={setActivePair}
+          />
 
           <div className="w-px h-5 bg-[#2b3139]" />
 
