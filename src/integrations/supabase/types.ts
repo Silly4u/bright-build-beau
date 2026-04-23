@@ -182,6 +182,39 @@ export type Database = {
         }
         Relationships: []
       }
+      morning_briefs: {
+        Row: {
+          brief_date: string
+          created_at: string
+          id: string
+          market_data: Json | null
+          outlook: string
+          recap: string
+          scenarios: Json
+          updated_at: string
+        }
+        Insert: {
+          brief_date: string
+          created_at?: string
+          id?: string
+          market_data?: Json | null
+          outlook: string
+          recap: string
+          scenarios?: Json
+          updated_at?: string
+        }
+        Update: {
+          brief_date?: string
+          created_at?: string
+          id?: string
+          market_data?: Json | null
+          outlook?: string
+          recap?: string
+          scenarios?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       news_articles: {
         Row: {
           badge: string | null
