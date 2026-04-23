@@ -20,8 +20,21 @@ const MatrixHero: React.FC = () => {
 
   return (
     <section className="relative pt-20 pb-12 px-6 lg:px-12 overflow-hidden">
+      {/* Video background */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-50"
+          src={heroMatrixBg.url}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-navy/60 via-navy/40 to-navy" />
+      </div>
+
       {/* Tag chip */}
-      <div className="inline-flex items-center gap-2 border border-uv/30 bg-uv/5 px-3 py-1.5 mb-8 shadow-[0_0_15px_rgba(217,38,169,0.4)]">
+      <div className="relative inline-flex items-center gap-2 border border-uv/30 bg-uv/5 px-3 py-1.5 mb-8 shadow-[0_0_15px_rgba(217,38,169,0.4)]">
         <span className="size-1.5 bg-uv rounded-full animate-ping" />
         <span className="font-mono text-[11px] text-uv uppercase tracking-[0.2em]">
           {version} • Hệ thống đang hoạt động • {time}
