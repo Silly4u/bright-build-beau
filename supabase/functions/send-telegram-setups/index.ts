@@ -53,21 +53,24 @@ function formatAssetCaption(setup: any, dateDisplay: string): string {
 }
 
 /**
- * Build a Microlink.io screenshot URL that captures the live /phan-tich page
- * with the right asset tab pre-selected via ?asset=XAU|BTC.
- * Microlink: free 1000 req/day, no API key needed for basic screenshots.
+ * Build a Microlink.io screenshot URL that captures ONLY the specific chart
+ * container (#chart-btc or #chart-xau) on the live /phan-tich page.
+ * Microlink crops to the matched element so the image is just the chart.
  */
 function buildChartScreenshotUrl(asset: string): string {
   const target = `${SITE_BASE}/phan-tich?asset=${asset}`;
+  const elementId = asset === "XAU" ? "#chart-xau" : "#chart-btc";
   const params = new URLSearchParams({
     url: target,
     screenshot: "true",
     meta: "false",
     embed: "screenshot.url",
+    element: elementId, // crop to this DOM element only
     "viewport.width": "1440",
     "viewport.height": "900",
     "viewport.deviceScaleFactor": "2",
-    waitForTimeout: "6000", // allow chart + indicators to render
+    waitForSelector: elementId,
+    waitForTimeout: "8000", // allow chart + indicators to fully render
     overlay: "false",
   });
   return `https://api.microlink.io/?${params.toString()}`;
