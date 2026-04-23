@@ -197,12 +197,12 @@ importance=1 (LOW):
 - Credit card spending, vehicle sales
 
 CRITICAL RULES:
-- Times are GMT+7 (Vietnam timezone)
+- Times in source may be EST/EDT (ForexFactory uses ET). CONVERT to GMT+7 (Vietnam) before output. ET → GMT+7: add 11 hours during EST (Nov-Mar), add 12 hours during EDT (Mar-Nov). If timezone unclear, assume input is already GMT+7 from vn.investing.
 - Date must be ${dateHint} unless content explicitly shows a different date
-- Use 2-letter country code (US, JP, EU, UK, AU, CA, CH, NZ, CN, DE, FR, IT, ES, KR, IN, BR, MX, SG, HK, ID, TH, MY, PH, VN, ZA, TR, RU, NL, BE, AT, PT, GR, IE, FI, NO, SE, DK, PL, CZ, HU, RO, IL, SA)
-- name: Vietnamese exactly as shown
+- Use 2-letter country code (US, JP, EU, UK, AU, CA, CH, NZ, CN, DE, FR, IT, ES, KR, IN, BR, MX, SG, HK, ID, TH, MY, PH, VN, ZA, TR, RU, NL, BE, AT, PT, GR, IE, FI, NO, SE, DK, PL, CZ, HU, RO, IL, SA). ForexFactory uses currency codes — map: USD→US, EUR→EU (or DE/FR if specified), GBP→UK, JPY→JP, AUD→AU, CAD→CA, CHF→CH, NZD→NZ, CNY→CN.
+- name: TRANSLATE to Vietnamese if source is English. Keep concise, professional tone. e.g. "Non-Farm Payrolls" → "Bảng Lương Phi Nông Nghiệp", "CPI y/y" → "CPI (Năm trên năm)".
 - actual/forecast/previous: string or null (preserve % and units)
-- EXCLUDE holidays, ads, navigation links
+- EXCLUDE holidays, ads, navigation links, "Tentative" timed items with no data
 - BE STRICT WITH IMPORTANCE — when in doubt, use lower tier`;
 
   const userPrompt = `Extract ALL economic events from this calendar content. Default date: ${dateHint}.
