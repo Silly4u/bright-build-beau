@@ -65,7 +65,6 @@ async function fetchChartScreenshotUrl(asset: string, attempt = 1): Promise<stri
     url: target,
     screenshot: "true",
     meta: "false",
-    embed: "screenshot.url",
     element: elementId,
     "viewport.width": "1280",
     "viewport.height": "760",
