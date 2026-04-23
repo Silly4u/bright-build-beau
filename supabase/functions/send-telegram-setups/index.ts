@@ -7,7 +7,8 @@ const BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN")!;
 const TELEGRAM_CHAT_ID = "-1003722231058";
 
 const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
-const MAX_MSG_LENGTH = 3900;
+const SITE_BASE = "https://tbndigital.xyz";
+const MAX_CAPTION = 1024; // Telegram caption limit
 
 const PROB_MAP: Record<string, string> = {
   high: "🟢 Cao",
@@ -15,40 +16,99 @@ const PROB_MAP: Record<string, string> = {
   low: "🔴 Thấp",
 };
 
-const ASSET_EMOJI: Record<string, string> = {
-  BTC: "₿",
-  XAU: "🥇",
+const ASSET_META: Record<string, { emoji: string; name: string; query: string }> = {
+  BTC: { emoji: "₿", name: "Bitcoin (BTC/USDT)", query: "BTC" },
+  XAU: { emoji: "🥇", name: "Vàng (XAU/USD)", query: "XAU" },
 };
 
-function formatSetupMessage(setups: any[], dateDisplay: string): string {
-  let msg = `📊 <b>KỊCH BẢN GIAO DỊCH HÔM NAY</b>\n🗓️ ${dateDisplay}\n`;
+/** Build Telegram caption for ONE asset (max 1024 chars). */
+function formatAssetCaption(setup: any, dateDisplay: string): string {
+  const meta = ASSET_META[setup.asset] || { emoji: "📈", name: setup.asset, query: setup.asset };
+  let msg = `${meta.emoji} <b>${meta.name}</b> — ${dateDisplay}\n`;
+  if (setup.current_price) {
+    const change = setup.price_change_24h ?? 0;
+    const arrow = change >= 0 ? "▲" : "▼";
+    msg += `💰 $${Number(setup.current_price).toLocaleString()} ${arrow} ${change.toFixed(2)}%\n`;
+  }
+  msg += `\n🧠 <i>${setup.ai_summary}</i>\n\n`;
 
-  for (const setup of setups) {
-    const emoji = ASSET_EMOJI[setup.asset] || "📈";
-    msg += `\n${emoji} <b>${setup.asset}</b>\n`;
-    msg += `🧠 <i>${setup.ai_summary}</i>\n\n`;
-
-    for (const s of setup.scenarios) {
-      const label = s.scenario === "A" ? "📈" : s.scenario === "B" ? "➡️" : "📉";
-      msg += `${label} <b>${s.scenario}. ${s.title}</b>\n`;
-      msg += `  Điều kiện: ${s.condition}\n`;
-      msg += `  Hành động: ${s.action}\n`;
-      if (s.targets?.length) {
-        msg += `  Mục tiêu: ${s.targets.map((t: number) => `$${t.toLocaleString()}`).join(" → ")}\n`;
-      }
-      msg += `  Vô hiệu: ${s.invalidation}\n`;
-      msg += `  Xác suất: ${PROB_MAP[s.probability] || s.probability}\n\n`;
+  for (const s of setup.scenarios || []) {
+    const label = s.scenario === "A" ? "📈" : s.scenario === "B" ? "➡️" : "📉";
+    msg += `${label} <b>${s.scenario}. ${s.title}</b>\n`;
+    msg += `• ĐK: ${s.condition}\n`;
+    msg += `• Hành động: ${s.action}\n`;
+    if (s.targets?.length) {
+      msg += `• TP: ${s.targets.map((t: number) => `$${t.toLocaleString()}`).join(" → ")}\n`;
     }
+    msg += `• Hủy: ${s.invalidation}\n`;
+    msg += `• Xác suất: ${PROB_MAP[s.probability] || s.probability}\n\n`;
   }
 
-  msg += `👉 Xem chi tiết → alphanet.vn/phan-tich`;
+  msg += `👉 ${SITE_BASE}/phan-tich`;
 
-  // Truncate if too long
-  if (msg.length > MAX_MSG_LENGTH) {
-    msg = msg.substring(0, MAX_MSG_LENGTH - 30) + "\n\n⚠️ <i>Đã rút gọn...</i>";
+  if (msg.length > MAX_CAPTION) {
+    msg = msg.substring(0, MAX_CAPTION - 30) + "\n…\n👉 Xem tại web";
   }
-
   return msg;
+}
+
+/**
+ * Build a Microlink.io screenshot URL that captures the live /phan-tich page
+ * with the right asset tab pre-selected via ?asset=XAU|BTC.
+ * Microlink: free 1000 req/day, no API key needed for basic screenshots.
+ */
+function buildChartScreenshotUrl(asset: string): string {
+  const target = `${SITE_BASE}/phan-tich?asset=${asset}`;
+  const params = new URLSearchParams({
+    url: target,
+    screenshot: "true",
+    meta: "false",
+    embed: "screenshot.url",
+    "viewport.width": "1440",
+    "viewport.height": "900",
+    "viewport.deviceScaleFactor": "2",
+    waitForTimeout: "6000", // allow chart + indicators to render
+    overlay: "false",
+  });
+  return `https://api.microlink.io/?${params.toString()}`;
+}
+
+/** Send one Telegram photo with caption. Returns message_id. */
+async function sendTelegramPhoto(asset: string, caption: string): Promise<number> {
+  const photoUrl = buildChartScreenshotUrl(asset);
+  console.log(`[${asset}] Photo URL: ${photoUrl}`);
+
+  const res = await fetch(`${TG_API}/sendPhoto`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: TELEGRAM_CHAT_ID,
+      photo: photoUrl,
+      caption,
+      parse_mode: "HTML",
+    }),
+  });
+
+  const data = await res.json();
+  if (!res.ok || !data.ok) {
+    // Fallback: send as plain text if photo upload fails (e.g. Microlink slow / 429)
+    console.error(`[${asset}] sendPhoto failed, falling back to sendMessage:`, JSON.stringify(data));
+    const msgRes = await fetch(`${TG_API}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: caption,
+        parse_mode: "HTML",
+        disable_web_page_preview: true,
+      }),
+    });
+    const msgData = await msgRes.json();
+    if (!msgRes.ok) throw new Error(`Telegram error: ${JSON.stringify(msgData)}`);
+    return msgData.result?.message_id;
+  }
+
+  return data.result?.message_id;
 }
 
 Deno.serve(async (req) => {
@@ -78,8 +138,7 @@ Deno.serve(async (req) => {
     // If no setups, generate them first
     if (!setups || setups.length === 0) {
       console.log("No setups found, generating...");
-      const genUrl = `${SUPABASE_URL}/functions/v1/generate-daily-setups`;
-      const genRes = await fetch(genUrl, {
+      const genRes = await fetch(`${SUPABASE_URL}/functions/v1/generate-daily-setups`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
@@ -93,7 +152,6 @@ Deno.serve(async (req) => {
         throw new Error(`Generate failed: ${errText}`);
       }
 
-      // Re-fetch
       const refetch = await supabase
         .from("daily_setups")
         .select("*")
@@ -102,12 +160,10 @@ Deno.serve(async (req) => {
         .order("asset");
 
       setups = refetch.data;
-      if (!setups || setups.length === 0) {
-        throw new Error("Failed to generate setups");
-      }
+      if (!setups || setups.length === 0) throw new Error("Failed to generate setups");
     }
 
-    // Check if already sent
+    // Skip if all already sent
     const allSent = setups.every((s: any) => s.telegram_message_id);
     if (allSent && !force) {
       return new Response(JSON.stringify({ ok: true, status: "already_sent" }), {
@@ -115,39 +171,44 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Format and send
-    const message = formatSetupMessage(setups, dateDisplay);
-
-    const tgRes = await fetch(`${TG_API}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: message,
-        parse_mode: "HTML",
-        disable_web_page_preview: true,
-      }),
+    // Send each asset as its own message with chart screenshot
+    const results: Record<string, any> = {};
+    // Force order: XAU first then BTC (or vice versa) — keep alphabetical for predictability
+    const ordered = [...setups].sort((a, b) => {
+      const order: Record<string, number> = { XAU: 0, BTC: 1 };
+      return (order[a.asset] ?? 99) - (order[b.asset] ?? 99);
     });
 
-    const tgData = await tgRes.json();
-    if (!tgRes.ok) {
-      throw new Error(`Telegram error: ${JSON.stringify(tgData)}`);
+    for (const setup of ordered) {
+      // Skip individually-sent setups unless force
+      if (setup.telegram_message_id && !force) {
+        results[setup.asset] = { status: "already_sent", message_id: setup.telegram_message_id };
+        continue;
+      }
+
+      try {
+        const caption = formatAssetCaption(setup, dateDisplay);
+        const messageId = await sendTelegramPhoto(setup.asset, caption);
+
+        await supabase
+          .from("daily_setups")
+          .update({ telegram_message_id: messageId })
+          .eq("id", setup.id);
+
+        results[setup.asset] = { status: "sent", message_id: messageId };
+
+        // Small gap between messages so chat order is clean and Microlink isn't hammered
+        await new Promise((r) => setTimeout(r, 1500));
+      } catch (e: any) {
+        console.error(`[${setup.asset}] send failed:`, e);
+        results[setup.asset] = { status: "error", error: e.message };
+      }
     }
 
-    const messageId = tgData.result?.message_id;
-
-    // Update all setups with message ID
-    for (const setup of setups) {
-      await supabase
-        .from("daily_setups")
-        .update({ telegram_message_id: messageId })
-        .eq("id", setup.id);
-    }
-
-    return new Response(JSON.stringify({ ok: true, message_id: messageId, setups_count: setups.length }), {
+    return new Response(JSON.stringify({ ok: true, date: dateStr, results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
