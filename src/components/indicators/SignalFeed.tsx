@@ -42,7 +42,9 @@ const SignalFeed: React.FC<SignalFeedProps> = ({ signals, loading, onSignalClick
     <div className="h-full space-y-1.5">
       {visibleSignals.map(signal => {
         const style = STRENGTH_STYLES[signal.strength] || STRENGTH_STYLES['✅ TRUNG BÌNH'];
-        const time = new Date(signal.sent_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        const sentDate = new Date(signal.sent_at);
+        const time = sentDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        const date = sentDate.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
         const isBuy = signal.conditions.some(c => ['Breakout', 'Support Bounce', 'Confluence', 'BB Squeeze'].includes(c));
 
         return (
