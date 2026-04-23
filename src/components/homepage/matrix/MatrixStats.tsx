@@ -40,15 +40,18 @@ const StatBox: React.FC<{ stat: Stat }> = ({ stat }) => {
       ? animated.toLocaleString('en-US')
       : animated.toString();
   return (
-    <div className={`bg-[#0D0F16] p-5 lg:p-6 border-b-2 ${stat.borderColor}`}>
+    <Link
+      to={stat.to}
+      className={`block bg-[#0D0F16] p-5 lg:p-6 border-b-2 ${stat.borderColor} hover:bg-[#161A26] transition-colors group`}
+    >
       <p className="font-mono text-[10px] lg:text-xs text-muted-foreground uppercase mb-2 tracking-widest">
         {stat.label}
       </p>
-      <p className="font-mono text-2xl lg:text-4xl font-bold text-foreground tabular-nums">
+      <p className="font-mono text-2xl lg:text-4xl font-bold text-foreground tabular-nums group-hover:text-cyan-brand transition-colors">
         {display}
         {stat.suffix}
       </p>
-    </div>
+    </Link>
   );
 };
 
