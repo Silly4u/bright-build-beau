@@ -651,6 +651,12 @@ const Analysis: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* ── POSITION CALC + TRADE JOURNAL ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              <PositionCalculator />
+              <TradeJournal />
+            </div>
           </div>
 
           {/* ── RIGHT SIDEBAR: Watchlist + Events + Alerts + Signal Feed ── */}
