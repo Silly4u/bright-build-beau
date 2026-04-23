@@ -56,35 +56,48 @@ function formatAssetCaption(setup: any, dateDisplay: string): string {
  * Call Microlink to capture ONLY the chart container, return the screenshot URL on Microlink CDN.
  * Returns null on failure.
  */
-async function fetchChartScreenshotUrl(asset: string): Promise<string | null> {
+async function fetchChartScreenshotUrl(asset: string, attempt = 1): Promise<string | null> {
   const target = `${SITE_BASE}/phan-tich?asset=${asset}`;
   const elementId = asset === "XAU" ? "#chart-xau" : "#chart-btc";
   const params = new URLSearchParams({
     url: target,
     screenshot: "true",
     meta: "false",
+    embed: "screenshot.url",
     element: elementId,
     "viewport.width": "1440",
     "viewport.height": "900",
     "viewport.deviceScaleFactor": "2",
     waitForSelector: elementId,
-    waitForTimeout: "8000",
+    waitForTimeout: "12000",
+    waitUntil: "networkidle0",
     overlay: "false",
+    timeout: "55000",
   });
   const apiUrl = `https://api.microlink.io/?${params.toString()}`;
+  console.log(`[${asset}] Microlink attempt ${attempt}: ${apiUrl}`);
 
   try {
-    const res = await fetch(apiUrl);
+    // AbortController to enforce our own ceiling (Edge functions have ~150s budget)
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 70_000);
+    const res = await fetch(apiUrl, { signal: ctrl.signal });
+    clearTimeout(timer);
     const json = await res.json();
-    if (json?.status !== "success" || !json?.data?.screenshot?.url) {
-      console.error(`[${asset}] Microlink returned no screenshot:`, JSON.stringify(json).slice(0, 500));
-      return null;
+    if (json?.status === "success" && json?.data?.screenshot?.url) {
+      return json.data.screenshot.url as string;
     }
-    return json.data.screenshot.url as string;
+    console.error(`[${asset}] Microlink attempt ${attempt} failed:`, JSON.stringify(json).slice(0, 400));
   } catch (e: any) {
-    console.error(`[${asset}] Microlink fetch error:`, e.message);
-    return null;
+    console.error(`[${asset}] Microlink attempt ${attempt} error:`, e.message);
   }
+
+  // Retry up to 2 times with backoff
+  if (attempt < 3) {
+    await new Promise((r) => setTimeout(r, 3000 * attempt));
+    return fetchChartScreenshotUrl(asset, attempt + 1);
+  }
+  return null;
 }
 
 /**
