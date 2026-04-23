@@ -22,10 +22,10 @@ interface EconEvent {
 }
 
 const HOW_STEPS = [
-  { num: '01', title: 'ĐĂNG KÝ TÀI KHOẢN', desc: 'Tạo tài khoản miễn phí trong 30 giây. Truy cập ngay vào platform.' },
-  { num: '02', title: 'KẾT NỐI TELEGRAM', desc: 'Tham gia kênh VIP để nhận tín hiệu real-time và phân tích chuyên sâu.' },
-  { num: '03', title: 'NHẬN TÍN HIỆU', desc: 'AI phân tích 24/7 và gửi setup chính xác đến bạn ngay khi cơ hội xuất hiện.' },
-  { num: '04', title: 'GIAO DỊCH AN TOÀN', desc: 'Theo dõi performance, quản lý risk, và scale lệnh có hệ thống.' },
+  { num: '01', title: 'ĐĂNG KÝ TÀI KHOẢN', desc: 'Tạo tài khoản miễn phí trong 30 giây. Truy cập ngay vào platform.', to: '/auth' },
+  { num: '02', title: 'KẾT NỐI TELEGRAM', desc: 'Tham gia kênh VIP để nhận tín hiệu real-time và phân tích chuyên sâu.', to: '/services' },
+  { num: '03', title: 'NHẬN TÍN HIỆU', desc: 'AI phân tích 24/7 và gửi setup chính xác đến bạn ngay khi cơ hội xuất hiện.', to: '/indicators' },
+  { num: '04', title: 'GIAO DỊCH AN TOÀN', desc: 'Theo dõi performance, quản lý risk, và scale lệnh có hệ thống.', to: '/analysis' },
 ];
 
 const FAQS = [
