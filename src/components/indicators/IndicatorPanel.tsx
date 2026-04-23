@@ -1,4 +1,5 @@
 import React from 'react';
+import IndicatorTooltip from './IndicatorTooltip';
 
 export interface IndicatorConfig {
   id: string;
@@ -36,6 +37,9 @@ const IndicatorPanel: React.FC<IndicatorPanelProps> = ({ indicators, onToggle })
               style={{ backgroundColor: ind.enabled ? ind.color : '#4B5563' }}
             />
             <span className="font-mono">{ind.label}</span>
+            <span onClick={(e) => e.stopPropagation()}>
+              <IndicatorTooltip indicatorId={ind.id} />
+            </span>
             {ind.note && (
               <span className="relative group/note cursor-help">
                 <span className="text-yellow-400 text-[10px]">⚠</span>
