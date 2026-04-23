@@ -22,10 +22,10 @@ interface EconEvent {
 }
 
 const HOW_STEPS = [
-  { num: '01', title: 'ĐĂNG KÝ TÀI KHOẢN', desc: 'Tạo tài khoản miễn phí trong 30 giây. Truy cập ngay vào platform.' },
-  { num: '02', title: 'KẾT NỐI TELEGRAM', desc: 'Tham gia kênh VIP để nhận tín hiệu real-time và phân tích chuyên sâu.' },
-  { num: '03', title: 'NHẬN TÍN HIỆU', desc: 'AI phân tích 24/7 và gửi setup chính xác đến bạn ngay khi cơ hội xuất hiện.' },
-  { num: '04', title: 'GIAO DỊCH AN TOÀN', desc: 'Theo dõi performance, quản lý risk, và scale lệnh có hệ thống.' },
+  { num: '01', title: 'ĐĂNG KÝ TÀI KHOẢN', desc: 'Tạo tài khoản miễn phí trong 30 giây. Truy cập ngay vào platform.', to: '/auth' },
+  { num: '02', title: 'KẾT NỐI TELEGRAM', desc: 'Tham gia kênh VIP để nhận tín hiệu real-time và phân tích chuyên sâu.', to: '/services' },
+  { num: '03', title: 'NHẬN TÍN HIỆU', desc: 'AI phân tích 24/7 và gửi setup chính xác đến bạn ngay khi cơ hội xuất hiện.', to: '/indicators' },
+  { num: '04', title: 'GIAO DỊCH AN TOÀN', desc: 'Theo dõi performance, quản lý risk, và scale lệnh có hệ thống.', to: '/analysis' },
 ];
 
 const FAQS = [
@@ -162,9 +162,10 @@ const MatrixContentDiscovery: React.FC = () => {
               const impactColor =
                 e.impact === 'high' ? 'text-neon-red border-neon-red/30 bg-neon-red/5' : 'text-cyan-brand border-cyan-brand/30 bg-cyan-brand/5';
               return (
-                <div
+                <Link
                   key={e.id}
-                  className={`p-3 hover:bg-white/5 transition-colors ${i < events.length - 1 ? 'border-b border-white/5' : ''}`}
+                  to="/economic-calendar"
+                  className={`block p-3 hover:bg-white/5 transition-colors ${i < events.length - 1 ? 'border-b border-white/5' : ''}`}
                 >
                   <div className="flex justify-between items-start gap-2 mb-1">
                     <span className="font-mono text-[10px] text-muted-foreground">
@@ -178,7 +179,7 @@ const MatrixContentDiscovery: React.FC = () => {
                     <span className="text-base">{e.flag}</span>
                     <span className="text-sm text-foreground line-clamp-2 leading-tight">{e.event_name}</span>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
@@ -195,9 +196,10 @@ const MatrixContentDiscovery: React.FC = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[1px] bg-white/5 p-[1px]">
           {HOW_STEPS.map((step, i) => (
-            <div
+            <Link
               key={step.num}
-              className="bg-[#0D0F16] p-6 hover:bg-[#161A26] transition-colors group relative"
+              to={step.to}
+              className="bg-[#0D0F16] p-6 hover:bg-[#161A26] transition-colors group relative block"
             >
               <div
                 className={`font-mono text-5xl font-bold mb-4 ${
@@ -206,9 +208,9 @@ const MatrixContentDiscovery: React.FC = () => {
               >
                 {step.num}
               </div>
-              <h3 className="font-bold text-foreground text-sm mb-2 tracking-wider">{step.title}</h3>
+              <h3 className="font-bold text-foreground text-sm mb-2 tracking-wider group-hover:text-cyan-brand transition-colors">{step.title}</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">{step.desc}</p>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

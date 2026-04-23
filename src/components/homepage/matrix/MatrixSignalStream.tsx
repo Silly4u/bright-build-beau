@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useSignals } from '@/hooks/useMarketData';
 
 const MatrixSignalStream: React.FC = () => {
@@ -15,7 +16,12 @@ const MatrixSignalStream: React.FC = () => {
           <div className="size-2 bg-uv shadow-[0_0_8px_#D926A9]" />
           SIGNAL_STREAM
         </h3>
-        <span className="font-mono text-[10px] text-muted-foreground">{signals.length} TÍN HIỆU</span>
+        <Link
+          to="/analysis"
+          className="font-mono text-[10px] text-muted-foreground hover:text-uv uppercase tracking-widest"
+        >
+          {signals.length} TÍN HIỆU →
+        </Link>
       </div>
       <div className="p-3 lg:p-4 flex flex-col gap-2 max-h-[280px] overflow-y-auto">
         {loading && [...Array(3)].map((_, i) => (
@@ -30,11 +36,12 @@ const MatrixSignalStream: React.FC = () => {
           const timeStr = time.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
           const dateStr = time.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
           return (
-            <div
+            <Link
               key={s.id}
-              className={`border-l-2 ${
-                buy ? 'border-neon-green bg-neon-green/[0.03]' : 'border-neon-red bg-neon-red/[0.03]'
-              } pl-3 py-2 font-mono`}
+              to="/analysis"
+              className={`block border-l-2 ${
+                buy ? 'border-neon-green bg-neon-green/[0.03] hover:bg-neon-green/[0.08]' : 'border-neon-red bg-neon-red/[0.03] hover:bg-neon-red/[0.08]'
+              } pl-3 py-2 font-mono transition-colors`}
             >
               <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
                 <span>[{timeStr} • {dateStr}]</span>
@@ -52,7 +59,7 @@ const MatrixSignalStream: React.FC = () => {
                 <span className="text-cyan-brand">@ {Number(s.price).toLocaleString()}</span>
                 <span className="text-muted-foreground text-[10px]">{s.timeframe}</span>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>

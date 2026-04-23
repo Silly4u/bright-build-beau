@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Stat {
@@ -7,6 +8,7 @@ interface Stat {
   suffix: string;
   format: 'number' | 'percent';
   borderColor: string;
+  to: string;
 }
 
 function useCountUp(target: number, duration = 1500): number {
@@ -38,15 +40,18 @@ const StatBox: React.FC<{ stat: Stat }> = ({ stat }) => {
       ? animated.toLocaleString('en-US')
       : animated.toString();
   return (
-    <div className={`bg-[#0D0F16] p-5 lg:p-6 border-b-2 ${stat.borderColor}`}>
+    <Link
+      to={stat.to}
+      className={`block bg-[#0D0F16] p-5 lg:p-6 border-b-2 ${stat.borderColor} hover:bg-[#161A26] transition-colors group`}
+    >
       <p className="font-mono text-[10px] lg:text-xs text-muted-foreground uppercase mb-2 tracking-widest">
         {stat.label}
       </p>
-      <p className="font-mono text-2xl lg:text-4xl font-bold text-foreground tabular-nums">
+      <p className="font-mono text-2xl lg:text-4xl font-bold text-foreground tabular-nums group-hover:text-cyan-brand transition-colors">
         {display}
         {stat.suffix}
       </p>
-    </div>
+    </Link>
   );
 };
 
@@ -61,9 +66,9 @@ const MatrixStats: React.FC = () => {
   }, []);
 
   const stats: Stat[] = [
-    { label: 'NODE_USERS', value: counts.users, suffix: '', format: 'number', borderColor: 'border-cyan-brand' },
-    { label: 'SIGNALS_FIRED', value: counts.signals, suffix: '', format: 'number', borderColor: 'border-uv' },
-    { label: 'WIN_RATE', value: counts.winRate, suffix: '%', format: 'percent', borderColor: 'border-neon-green' },
+    { label: 'NODE_USERS', value: counts.users, suffix: '', format: 'number', borderColor: 'border-cyan-brand', to: '/services' },
+    { label: 'SIGNALS_FIRED', value: counts.signals, suffix: '', format: 'number', borderColor: 'border-uv', to: '/analysis' },
+    { label: 'WIN_RATE', value: counts.winRate, suffix: '%', format: 'percent', borderColor: 'border-neon-green', to: '/analysis' },
   ];
 
   return (
