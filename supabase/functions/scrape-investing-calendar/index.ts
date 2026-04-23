@@ -408,11 +408,11 @@ serve(async (req) => {
 
     // Mode: 'today' (default), 'week' (Mon-Sun current week), '3day' (yesterday/today/tomorrow)
     let mode = "today";
-    let targetUrl = "https://vn.investing.com/economic-calendar/";
+    let customUrl: string | null = null;
     try {
       const body = await req.json();
       if (body?.mode) mode = body.mode;
-      if (body?.url) targetUrl = body.url;
+      if (body?.url) customUrl = body.url;
     } catch { /* default */ }
 
     // Compute today in VN time (GMT+7) for date hint
@@ -420,28 +420,78 @@ serve(async (req) => {
     const vnNow = new Date(nowUtc.getTime() + 7 * 3600 * 1000);
     const vnToday = `${vnNow.getUTCFullYear()}-${String(vnNow.getUTCMonth() + 1).padStart(2, "0")}-${String(vnNow.getUTCDate()).padStart(2, "0")}`;
 
-    console.log(`Mode: ${mode}, target: ${targetUrl}, vnToday: ${vnToday}`);
+    // ─── Build list of (url, dateHint) pairs to scrape ───
+    // forexfactory.com supports ?day=mmmddd.YYYY for any single date and renders full HTML (Jina-friendly)
+    const ffMonth = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+    const ffDayUrl = (d: Date) => {
+      const m = ffMonth[d.getUTCMonth()];
+      const day = String(d.getUTCDate()).padStart(2, "0");
+      const y = d.getUTCFullYear();
+      return `https://www.forexfactory.com/calendar?day=${m}${day}.${y}`;
+    };
+    const fmtVnKey = (d: Date) => `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,"0")}-${String(d.getUTCDate()).padStart(2,"0")}`;
 
-    // Fetch via Jina Reader
-    const markdown = await fetchViaJina(targetUrl);
-    console.log("Markdown length:", markdown.length);
-
-    if (markdown.length < 5000) {
-      throw new Error(`Content too short (${markdown.length} chars), likely blocked`);
+    const targets: { url: string; dateHint: string }[] = [];
+    if (customUrl) {
+      targets.push({ url: customUrl, dateHint: vnToday });
+    } else if (mode === "today") {
+      targets.push({ url: "https://vn.investing.com/economic-calendar/", dateHint: vnToday });
+    } else if (mode === "3day") {
+      for (const offset of [-1, 0, 1]) {
+        const d = new Date(vnNow); d.setUTCDate(vnNow.getUTCDate() + offset);
+        targets.push({ url: ffDayUrl(d), dateHint: fmtVnKey(d) });
+      }
+    } else if (mode === "week") {
+      // Monday → Sunday in VN time
+      const dow = vnNow.getUTCDay(); // 0=Sun..6=Sat
+      const diffToMonday = dow === 0 ? -6 : 1 - dow;
+      const monday = new Date(vnNow); monday.setUTCDate(vnNow.getUTCDate() + diffToMonday);
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(monday); d.setUTCDate(monday.getUTCDate() + i);
+        targets.push({ url: ffDayUrl(d), dateHint: fmtVnKey(d) });
+      }
+    } else {
+      targets.push({ url: "https://vn.investing.com/economic-calendar/", dateHint: vnToday });
     }
 
-    // Trim to events portion (skip nav, keep table area)
-    const tableStart = markdown.indexOf("Thời Gian Hiện Tại");
-    const trimmed = tableStart > 0 ? markdown.slice(tableStart, tableStart + 50000) : markdown.slice(0, 50000);
+    console.log(`Mode: ${mode}, vnToday: ${vnToday}, targets: ${targets.length}`);
 
-    // AI extraction
     const MODELS = [
       "google/gemini-2.5-flash",
       "google/gemini-2.5-flash-lite",
       "openai/gpt-5-nano",
     ];
-    let events = await extractWithAI(trimmed, LOVABLE_API_KEY, MODELS, vnToday);
-    if (!events) throw new Error("All AI models failed to extract events");
+
+    let events: any[] = [];
+    for (const t of targets) {
+      try {
+        console.log(`Fetching: ${t.url} (date=${t.dateHint})`);
+        const md = await fetchViaJina(t.url);
+        console.log(`  → markdown length: ${md.length}`);
+        if (md.length < 3000) { console.warn(`  → too short, skip`); continue; }
+
+        // Trim to events portion
+        const candidates = [
+          md.indexOf("Thời Gian Hiện Tại"),
+          md.indexOf("Time"),
+          md.indexOf("Currency"),
+        ].filter(i => i > 0);
+        const tableStart = candidates.length ? Math.min(...candidates) : 0;
+        const trimmed = md.slice(tableStart, tableStart + 50000);
+
+        const partial = await extractWithAI(trimmed, LOVABLE_API_KEY, MODELS, t.dateHint);
+        if (partial && partial.length > 0) {
+          for (const ev of partial) if (!ev.date) ev.date = t.dateHint;
+          events.push(...partial);
+          console.log(`  → +${partial.length} events`);
+        }
+      } catch (e) {
+        console.error(`Target ${t.url} failed:`, e instanceof Error ? e.message : e);
+      }
+    }
+
+    if (events.length === 0) throw new Error("No events extracted from any target");
+    console.log(`Total events extracted: ${events.length}`);
 
     // ─── Second pass: validate HIGH importance ───
     events = await validateImportance(events, LOVABLE_API_KEY);
