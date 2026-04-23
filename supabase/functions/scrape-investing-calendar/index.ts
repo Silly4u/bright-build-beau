@@ -9,126 +9,206 @@ const corsHeaders = {
 
 // ─── Country → Flag mapping ───
 const FLAG_MAP: Record<string, string> = {
-  "Mỹ": "🇺🇸", "Anh": "🇬🇧", "Nhật Bản": "🇯🇵", "Eurozone": "🇪🇺",
-  "Úc": "🇦🇺", "Canada": "🇨🇦", "Thụy Sĩ": "🇨🇭", "New Zealand": "🇳🇿",
-  "Trung Quốc": "🇨🇳", "Đức": "🇩🇪", "Pháp": "🇫🇷", "Ý": "🇮🇹",
-  "Tây Ban Nha": "🇪🇸", "Hàn Quốc": "🇰🇷", "Ấn Độ": "🇮🇳",
-  "Brazil": "🇧🇷", "Mexico": "🇲🇽", "Singapore": "🇸🇬",
-  "Hồng Kông": "🇭🇰", "Indonesia": "🇮🇩", "Thái Lan": "🇹🇭",
-  "Malaysia": "🇲🇾", "Philippines": "🇵🇭", "Việt Nam": "🇻🇳",
-  "Nam Phi": "🇿🇦", "Thổ Nhĩ Kỳ": "🇹🇷", "Nga": "🇷🇺",
-  "Hà Lan": "🇳🇱", "Bỉ": "🇧🇪", "Áo": "🇦🇹", "Bồ Đào Nha": "🇵🇹",
-  "Hy Lạp": "🇬🇷", "Ireland": "🇮🇪", "Phần Lan": "🇫🇮",
-  "Na Uy": "🇳🇴", "Thụy Điển": "🇸🇪", "Đan Mạch": "🇩🇰",
-  "Ba Lan": "🇵🇱", "Séc": "🇨🇿", "Hungary": "🇭🇺",
-  "Romania": "🇷🇴", "Israel": "🇮🇱", "Ả Rập Saudi": "🇸🇦",
+  "Mỹ": "🇺🇸", "Hoa Kỳ": "🇺🇸", "US": "🇺🇸",
+  "Anh": "🇬🇧", "Vương Quốc Anh": "🇬🇧", "UK": "🇬🇧",
+  "Nhật Bản": "🇯🇵", "Nhật": "🇯🇵", "JP": "🇯🇵",
+  "Eurozone": "🇪🇺", "Khu vực Eurozone": "🇪🇺", "EU": "🇪🇺",
+  "Úc": "🇦🇺", "Australia": "🇦🇺", "AU": "🇦🇺",
+  "Canada": "🇨🇦", "CA": "🇨🇦",
+  "Thụy Sĩ": "🇨🇭", "CH": "🇨🇭",
+  "New Zealand": "🇳🇿", "NZ": "🇳🇿",
+  "Trung Quốc": "🇨🇳", "CN": "🇨🇳",
+  "Đức": "🇩🇪", "DE": "🇩🇪",
+  "Pháp": "🇫🇷", "FR": "🇫🇷",
+  "Ý": "🇮🇹", "Italy": "🇮🇹", "IT": "🇮🇹",
+  "Tây Ban Nha": "🇪🇸", "ES": "🇪🇸",
+  "Hàn Quốc": "🇰🇷", "KR": "🇰🇷",
+  "Ấn Độ": "🇮🇳", "IN": "🇮🇳",
+  "Brazil": "🇧🇷", "BR": "🇧🇷",
+  "Mexico": "🇲🇽", "MX": "🇲🇽",
+  "Singapore": "🇸🇬", "SG": "🇸🇬",
+  "Hồng Kông": "🇭🇰", "HK": "🇭🇰",
+  "Indonesia": "🇮🇩", "ID": "🇮🇩",
+  "Thái Lan": "🇹🇭", "TH": "🇹🇭",
+  "Malaysia": "🇲🇾", "MY": "🇲🇾",
+  "Philippines": "🇵🇭", "PH": "🇵🇭",
+  "Việt Nam": "🇻🇳", "VN": "🇻🇳",
+  "Nam Phi": "🇿🇦", "ZA": "🇿🇦",
+  "Thổ Nhĩ Kỳ": "🇹🇷", "TR": "🇹🇷",
+  "Nga": "🇷🇺", "RU": "🇷🇺",
+  "Hà Lan": "🇳🇱", "NL": "🇳🇱",
+  "Bỉ": "🇧🇪", "BE": "🇧🇪",
+  "Áo": "🇦🇹", "AT": "🇦🇹",
+  "Bồ Đào Nha": "🇵🇹", "PT": "🇵🇹",
+  "Hy Lạp": "🇬🇷", "GR": "🇬🇷",
+  "Ireland": "🇮🇪", "IE": "🇮🇪",
+  "Phần Lan": "🇫🇮", "FI": "🇫🇮",
+  "Na Uy": "🇳🇴", "NO": "🇳🇴",
+  "Thụy Điển": "🇸🇪", "SE": "🇸🇪",
+  "Đan Mạch": "🇩🇰", "DK": "🇩🇰",
+  "Ba Lan": "🇵🇱", "PL": "🇵🇱",
+  "Séc": "🇨🇿", "CZ": "🇨🇿",
+  "Hungary": "🇭🇺", "HU": "🇭🇺",
+  "Romania": "🇷🇴", "RO": "🇷🇴",
+  "Israel": "🇮🇱", "IL": "🇮🇱",
+  "Ả Rập Saudi": "🇸🇦", "SA": "🇸🇦",
+};
+
+// Country-code → Vietnamese name (Investing uses 2-letter codes in VN page)
+const CC_TO_VN: Record<string, string> = {
+  US: "Mỹ", JP: "Nhật Bản", EU: "Eurozone", UK: "Anh",
+  AU: "Úc", CA: "Canada", CH: "Thụy Sĩ", NZ: "New Zealand",
+  CN: "Trung Quốc", DE: "Đức", FR: "Pháp", IT: "Ý",
+  ES: "Tây Ban Nha", KR: "Hàn Quốc", IN: "Ấn Độ",
+  BR: "Brazil", MX: "Mexico", SG: "Singapore",
+  HK: "Hồng Kông", ID: "Indonesia", TH: "Thái Lan",
+  MY: "Malaysia", PH: "Philippines", VN: "Việt Nam",
+  ZA: "Nam Phi", TR: "Thổ Nhĩ Kỳ", RU: "Nga",
+  NL: "Hà Lan", BE: "Bỉ", AT: "Áo", PT: "Bồ Đào Nha",
+  GR: "Hy Lạp", IE: "Ireland", FI: "Phần Lan",
+  NO: "Na Uy", SE: "Thụy Điển", DK: "Đan Mạch",
+  PL: "Ba Lan", CZ: "Séc", HU: "Hungary",
+  RO: "Romania", IL: "Israel", SA: "Ả Rập Saudi",
+};
+
+const CC_TO_CCY: Record<string, string> = {
+  US: "USD", JP: "JPY", EU: "EUR", UK: "GBP",
+  AU: "AUD", CA: "CAD", CH: "CHF", NZ: "NZD",
+  CN: "CNY", DE: "EUR", FR: "EUR", IT: "EUR",
+  ES: "EUR", KR: "KRW", IN: "INR", BR: "BRL",
+  MX: "MXN", SG: "SGD", HK: "HKD", ID: "IDR",
+  TH: "THB", MY: "MYR", PH: "PHP", VN: "VND",
+  ZA: "ZAR", TR: "TRY", RU: "RUB", NL: "EUR",
+  BE: "EUR", AT: "EUR", PT: "EUR", GR: "EUR",
+  IE: "EUR", FI: "EUR", NO: "NOK", SE: "SEK",
+  DK: "DKK", PL: "PLN", CZ: "CZK", HU: "HUF",
+  RO: "RON", IL: "ILS", SA: "SAR",
 };
 
 const IMPACT_MAP: Record<number, string> = { 1: "low", 2: "medium", 3: "high" };
 
-// ─── IMPORTANCE OVERRIDES (hardcoded) ───
-// Keywords in event name → forced importance
+// ─── IMPORTANCE OVERRIDES (hardcoded - applied AFTER AI) ───
 const OVERRIDE_DOWN_TO_1: string[] = [
-  // JPY
-  "Thất Nghiệp Nhật", "Bán Lẻ Nhật",
-  // CNY
-  "PBoC", "Lãi Suất Cho Vay Cơ Bản",
-  // CAD
-  "Bán Lẻ Canada", "Doanh Số Bán Lẻ Canada",
-  // AUD
-  "Thay Đổi Việc Làm Úc", "Employment Change Úc",
-  // EUR minor
-  "CPI Pháp",
-  // USD minor
-  "Goolsbee",
+  "thất nghiệp nhật", "bán lẻ nhật",
+  "pboc", "lãi suất cho vay cơ bản",
+  "bán lẻ canada", "doanh số bán lẻ canada",
+  "thay đổi việc làm úc",
+  "cpi pháp",
+  "goolsbee",
+  "đấu giá hối phiếu", "đấu giá tín phiếu",
+  "fdi trung quốc",
+  "chi tiêu thẻ tín dụng",
+  "hoạt động quốc gia của fed chi nhánh chicago",
 ];
 
 const OVERRIDE_TO_2: string[] = [
-  "Chicago PMI",
-  "Thất Nghiệp Đức", "Tỷ Lệ Thất Nghiệp Đức",
-  "CPI Ý", "Italy CPI",
-  "CPI Eurozone", "Eurozone CPI",
-  "Core CPI Eurozone", "CPI Lõi Eurozone",
-  "GDP Canada", "GDP MoM Canada",
-  "Fed Barr", "Barr",
+  "chicago pmi",
+  "thất nghiệp đức", "tỷ lệ thất nghiệp đức",
+  "cpi ý", "italy cpi",
+  "cpi eurozone", "eurozone cpi",
+  "core cpi eurozone", "cpi lõi eurozone",
+  "gdp canada", "gdp mom canada",
+  "fed barr", "barr",
 ];
 
 const OVERRIDE_UP_TO_3: string[] = [
-  "PMI Sản Xuất", "PMI Dịch Vụ", "ISM PMI",
-  "Jobless Claims", "Đơn Xin Trợ Cấp Thất Nghiệp",
-  "Trump",
-  "CB Consumer Confidence", "Niềm Tin Tiêu Dùng CB",
-  "JOLTS", "Cơ Hội Việc Làm JOLTS",
+  "pmi sản xuất", "pmi dịch vụ", "ism pmi",
+  "jobless claims", "đơn xin trợ cấp thất nghiệp", "đề nghị trợ cấp thất nghiệp",
+  "trump", "powell", "lagarde",
+  "cb consumer confidence", "niềm tin tiêu dùng cb",
+  "jolts", "cơ hội việc làm jolts",
+  "lãi suất fed", "fed funds", "fomc",
+  "ecb rate", "lãi suất ecb",
+  "boe rate", "lãi suất boe",
+  "boj rate", "lãi suất boj",
+  "rba rate", "lãi suất rba",
+  "non-farm", "phi nông nghiệp", "nfp",
+  "cpi mỹ", "us cpi", "core cpi mỹ",
+  "gdp mỹ", "us gdp",
+  "tỷ lệ thất nghiệp mỹ", "us unemployment",
 ];
 
 function applyOverrides(name: string, country: string, aiImportance: number): number {
   const text = `${name} ${country}`.toLowerCase();
-
-  for (const kw of OVERRIDE_UP_TO_3) {
-    if (text.includes(kw.toLowerCase())) return 3;
-  }
-  for (const kw of OVERRIDE_TO_2) {
-    if (text.includes(kw.toLowerCase())) return 2;
-  }
-  for (const kw of OVERRIDE_DOWN_TO_1) {
-    if (text.includes(kw.toLowerCase())) return 1;
-  }
-
+  for (const kw of OVERRIDE_UP_TO_3) if (text.includes(kw)) return 3;
+  for (const kw of OVERRIDE_TO_2) if (text.includes(kw)) return 2;
+  for (const kw of OVERRIDE_DOWN_TO_1) if (text.includes(kw)) return 1;
   return aiImportance;
+}
+
+// ─── Fetch via Jina Reader (bypasses Cloudflare) ───
+async function fetchViaJina(url: string): Promise<string> {
+  const jinaUrl = `https://r.jina.ai/${url}`;
+  const res = await fetch(jinaUrl, {
+    headers: {
+      "Accept": "text/plain",
+      "X-Return-Format": "markdown",
+    },
+  });
+  if (!res.ok) throw new Error(`Jina fetch failed: ${res.status}`);
+  return await res.text();
 }
 
 // ─── AI extraction with fallback chain ───
 async function extractWithAI(
   markdown: string,
   apiKey: string,
-  models: string[]
+  models: string[],
+  dateHint: string
 ): Promise<any[] | null> {
-  const systemPrompt = `You extract economic calendar events from scraped vn.investing.com content. Return ONLY a valid JSON array, no markdown fences, no explanation.
+  const systemPrompt = `You are a strict economic-calendar extractor. Return ONLY a valid JSON array, no markdown fences, no explanation.
 
-Each object must have: date, time, country, currency, importance, name, actual, forecast, previous.
+Each object: { date, time, country_code, name, actual, forecast, previous, importance }
 
-IMPORTANCE CLASSIFICATION:
-importance=3 (HIGH - market-moving):
-- Interest rate decisions (Lãi Suất, Fed Funds Rate, ECB Rate, BOJ Rate, BOE Rate, RBA Rate)
-- Non-Farm Payrolls (NFP, Bảng Lương Phi Nông Nghiệp)
-- CPI / Core CPI headline (YoY for US, EU, UK, JP, AU)
-- GDP headline for major economies
-- Unemployment Rate (US, EU, UK, JP, AU, CA)
-- PMI Manufacturing/Services ISM
-- Central bank speeches by heads (Fed Chair, ECB President, BOJ Governor, BOE Governor)
-- FOMC Minutes, ECB Press Conference
-- Retail Sales headline for US, EU
-- Spring Forecast Statement / Budget
+IMPORTANCE CLASSIFICATION (BE STRICT — IMPORTANCE MUST BE ACCURATE):
+
+importance=3 (HIGH — market-moving, top tier ONLY):
+- Interest rate decisions of major banks (Fed, ECB, BOE, BOJ, RBA, BOC, SNB, RBNZ)
+- Non-Farm Payrolls (NFP)
+- CPI / Core CPI HEADLINE for US, EU, UK, JP, AU, CA (YoY only)
+- GDP HEADLINE (advance/preliminary) for US, EU, UK, JP
+- Unemployment Rate for US, EU, UK, JP, AU, CA
+- ISM Manufacturing/Services PMI (US only)
+- Speeches by Fed Chair (Powell), ECB President (Lagarde), BOJ Governor, BOE Governor
+- FOMC Minutes / Statement / Press Conference
+- Retail Sales HEADLINE for US
+- Trump speeches/policy announcements
 
 importance=2 (MEDIUM):
-- PMI for individual countries (not ISM)
-- CPI for smaller economies or sub-components
-- Trade Balance, Current Account
-- Employment Change, Jobless Claims
+- Country-specific PMI (Manufacturing/Services/Composite for DE, FR, UK, JP, AU, CA)
+- CPI for smaller economies (CH, NZ, CA, AU)
+- Core inflation sub-readings, MoM CPI
+- Trade Balance, Current Account (major economies)
+- Jobless Claims (Initial, Continuing) — US only
 - Industrial Production, Factory Orders
-- Consumer Confidence, Business Confidence
-- Housing data, PPI
-- Central bank member speeches (not heads)
-- Bond Auctions (10Y, 30Y)
+- Consumer Confidence (CB, UoM, GfK), Business Confidence (IFO, ZEW)
+- Housing Starts, Building Permits, Existing/New Home Sales
+- PPI, Import/Export Prices
+- Central bank member speeches (NOT chairs)
+- Bond Auctions for 10Y, 30Y of major economies
 
 importance=1 (LOW):
-- Minor auctions (3M, 6M bills)
-- Small country data, revised/final readings
-- Money supply, credit data, holidays
+- T-bill auctions (3M, 6M, 4-week)
+- Small/emerging country data
+- Revised/Final readings (when preliminary already released)
+- Money supply, credit data
+- Holiday markers, regional Fed manufacturing indices (KC, Richmond, Dallas)
+- FDI, Foreign Reserves
+- Credit card spending, vehicle sales
 
-CRITICAL: Times/dates are GMT+7. Extract exactly as shown.`;
+CRITICAL RULES:
+- Times are GMT+7 (Vietnam timezone)
+- Date must be ${dateHint} unless content explicitly shows a different date
+- Use 2-letter country code (US, JP, EU, UK, AU, CA, CH, NZ, CN, DE, FR, IT, ES, KR, IN, BR, MX, SG, HK, ID, TH, MY, PH, VN, ZA, TR, RU, NL, BE, AT, PT, GR, IE, FI, NO, SE, DK, PL, CZ, HU, RO, IL, SA)
+- name: Vietnamese exactly as shown
+- actual/forecast/previous: string or null (preserve % and units)
+- EXCLUDE holidays, ads, navigation links
+- BE STRICT WITH IMPORTANCE — when in doubt, use lower tier`;
 
-  const userPrompt = `Extract ALL economic calendar events from this content.
-Rules:
-- date: YYYY-MM-DD (year 2026)
-- time: HH:MM 24h (GMT+7), or null
-- country: Vietnamese name
-- currency: code (USD, EUR, GBP, JPY, CNY, AUD, CAD, CHF, NZD, etc.)
-- importance: 1, 2, or 3
-- name: Vietnamese event name exactly as shown
-- actual, forecast, previous: string or null
-EXCLUDE holidays, ads, navigation.
-Content: ${markdown}`;
+  const userPrompt = `Extract ALL economic events from this calendar content. Default date: ${dateHint}.
+
+Content:
+${markdown}`;
 
   for (const model of models) {
     console.log(`Trying model: ${model}`);
@@ -145,20 +225,18 @@ Content: ${markdown}`;
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
           ],
-          temperature: 0.1,
+          temperature: 0.05,
         }),
       });
 
       if (!res.ok) {
-        const errText = await res.text();
-        console.error(`Model ${model} failed: ${res.status} - ${errText}`);
+        console.error(`Model ${model} failed: ${res.status} - ${await res.text()}`);
         continue;
       }
 
       const data = await res.json();
       const content = data.choices?.[0]?.message?.content || "";
 
-      // Parse JSON
       let events: any[];
       try {
         events = JSON.parse(content);
@@ -168,12 +246,8 @@ Content: ${markdown}`;
           events = JSON.parse(jsonMatch[1].trim());
         } else {
           const arrayMatch = content.match(/\[[\s\S]*\]/);
-          if (arrayMatch) {
-            events = JSON.parse(arrayMatch[0]);
-          } else {
-            console.error(`Model ${model}: could not parse JSON`);
-            continue;
-          }
+          if (arrayMatch) events = JSON.parse(arrayMatch[0]);
+          else { console.error(`Model ${model}: could not parse JSON`); continue; }
         }
       }
 
@@ -185,8 +259,80 @@ Content: ${markdown}`;
       console.error(`Model ${model} error:`, e);
     }
   }
-
   return null;
+}
+
+// ─── Second AI pass: re-validate importance for HIGH events ───
+async function validateImportance(
+  events: any[],
+  apiKey: string
+): Promise<any[]> {
+  // Only re-check events flagged HIGH (cheapest, highest impact on UX)
+  const highEvents = events.filter(e => e.importance === 3);
+  if (highEvents.length === 0) return events;
+
+  const list = highEvents.map((e, i) =>
+    `${i}. [${e.country_code}] ${e.name} (date=${e.date} time=${e.time})`
+  ).join("\n");
+
+  const prompt = `You are a strict reviewer. The following events were tagged importance=3 (HIGH). For each, decide if it TRULY belongs to importance=3 by these rules:
+
+KEEP at 3 ONLY if:
+- Major central bank rate decision (Fed/ECB/BOE/BOJ/RBA/BOC/SNB/RBNZ)
+- NFP, US CPI/Core CPI headline (YoY), US GDP headline, US Unemployment Rate, ISM PMI
+- CPI/Unemployment headline for EU, UK, JP, AU, CA
+- Speech by Powell, Lagarde, BOJ Gov, BOE Gov
+- FOMC minutes / press conference
+- Trump policy announcement
+
+DOWNGRADE to 2 if it's a country PMI (DE/FR/UK/JP), Jobless Claims, Consumer Confidence, Trade Balance, smaller-economy CPI.
+DOWNGRADE to 1 if it's an auction, FDI, regional Fed index, revised reading, credit-card spending, holiday.
+
+Events to review:
+${list}
+
+Respond ONLY with JSON array of {"index": number, "importance": 1|2|3} for each. No explanation.`;
+
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0,
+      }),
+    });
+    if (!res.ok) { console.warn("Validate pass failed:", res.status); return events; }
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content || "";
+
+    let decisions: { index: number; importance: number }[];
+    try { decisions = JSON.parse(content); }
+    catch {
+      const m = content.match(/\[[\s\S]*\]/);
+      if (!m) return events;
+      decisions = JSON.parse(m[0]);
+    }
+
+    let downgraded = 0;
+    for (const d of decisions) {
+      const orig = highEvents[d.index];
+      if (!orig) continue;
+      if (d.importance !== 3) {
+        const idx = events.indexOf(orig);
+        if (idx >= 0) {
+          events[idx].importance = d.importance;
+          downgraded++;
+        }
+      }
+    }
+    console.log(`Validation: downgraded ${downgraded}/${highEvents.length} HIGH events`);
+    return events;
+  } catch (e) {
+    console.warn("Validate pass error:", e);
+    return events;
+  }
 }
 
 serve(async (req) => {
@@ -202,79 +348,71 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Mode: 'today' (default), 'week' (Mon-Sun current week), '3day' (yesterday/today/tomorrow)
+    let mode = "today";
     let targetUrl = "https://vn.investing.com/economic-calendar/";
     try {
       const body = await req.json();
+      if (body?.mode) mode = body.mode;
       if (body?.url) targetUrl = body.url;
     } catch { /* default */ }
 
-    console.log("Scraping:", targetUrl);
+    // Compute today in VN time (GMT+7) for date hint
+    const nowUtc = new Date();
+    const vnNow = new Date(nowUtc.getTime() + 7 * 3600 * 1000);
+    const vnToday = `${vnNow.getUTCFullYear()}-${String(vnNow.getUTCMonth() + 1).padStart(2, "0")}-${String(vnNow.getUTCDate()).padStart(2, "0")}`;
 
-    // Fetch page
-    const pageRes = await fetch(targetUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "vi-VN,vi;q=0.9,en;q=0.8",
-      },
-    });
+    console.log(`Mode: ${mode}, target: ${targetUrl}, vnToday: ${vnToday}`);
 
-    if (!pageRes.ok) throw new Error(`Fetch failed: ${pageRes.status}`);
+    // Fetch via Jina Reader
+    const markdown = await fetchViaJina(targetUrl);
+    console.log("Markdown length:", markdown.length);
 
-    const html = await pageRes.text();
-    const textContent = html
-      .replace(/<script[\s\S]*?<\/script>/gi, "")
-      .replace(/<style[\s\S]*?<\/style>/gi, "")
-      .replace(/<br\s*\/?>/gi, "\n")
-      .replace(/<\/tr>/gi, "\n")
-      .replace(/<\/td>/gi, " | ")
-      .replace(/<\/th>/gi, " | ")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/&nbsp;/g, " ")
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, 60000);
+    if (markdown.length < 5000) {
+      throw new Error(`Content too short (${markdown.length} chars), likely blocked`);
+    }
 
-    console.log("Text length:", textContent.length);
+    // Trim to events portion (skip nav, keep table area)
+    const tableStart = markdown.indexOf("Thời Gian Hiện Tại");
+    const trimmed = tableStart > 0 ? markdown.slice(tableStart, tableStart + 50000) : markdown.slice(0, 50000);
 
-    // AI extraction with fallback chain
+    // AI extraction
     const MODELS = [
       "google/gemini-2.5-flash",
       "google/gemini-2.5-flash-lite",
       "openai/gpt-5-nano",
     ];
+    let events = await extractWithAI(trimmed, LOVABLE_API_KEY, MODELS, vnToday);
+    if (!events) throw new Error("All AI models failed to extract events");
 
-    const events = await extractWithAI(textContent, LOVABLE_API_KEY, MODELS);
+    // ─── Second pass: validate HIGH importance ───
+    events = await validateImportance(events, LOVABLE_API_KEY);
 
-    if (!events) {
-      throw new Error("All AI models failed to extract events");
-    }
-
-    // Upsert events
-    let inserted = 0, updated = 0, skipped = 0;
+    // Upsert
+    let inserted = 0, updated = 0, skipped = 0, importanceRevised = 0;
 
     for (const ev of events) {
-      if (!ev.date || !ev.name || !ev.country) { skipped++; continue; }
+      if (!ev.date || !ev.name || !ev.country_code) { skipped++; continue; }
 
-      // Apply importance overrides
-      const finalImportance = applyOverrides(ev.name, ev.country, ev.importance || 2);
+      const country = CC_TO_VN[ev.country_code] || ev.country_code;
+      const flag = FLAG_MAP[country] || FLAG_MAP[ev.country_code] || "🌐";
+
+      // Apply hardcoded overrides as final pass
+      const aiImp = typeof ev.importance === "number" ? ev.importance : 2;
+      const finalImportance = applyOverrides(ev.name, country, aiImp);
+      if (finalImportance !== aiImp) importanceRevised++;
       const impact = IMPACT_MAP[finalImportance] || "medium";
 
       const eventTime = ev.time
         ? `${ev.date}T${ev.time}:00+07:00`
         : `${ev.date}T00:00:00+07:00`;
 
-      const flag = FLAG_MAP[ev.country] || "🌐";
-
       // Check existing
       const { data: existing } = await supabase
         .from("economic_events")
         .select("id, actual, estimate, prev, impact")
         .eq("event_name", ev.name)
-        .eq("country", ev.country)
+        .eq("country", country)
         .gte("event_time", `${ev.date}T00:00:00+07:00`)
         .lte("event_time", `${ev.date}T23:59:59+07:00`)
         .limit(1);
@@ -306,7 +444,7 @@ serve(async (req) => {
           .from("economic_events")
           .insert({
             event_time: eventTime,
-            country: ev.country,
+            country,
             flag,
             event_name: ev.name,
             impact,
@@ -314,7 +452,6 @@ serve(async (req) => {
             estimate: ev.forecast || null,
             prev: ev.previous || null,
           });
-
         if (insertErr) {
           console.error("Insert error:", ev.name, insertErr.message);
           skipped++;
@@ -324,7 +461,16 @@ serve(async (req) => {
       }
     }
 
-    const result = { ok: true, total_extracted: events.length, inserted, updated, skipped };
+    const result = {
+      ok: true,
+      mode,
+      vnToday,
+      total_extracted: events.length,
+      inserted,
+      updated,
+      skipped,
+      importance_revised_by_overrides: importanceRevised,
+    };
     console.log("Result:", JSON.stringify(result));
 
     return new Response(JSON.stringify(result), {
