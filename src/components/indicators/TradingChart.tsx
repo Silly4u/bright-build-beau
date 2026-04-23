@@ -335,17 +335,30 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
     // ── Bollinger Bands ──
     if (indicators && enabledIndicators.includes('bb_squeeze')) {
-      const addBBLine = (values: number[], color: string) => {
+      const addBBLine = (
+        values: number[],
+        color: string,
+        opts: { width?: 1 | 2 | 3 | 4; style?: number; title?: string } = {},
+      ) => {
         const s = chart.addSeries(LineSeries, {
-          color, lineWidth: 1, lineStyle: 2,
-          priceLineVisible: false, lastValueVisible: false,
+          color,
+          lineWidth: opts.width ?? 2,
+          lineStyle: opts.style ?? 0, // 0 = solid
+          priceLineVisible: false,
+          lastValueVisible: false,
+          title: opts.title,
         });
         const d = values.map((v, i) => ({ time: (candles[i].time / 1000) as any, value: v }))
           .filter(p => typeof p.value === 'number' && !isNaN(p.value));
         if (d.length > 0) s.setData(d);
       };
-      addBBLine(indicators.bb.upper, 'rgba(66,165,245,0.3)');
-      addBBLine(indicators.bb.lower, 'rgba(66,165,245,0.3)');
+      // Upper / Lower: solid, brighter blue
+      addBBLine(indicators.bb.upper, 'rgba(66,165,245,0.9)', { width: 2, style: 0, title: 'BB Upper' });
+      addBBLine(indicators.bb.lower, 'rgba(66,165,245,0.9)', { width: 2, style: 0, title: 'BB Lower' });
+      // Middle (SMA20): dashed amber so it's clearly distinguishable
+      if (indicators.bb.middle) {
+        addBBLine(indicators.bb.middle, 'rgba(255,193,7,0.95)', { width: 2, style: 2, title: 'BB Mid (SMA20)' });
+      }
     }
 
     // ── EMA lines ──
