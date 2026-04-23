@@ -460,15 +460,14 @@ serve(async (req) => {
       "openai/gpt-5-nano",
     ];
 
-    let events: any[] = [];
-    for (const t of targets) {
+    // Process all targets in PARALLEL (Jina + Gemini direct support concurrent calls)
+    const results = await Promise.all(targets.map(async (t) => {
       try {
         console.log(`Fetching: ${t.url} (date=${t.dateHint})`);
         const md = await fetchViaJina(t.url);
-        console.log(`  → markdown length: ${md.length}`);
-        if (md.length < 3000) { console.warn(`  → too short, skip`); continue; }
+        console.log(`  → ${t.dateHint}: markdown length ${md.length}`);
+        if (md.length < 3000) { console.warn(`  → ${t.dateHint}: too short, skip`); return []; }
 
-        // Trim to events portion
         const candidates = [
           md.indexOf("Thời Gian Hiện Tại"),
           md.indexOf("Time"),
@@ -480,13 +479,17 @@ serve(async (req) => {
         const partial = await extractWithAI(trimmed, LOVABLE_API_KEY, MODELS, t.dateHint);
         if (partial && partial.length > 0) {
           for (const ev of partial) if (!ev.date) ev.date = t.dateHint;
-          events.push(...partial);
-          console.log(`  → +${partial.length} events`);
+          console.log(`  → ${t.dateHint}: +${partial.length} events`);
+          return partial;
         }
+        return [];
       } catch (e) {
         console.error(`Target ${t.url} failed:`, e instanceof Error ? e.message : e);
+        return [];
       }
-    }
+    }));
+
+    let events: any[] = results.flat();
 
     if (events.length === 0) throw new Error("No events extracted from any target");
     console.log(`Total events extracted: ${events.length}`);
