@@ -7,6 +7,7 @@ import { useBookmarks, useReadHistory } from '@/hooks/useNewsLocal';
 import NewsSidebar from '@/components/news/NewsSidebar';
 import BookmarkButton from '@/components/news/BookmarkButton';
 import ReactionBar from '@/components/news/ReactionBar';
+import { CONTACT_INFO } from '@/lib/contact';
 
 interface NewsStream {
   id: string;
@@ -22,11 +23,11 @@ interface NewsStream {
 }
 
 const NEWS_STREAMS: NewsStream[] = [
-  { id: 'hot', label: 'Tin Nóng', icon: '🔥', description: 'Tin tức nóng nhất, biến động giá, xu hướng thị trường', sources: 'CoinGecko · CryptoPanic', color: 'text-rose-400', borderColor: 'border-rose-400/40', bgColor: 'bg-rose-400/10', ctaLink: 'https://t.me/UNCLETRADER', ctaLabel: '🚀 Theo dõi Telegram' },
-  { id: 'whale', label: 'Cá Voi', icon: '🐋', description: 'Giao dịch siêu lớn, dòng tiền nạp/rút, TVL On-chain', sources: 'DefiLlama · Whale Alert', color: 'text-cyan-400', borderColor: 'border-cyan-400/40', bgColor: 'bg-cyan-400/10', ctaLink: 'https://t.me/UNCLETRADER', ctaLabel: '🐋 Cảnh báo Cá Voi' },
-  { id: 'macro', label: 'Vĩ Mô', icon: '🏛️', description: 'FED, SEC, lạm phát, luật pháp, lịch kinh tế', sources: 'Finnhub · CryptoPanic', color: 'text-violet-400', borderColor: 'border-violet-400/40', bgColor: 'bg-violet-400/10', ctaLink: 'https://t.me/UNCLETRADER', ctaLabel: '📡 Cập nhật Vĩ Mô' },
+  { id: 'hot', label: 'Tin Nóng', icon: '🔥', description: 'Tin tức nóng nhất, biến động giá, xu hướng thị trường', sources: 'CoinGecko · CryptoPanic', color: 'text-rose-400', borderColor: 'border-rose-400/40', bgColor: 'bg-rose-400/10', ctaLink: CONTACT_INFO.telegramUrl, ctaLabel: '🚀 Theo dõi Telegram' },
+  { id: 'whale', label: 'Cá Voi', icon: '🐋', description: 'Giao dịch siêu lớn, dòng tiền nạp/rút, TVL On-chain', sources: 'DefiLlama · Whale Alert', color: 'text-cyan-400', borderColor: 'border-cyan-400/40', bgColor: 'bg-cyan-400/10', ctaLink: CONTACT_INFO.telegramUrl, ctaLabel: '🐋 Cảnh báo Cá Voi' },
+  { id: 'macro', label: 'Vĩ Mô', icon: '🏛️', description: 'FED, SEC, lạm phát, luật pháp, lịch kinh tế', sources: 'Finnhub · CryptoPanic', color: 'text-violet-400', borderColor: 'border-violet-400/40', bgColor: 'bg-violet-400/10', ctaLink: CONTACT_INFO.telegramUrl, ctaLabel: '📡 Cập nhật Vĩ Mô' },
   { id: 'event', label: 'Sự Kiện', icon: '📅', description: 'Mainnet, Halving, xả token, Airdrop', sources: 'CoinMarketCal · CoinGecko', color: 'text-amber-400', borderColor: 'border-amber-400/40', bgColor: 'bg-amber-400/10', ctaLink: 'https://www.okx.com/join/UNCLETRADER', ctaLabel: '💰 Trade OKX -20% phí' },
-  { id: 'sentiment', label: 'Tâm Lý', icon: '📊', description: 'Fear & Greed, Long/Short, thanh lý, social buzz', sources: 'Alternative.me · CoinGecko', color: 'text-emerald-400', borderColor: 'border-emerald-400/40', bgColor: 'bg-emerald-400/10', ctaLink: 'https://t.me/UNCLETRADER', ctaLabel: '📊 Phân tích Tâm Lý' },
+  { id: 'sentiment', label: 'Tâm Lý', icon: '📊', description: 'Fear & Greed, Long/Short, thanh lý, social buzz', sources: 'Alternative.me · CoinGecko', color: 'text-emerald-400', borderColor: 'border-emerald-400/40', bgColor: 'bg-emerald-400/10', ctaLink: CONTACT_INFO.telegramUrl, ctaLabel: '📊 Phân tích Tâm Lý' },
 ];
 
 const SAVED_TAB = 'saved';
