@@ -114,6 +114,18 @@ body {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+@keyframes floatCardSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+}
+@keyframes floatCardMedium {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(12px); }
+}
+@keyframes floatCardDelayed {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
 
 .animate-blob-1 { animation: blobFloat 12s ease-in-out infinite; }
 .animate-blob-2 { animation: blobFloat2 15s ease-in-out infinite; }
@@ -122,6 +134,17 @@ body {
 .animate-fade-up { animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 .animate-pulse-glow { animation: pulseGlow 3s ease-in-out infinite; }
 .animate-rotate-slow { animation: rotateSlow 20s linear infinite; }
+.animate-float-card-slow { animation: floatCardSlow 8.5s ease-in-out infinite; }
+.animate-float-card-medium { animation: floatCardMedium 10s ease-in-out infinite 0.7s; }
+.animate-float-card-delayed { animation: floatCardDelayed 9.25s ease-in-out infinite 1.3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-card-slow,
+  .animate-float-card-medium,
+  .animate-float-card-delayed {
+    animation: none;
+  }
+}
 
 /* ─── Scan sweep animation ───────────────────────────────── */
 @keyframes scanSweep {
