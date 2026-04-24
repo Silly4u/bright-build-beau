@@ -25,15 +25,19 @@ const ChartSnapshot: React.FC = () => {
   const data = useMarketData(symbol, tf);
   const signals = useSmartSignals(data.candles, data.indicators, data.zones, symbol, data.loading);
 
-  // Mark page as ready when chart has data so Microlink's waitForSelector resolves
+  const hasChartData = data.candles.length > 0 && !data.loading;
+
+  // Mark page as ready only after TradingChart has mounted with non-empty candles.
+  // TradingChart creates its canvas on mount, so mounting it with empty candles
+  // leaves Microlink with only the legend/header and a blank chart area.
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    if (data.candles.length > 0 && !data.loading) {
-      // Give chart 1.5s to draw indicators after data arrives
-      const t = setTimeout(() => setReady(true), 1500);
+    setReady(false);
+    if (hasChartData) {
+      const t = setTimeout(() => setReady(true), 3000);
       return () => clearTimeout(t);
     }
-  }, [data.candles.length, data.loading]);
+  }, [hasChartData, asset, tf]);
 
   const price = data.candles[data.candles.length - 1]?.close ?? 0;
   const prev = data.candles[data.candles.length - 2]?.close ?? price;
@@ -63,16 +67,23 @@ const ChartSnapshot: React.FC = () => {
       </div>
 
       <div id={chartId} className="rounded-lg border border-border bg-card overflow-hidden">
-        <TradingChart
-          candles={data.candles}
-          indicators={data.indicators}
-          zones={data.zones}
-          signals={signals.map((s: any) => ({ time: Number(s.time), type: s.type === 'sell' ? 'sell' as const : 'buy' as const }))}
-          enabledIndicators={ENABLED_INDICATORS}
-          height={620}
-          label={label}
-          timeframe={tf}
-        />
+        {hasChartData ? (
+          <TradingChart
+            key={`${asset}-${tf}-${data.candles.length}`}
+            candles={data.candles}
+            indicators={data.indicators}
+            zones={data.zones}
+            signals={signals.map((s: any) => ({ time: Number(s.time), type: s.type === 'sell' ? 'sell' as const : 'buy' as const }))}
+            enabledIndicators={ENABLED_INDICATORS}
+            height={620}
+            label={label}
+            timeframe={tf}
+          />
+        ) : (
+          <div className="flex h-[662px] items-center justify-center bg-[#0b0e11] text-sm text-muted-foreground">
+            Loading {label}...
+          </div>
+        )}
       </div>
 
       {/* Marker that Microlink can wait on once chart is fully drawn */}
