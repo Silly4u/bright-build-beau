@@ -8,12 +8,12 @@ import slotImage05 from '@/assets/cta-slot-05.png';
 import slotImage06 from '@/assets/cta-slot-06.png';
 
 const visualSlots = [
-  { label: 'Slot 01', image: slotImage01, className: 'lg:left-[4%] lg:top-[11%] lg:w-64 lg:h-40 lg:-rotate-[10deg]', animation: 'animate-float-card-slow' },
-  { label: 'Slot 02', image: slotImage02, className: 'lg:left-[32%] lg:top-[4%] lg:w-40 lg:h-56 lg:rotate-[7deg]', animation: 'animate-float-card-medium' },
-  { label: 'Slot 03', image: slotImage03, className: 'lg:right-[5%] lg:top-[13%] lg:w-72 lg:h-44 lg:rotate-[12deg]', animation: 'animate-float-card-delayed' },
-  { label: 'Slot 04', image: slotImage04, className: 'lg:left-[8%] lg:bottom-[10%] lg:w-72 lg:h-48 lg:rotate-[8deg]', animation: 'animate-float-card-delayed' },
-  { label: 'Slot 05', image: slotImage05, className: 'lg:left-[38%] lg:bottom-[3%] lg:w-44 lg:h-60 lg:-rotate-[6deg]', animation: 'animate-float-card-slow' },
-  { label: 'Slot 06', image: slotImage06, className: 'lg:right-[11%] lg:bottom-[12%] lg:w-56 lg:h-44 lg:-rotate-[13deg]', animation: 'animate-float-card-medium' },
+  { label: 'Slot 01', image: slotImage01, className: 'lg:left-[3%] lg:top-[10%] lg:w-72 lg:h-44 lg:-rotate-[10deg]', animation: 'animate-float-card-slow' },
+  { label: 'Slot 02', image: slotImage02, className: 'lg:left-[31%] lg:top-[3%] lg:w-48 lg:h-64 lg:rotate-[7deg]', animation: 'animate-float-card-medium' },
+  { label: 'Slot 03', image: slotImage03, className: 'lg:right-[3%] lg:top-[12%] lg:w-80 lg:h-48 lg:rotate-[12deg]', animation: 'animate-float-card-delayed' },
+  { label: 'Slot 04', image: slotImage04, className: 'lg:left-[6%] lg:bottom-[9%] lg:w-80 lg:h-52 lg:rotate-[8deg]', animation: 'animate-float-card-delayed' },
+  { label: 'Slot 05', image: slotImage05, className: 'lg:left-[37%] lg:bottom-[2%] lg:w-52 lg:h-72 lg:-rotate-[6deg]', animation: 'animate-float-card-slow' },
+  { label: 'Slot 06', image: slotImage06, className: 'lg:right-[9%] lg:bottom-[11%] lg:w-64 lg:h-48 lg:-rotate-[13deg]', animation: 'animate-float-card-medium' },
 ];
 
 const CtaSection: React.FC = () => {
