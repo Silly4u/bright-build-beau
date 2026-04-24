@@ -11,8 +11,8 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const symbols = url.searchParams.get("symbols"); // e.g. ["BTCUSDT","XAUUSDT"]
-    const symbol = url.searchParams.get("symbol");   // single symbol
+    const symbols = url.searchParams.get("symbols") ?? req.headers.get("x-symbols"); // e.g. ["BTCUSDT","XAUUSDT"]
+    const symbol = url.searchParams.get("symbol") ?? req.headers.get("x-symbol");   // single symbol
 
     let binanceUrl: string;
     if (symbols) {

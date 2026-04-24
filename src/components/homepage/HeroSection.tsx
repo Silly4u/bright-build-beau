@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CryptoTicker {
   symbol: string;
@@ -30,7 +31,14 @@ const HeroSection: React.FC = () => {
       const symbols = initialTickers.map((t) => t.binanceSymbol);
       const results = await Promise.allSettled(
         symbols.map((sym) =>
-          fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/binance-proxy?symbol=${sym}`, { cache: 'no-store' }).then((r) => r.json())
+          supabase.functions.invoke('binance-proxy', {
+            body: null,
+            method: 'GET',
+            headers: { 'x-symbol': sym },
+          }).then(({ data, error }) => {
+            if (error) throw error;
+            return data;
+          })
         )
       );
       setTickers((prev) =>
