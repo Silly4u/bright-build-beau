@@ -141,9 +141,8 @@ const ChartSnapshot: React.FC = () => {
 
   const hasChartData = data.candles.length > 0 && !data.loading;
 
-  // Mark page as ready only after TradingChart has mounted with non-empty candles.
-  // TradingChart creates its canvas on mount, so mounting it with empty candles
-  // leaves Microlink with only the legend/header and a blank chart area.
+  // Mark page as ready only after the lightweight snapshot chart has drawn.
+  // Microlink waits for this marker before capturing the Telegram image.
   const [ready, setReady] = useState(false);
   useEffect(() => {
     setReady(false);
