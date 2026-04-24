@@ -2,12 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 const visualSlots = [
-  { label: 'Slot 01', className: 'lg:left-[8%] lg:top-[10%] lg:-rotate-12 lg:w-56 lg:h-36' },
-  { label: 'Slot 02', className: 'lg:left-1/2 lg:top-[6%] lg:-translate-x-1/2 lg:w-36 lg:h-48' },
-  { label: 'Slot 03', className: 'lg:right-[8%] lg:top-[9%] lg:rotate-12 lg:w-64 lg:h-40' },
-  { label: 'Slot 04', className: 'lg:left-[10%] lg:bottom-[8%] lg:-rotate-[16deg] lg:w-60 lg:h-40' },
-  { label: 'Slot 05', className: 'lg:left-1/2 lg:bottom-[4%] lg:-translate-x-1/2 lg:w-36 lg:h-48' },
-  { label: 'Slot 06', className: 'lg:right-[12%] lg:bottom-[8%] lg:rotate-[16deg] lg:w-48 lg:h-40' },
+  { label: 'Slot 01', className: 'lg:left-[4%] lg:top-[11%] lg:w-64 lg:h-40 lg:-rotate-[10deg]', animation: 'animate-float-card-slow' },
+  { label: 'Slot 02', className: 'lg:left-[32%] lg:top-[4%] lg:w-40 lg:h-56 lg:rotate-[7deg]', animation: 'animate-float-card-medium' },
+  { label: 'Slot 03', className: 'lg:right-[5%] lg:top-[13%] lg:w-72 lg:h-44 lg:rotate-[12deg]', animation: 'animate-float-card-delayed' },
+  { label: 'Slot 04', className: 'lg:left-[8%] lg:bottom-[10%] lg:w-72 lg:h-48 lg:rotate-[8deg]', animation: 'animate-float-card-delayed' },
+  { label: 'Slot 05', className: 'lg:left-[38%] lg:bottom-[3%] lg:w-44 lg:h-60 lg:-rotate-[6deg]', animation: 'animate-float-card-slow' },
+  { label: 'Slot 06', className: 'lg:right-[11%] lg:bottom-[12%] lg:w-56 lg:h-44 lg:-rotate-[13deg]', animation: 'animate-float-card-medium' },
 ];
 
 const CtaSection: React.FC = () => {
@@ -30,24 +30,27 @@ const CtaSection: React.FC = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-20 lg:py-28 relative overflow-hidden">
+    <section ref={sectionRef} className="py-24 lg:py-32 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none bg-background" />
-      <div className="absolute inset-0 pointer-events-none opacity-40 matrix-grid-bg" />
+      <div className="absolute inset-0 pointer-events-none opacity-25 matrix-grid-bg" />
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 min-h-[760px] lg:min-h-[720px]">
-        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:block">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 min-h-[860px] lg:min-h-[780px]">
+        <div className="relative grid grid-cols-2 gap-x-7 gap-y-10 pt-4 sm:grid-cols-3 lg:block lg:pt-0 lg:min-h-[780px]">
           {visualSlots.map((slot) => (
             <div
               key={slot.label}
               className={`reveal-hidden relative lg:absolute ${slot.className}`}
             >
-              <div className="aspect-[4/3] lg:aspect-auto lg:h-full rounded-[2rem] border border-border/40 bg-card/70 shadow-card-glow backdrop-blur-md" />
-              <div className="mt-3 text-center font-mono-custom text-xs text-muted-foreground">{slot.label}</div>
+              <div className={`${slot.animation} group relative aspect-[4/3] lg:aspect-auto lg:h-full rounded-[1.75rem] border border-border/20 bg-card/55 shadow-card-glow backdrop-blur-xl transition-transform duration-500 hover:scale-[1.025]`}>
+                <div className="absolute inset-0 rounded-[1.75rem] bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 opacity-70" />
+                <div className="absolute inset-[1px] rounded-[1.7rem] border border-foreground/5" />
+                <div className="absolute bottom-4 left-4 font-mono-custom text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70">{slot.label}</div>
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 lg:left-1/2 lg:right-auto lg:w-[440px] lg:-translate-x-1/2 text-center">
+        <div className="pointer-events-auto absolute inset-x-6 top-1/2 z-20 mx-auto max-w-[470px] -translate-y-1/2 text-center lg:left-1/2 lg:right-auto lg:w-[470px] lg:-translate-x-1/2">
           <p className="reveal-hidden font-mono-custom text-base sm:text-lg leading-relaxed text-foreground">
             From trading to community, unlock
             <br className="hidden sm:block" />
