@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Zap, MessageCircle, BarChart3 } from 'lucide-react';
-import heroMatrixBg from '@/assets/hero-matrix-bg.mp4.asset.json';
 
 const MatrixHero: React.FC = () => {
   const [version, setVersion] = useState('V.3.0.4');
@@ -28,7 +27,7 @@ const MatrixHero: React.FC = () => {
           muted
           playsInline
           className="absolute inset-0 w-full h-full object-cover opacity-50"
-          src={heroMatrixBg.url}
+          src="/videos/financial-market-hero.mp4"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-navy/60 via-navy/40 to-navy" />
       </div>
