@@ -14,28 +14,37 @@ import CtaSection from '@/components/homepage/CtaSection';
 
 const Index: React.FC = () => {
   return (
-    <main className="min-h-screen bg-navy text-foreground relative overflow-x-hidden">
+    <main className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
       <Header />
 
-      {/* Matrix neon ambient layer */}
-      <div className="absolute inset-0 matrix-grid-bg pointer-events-none z-0" />
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] aspect-square matrix-glow-uv pointer-events-none rounded-full z-0" />
-      <div className="absolute top-[20%] right-[-10%] w-[40%] aspect-square matrix-glow-cyan pointer-events-none rounded-full z-0" />
-
       <div className="relative z-10">
-        {/* Hero + Live Widgets side-by-side */}
-        <div className="max-w-7xl mx-auto pt-24 lg:pt-28 grid grid-cols-1 lg:grid-cols-12 gap-6 px-6 lg:px-12">
-          <div className="lg:col-span-7">
-            <MatrixHero />
+        <section className="relative min-h-[92svh] overflow-hidden border-b border-primary/10">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            className="absolute inset-0 h-full w-full object-cover opacity-60"
+            src="/videos/financial-market-hero.mp4"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,hsl(var(--background))_0%,hsl(var(--background)/0.86)_38%,hsl(var(--background)/0.54)_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_28%,hsl(var(--primary)/0.22),transparent_34%),radial-gradient(circle_at_22%_78%,hsl(var(--secondary)/0.18),transparent_30%)]" />
+          <div className="absolute inset-0 matrix-grid-bg opacity-35" />
+
+          <div className="relative max-w-7xl mx-auto min-h-[92svh] pt-28 lg:pt-32 pb-12 px-5 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-7 lg:gap-10 items-center">
+            <div className="lg:col-span-7 xl:col-span-8">
+              <MatrixHero />
+            </div>
+            <aside className="lg:col-span-5 xl:col-span-4 flex flex-col gap-4 lg:gap-5 lg:translate-y-8">
+              <MatrixLiveTicker />
+              <MatrixSignalStream />
+            </aside>
           </div>
-          <div className="lg:col-span-5 flex flex-col gap-5 pt-6 lg:pt-24">
-            <MatrixLiveTicker />
-            <MatrixSignalStream />
-          </div>
-        </div>
+        </section>
 
         {/* Stats counter + trust badges */}
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto -mt-1">
           <MatrixStats />
         </div>
 

@@ -18,42 +18,29 @@ const MatrixHero: React.FC = () => {
   }, []);
 
   return (
-    <section className="relative pt-20 pb-12 px-6 lg:px-12 overflow-hidden">
-      {/* Video background */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-50"
-          src="/videos/financial-market-hero.mp4"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-navy/60 via-navy/40 to-navy" />
-      </div>
-
+    <section className="relative py-8 lg:py-12 overflow-hidden">
       {/* Tag chip */}
-      <div className="relative inline-flex items-center gap-2 border border-uv/30 bg-uv/5 px-3 py-1.5 mb-8 shadow-[0_0_15px_rgba(217,38,169,0.4)]">
-        <span className="size-1.5 bg-uv rounded-full animate-ping" />
-        <span className="font-mono text-[11px] text-uv uppercase tracking-[0.2em]">
+      <div className="relative inline-flex max-w-full items-center gap-2 border border-secondary/30 bg-secondary/10 px-3 py-1.5 mb-7 shadow-violet-glow">
+        <span className="size-1.5 bg-secondary rounded-full animate-ping shrink-0" />
+        <span className="font-mono text-[10px] sm:text-[11px] text-secondary-foreground uppercase tracking-[0.18em] truncate">
           {version} • Hệ thống đang hoạt động • {time}
         </span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Hero Text */}
-        <div className="lg:col-span-7 flex flex-col gap-8">
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold uppercase tracking-tight leading-[0.85] text-foreground font-display">
+        <div className="lg:col-span-10 flex flex-col gap-7 lg:gap-8">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold uppercase tracking-normal leading-[0.86] text-foreground font-display max-w-[10ch]">
             Giao Dịch
             <br />
-            <span className="bg-clip-text text-transparent bg-[linear-gradient(90deg,#00F0FF_0%,#D926A9_100%)] drop-shadow-[0_0_30px_rgba(0,240,255,0.3)]">
+            <span className="text-primary drop-shadow-[0_0_30px_hsl(var(--primary)/0.28)]">
               Tốc Độ Quang
             </span>
             <br />
             Không Độ Trễ.
           </h1>
 
-          <p className="font-mono text-muted-foreground text-base lg:text-lg max-w-[55ch] border-l-2 border-cyan-brand/50 pl-4 leading-relaxed">
+          <p className="font-mono text-muted-foreground text-sm sm:text-base lg:text-lg max-w-[58ch] border-l-2 border-primary/50 pl-4 leading-relaxed">
             Cắm trực tiếp vào ma trận thị trường. Tín hiệu siêu tốc, phân tích AI thời gian thực,
             cộng đồng trader chuyên nghiệp Việt Nam.
           </p>
@@ -62,7 +49,7 @@ const MatrixHero: React.FC = () => {
           <div className="flex flex-wrap items-center gap-3 lg:gap-4">
             <Link
               to="/auth"
-              className="group bg-cyan-brand text-navy font-bold uppercase tracking-widest text-sm lg:text-base px-6 lg:px-8 py-3 lg:py-4 border-2 border-cyan-brand shadow-[0_0_25px_rgba(0,240,255,0.4)] hover:bg-white hover:border-white transition-all duration-300 inline-flex items-center gap-2"
+              className="group bg-primary text-primary-foreground font-bold uppercase tracking-widest text-sm lg:text-base px-6 lg:px-8 py-3 lg:py-4 border-2 border-primary shadow-cyan-glow hover:bg-foreground hover:border-foreground transition-all duration-300 inline-flex items-center gap-2"
             >
               <Zap className="w-4 h-4" />
               Đăng Ký Ngay
@@ -72,18 +59,18 @@ const MatrixHero: React.FC = () => {
               href="https://t.me/uncletraderVN"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-navy text-uv font-bold uppercase tracking-widest text-sm lg:text-base px-6 lg:px-8 py-3 lg:py-4 border-2 border-uv shadow-[inset_0_0_15px_rgba(217,38,169,0.4)] hover:bg-uv hover:text-white transition-all duration-300 inline-flex items-center gap-2"
+              className="bg-background/70 text-secondary-foreground font-bold uppercase tracking-widest text-sm lg:text-base px-6 lg:px-8 py-3 lg:py-4 border-2 border-secondary shadow-violet-glow hover:bg-secondary hover:text-secondary-foreground transition-all duration-300 inline-flex items-center gap-2"
             >
               <MessageCircle className="w-4 h-4" />
               Telegram VIP
             </a>
             <Link
               to="/services"
-              className="text-muted-foreground hover:text-cyan-brand font-mono text-sm uppercase tracking-widest underline underline-offset-4 px-4 py-3 transition-colors inline-flex items-center gap-2"
+              className="text-muted-foreground hover:text-primary font-mono text-sm uppercase tracking-widest underline underline-offset-4 px-4 py-3 transition-colors inline-flex items-center gap-2"
             >
               <BarChart3 className="w-4 h-4" />
               Xem Dịch Vụ
-              <span className="text-cyan-brand">→</span>
+              <span className="text-primary">→</span>
             </Link>
           </div>
         </div>
