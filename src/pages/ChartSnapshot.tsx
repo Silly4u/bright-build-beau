@@ -3,12 +3,6 @@ import { createChart, ColorType, CandlestickSeries, LineSeries, type IChartApi }
 import { useMarketData } from '@/hooks/useMarketData';
 import type { Candle, Indicators, Zone } from '@/hooks/useMarketData';
 
-const ENABLED_INDICATORS = [
-  'bb_squeeze', 'breakout', 'breakdown', 'confluence',
-  'momentum', 'vol_spike', 'rsi_div', 'sup_bounce',
-  'macd_cross', 'prev_week_fib',
-];
-
 interface SnapshotChartProps {
   candles: Candle[];
   indicators: Indicators | null;
