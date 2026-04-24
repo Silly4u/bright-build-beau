@@ -10,6 +10,7 @@ import { useSmartSignals } from '@/hooks/useSmartSignal';
 import { useDXY } from '@/hooks/useDXY';
 import { supabase } from '@/integrations/supabase/client';
 import { computeDualTrendlines } from '@/lib/computeTrendline';
+import { CONTACT_INFO } from '@/lib/contact';
 import html2canvas from 'html2canvas';
 
 const TIMEFRAMES = ['M5', 'M15', 'M30', 'H1', 'H4', 'D1', 'W1'];
@@ -260,7 +261,7 @@ const AnalysisDetail: React.FC = () => {
                 }`}>
                 {sendingSignal ? '⏳ Đang gửi...' : `📤 Gửi ${symbol?.toUpperCase()} Signal`}
               </button>
-              <a href="https://t.me/UNCLETRADER" target="_blank" rel="noopener noreferrer"
+              <a href={CONTACT_INFO.telegramUrl} target="_blank" rel="noopener noreferrer"
                 className="btn-primary px-5 py-2.5 rounded-xl text-xs font-bold text-center">
                 🚀 Tham Gia BOT SIGNAL Telegram
               </a>
