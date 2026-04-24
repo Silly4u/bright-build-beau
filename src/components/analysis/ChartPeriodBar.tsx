@@ -133,7 +133,7 @@ const ChartPeriodBar: React.FC<ChartPeriodBarProps> = ({ activeTf, onSelect, rig
             <div className="absolute right-0 bottom-full mb-1.5 w-56 max-h-[420px] overflow-y-auto bg-card border border-border/10 rounded-md shadow-2xl z-50 py-1">
               {INTERVAL_GROUPS.map(group => (
                 <div key={group.name}>
-                  <div className="px-3 pt-2 pb-1 text-[9px] font-mono text-[#848e9c] uppercase tracking-wider">
+                  <div className="px-3 pt-2 pb-1 text-[9px] font-mono text-muted-foreground uppercase tracking-wider">
                     {group.name}
                   </div>
                   {group.items.map(item => {
@@ -144,8 +144,8 @@ const ChartPeriodBar: React.FC<ChartPeriodBarProps> = ({ activeTf, onSelect, rig
                         onClick={() => { onSelect?.(item.tf); setOpen(false); }}
                         className={`w-full flex items-center justify-between px-3 py-1.5 text-[11px] font-mono transition-colors ${
                           isActive
-                            ? 'bg-white/10 text-[#fcd535]'
-                            : 'text-[#eaecef] hover:bg-white/5'
+                            ? 'bg-accent/10 text-accent'
+                            : 'text-foreground hover:bg-foreground/5'
                         }`}
                       >
                         <span>{item.label}</span>
@@ -160,7 +160,7 @@ const ChartPeriodBar: React.FC<ChartPeriodBarProps> = ({ activeTf, onSelect, rig
         </div>
 
         {rightLabel && (
-          <span className="text-[10px] font-mono text-[#848e9c]/70 whitespace-nowrap">{rightLabel}</span>
+          <span className="text-[10px] font-mono text-muted-foreground/70 whitespace-nowrap">{rightLabel}</span>
         )}
       </div>
     </div>
