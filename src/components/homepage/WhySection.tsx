@@ -18,6 +18,14 @@ const features = [
     color: 'violet',
   },
   {
+    icon: '⏰',
+    label: 'HỖ TRỢ 24/7',
+    title: 'Phản Hồi Trong 2 Giờ',
+    desc: 'Đội ngũ hỗ trợ luôn sẵn sàng giải đáp mọi thắc mắc về tín hiệu và chiến lược.',
+    stat: '< 2h response',
+    color: 'violet',
+  },
+  {
     icon: '🛡️',
     label: 'MINH BẠCH 100%',
     title: 'Lịch Sử Trade Công Khai',
@@ -33,14 +41,6 @@ const features = [
     desc: 'Từ technical analysis cơ bản đến on-chain data nâng cao. Nội dung được cập nhật liên tục theo thị trường.',
     stat: '50+ bài học',
     color: 'cyan',
-  },
-  {
-    icon: '⏰',
-    label: 'HỖ TRỢ 24/7',
-    title: 'Phản Hồi Trong 2 Giờ',
-    desc: 'Đội ngũ hỗ trợ luôn sẵn sàng giải đáp mọi thắc mắc về tín hiệu và chiến lược.',
-    stat: '< 2h response',
-    color: 'violet',
   },
 ];
 
