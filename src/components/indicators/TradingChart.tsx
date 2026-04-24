@@ -615,7 +615,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
           color: isLong ? '#26a69a' : '#ef5350',
           lineWidth: 2,
           lineStyle: 0,
-          axisLabelVisible: true,
+          axisLabelVisible: showPriceLineLabels,
           title: isLong ? '▲ AI Buy' : '▼ AI Sell',
         } as any);
 
@@ -628,7 +628,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
           setSafeData(series, entryT, price, endT, price);
           candleSeries.createPriceLine({
             price, color: '#26a69a', lineWidth: 1, lineStyle: 2,
-            axisLabelVisible: true, title: label,
+            axisLabelVisible: false, title: label,
           } as any);
         };
 
@@ -645,7 +645,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
           setSafeData(slSeries, entryT, sig.SL, endT, sig.SL);
           candleSeries.createPriceLine({
             price: sig.SL, color: '#ef5350', lineWidth: 1, lineStyle: 2,
-            axisLabelVisible: true, title: 'SL',
+            axisLabelVisible: false, title: 'SL',
           } as any);
         }
       }
