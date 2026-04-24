@@ -80,14 +80,14 @@ export default {
         },
       },
       fontFamily: {
-        display: ['Fraunces', 'serif'],
-        body: ['Manrope', 'sans-serif'],
+        display: ['Inter', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       backgroundImage: {
-        'gradient-cyber': 'linear-gradient(135deg, #00D4FF 0%, #7C3AED 100%)',
-        'gradient-gold': 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)',
-        'gradient-dark': 'linear-gradient(180deg, #0A0F1E 0%, #111827 100%)',
+        'gradient-cyber': 'linear-gradient(135deg, hsl(var(--color-cyan)) 0%, hsl(var(--color-violet)) 42%, hsl(var(--color-gold)) 72%, hsl(var(--color-violet-light)) 100%)',
+        'gradient-gold': 'linear-gradient(135deg, hsl(var(--color-gold)) 0%, hsl(var(--color-violet-light)) 100%)',
+        'gradient-dark': 'linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%)',
       },
       borderRadius: {
         lg: "var(--radius)",
