@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useEconomicEvents } from '@/hooks/useEconomicEvents';
+import { CONTACT_INFO } from '@/lib/contact';
 
 function fmtCountdown(target: Date): { text: string; soon: boolean; live: boolean; past: boolean } {
   const diff = target.getTime() - Date.now();
@@ -95,7 +96,7 @@ const NewsSidebar: React.FC = () => {
 
       {/* CTA Telegram dính */}
       <a
-        href="https://t.me/UNCLETRADER"
+        href={CONTACT_INFO.telegramUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="block bg-gradient-to-br from-cyan-500/20 via-cyan-500/10 to-violet-500/20 border border-cyan-400/30 rounded-2xl p-5 hover:border-cyan-400/60 hover:scale-[1.02] transition-all group"
