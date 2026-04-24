@@ -6,6 +6,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useIndicatorPermissions } from '@/hooks/useIndicatorPermissions';
 import EconomicTicker from './EconomicTicker';
 
+type BinanceTicker = {
+  symbol: string;
+  lastPrice?: string;
+  priceChangePercent?: string;
+};
+
 const navLinks = [
   { href: '/', label: 'Trang Chủ' },
   { href: '/tin-tuc', label: 'Tin Tức' },
@@ -24,14 +30,14 @@ const useLivePrice = () => {
   useEffect(() => {
     const fetchPrices = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/binance-proxy?symbol=BTCUSDT`);
-        const data = await res.json();
-        if (data?.lastPrice) setBtc({ price: parseFloat(data.lastPrice), change: parseFloat(data.priceChangePercent) });
-      } catch { /* silent */ }
-      try {
-        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/binance-proxy?symbol=PAXGUSDT`);
-        const data = await res.json();
-        if (data?.lastPrice) setGold({ price: parseFloat(data.lastPrice), change: parseFloat(data.priceChangePercent) });
+        const symbols = encodeURIComponent(JSON.stringify(['BTCUSDT', 'PAXGUSDT']));
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/binance-proxy?symbols=${symbols}`);
+        if (!res.ok) return;
+        const data = await res.json() as BinanceTicker[];
+        const btcTicker = data.find((ticker) => ticker.symbol === 'BTCUSDT');
+        const goldTicker = data.find((ticker) => ticker.symbol === 'PAXGUSDT');
+        if (btcTicker?.lastPrice) setBtc({ price: parseFloat(btcTicker.lastPrice), change: parseFloat(btcTicker.priceChangePercent ?? '0') });
+        if (goldTicker?.lastPrice) setGold({ price: parseFloat(goldTicker.lastPrice), change: parseFloat(goldTicker.priceChangePercent ?? '0') });
       } catch { /* silent */ }
     };
     fetchPrices();
