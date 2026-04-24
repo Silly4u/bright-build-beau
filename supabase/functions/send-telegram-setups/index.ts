@@ -58,9 +58,9 @@ function formatAssetCaption(setup: any, dateDisplay: string): string {
  */
 async function fetchChartScreenshotUrl(asset: string, attempt = 1): Promise<string | null> {
   const cacheBuster = `${asset.toLowerCase()}-${Date.now()}-${attempt}`;
-  // Use the lightweight /chart-snapshot route — no header/footer/news/ticker —
-  // so Microlink can render in well under its 27s navigation timeout.
-  const target = `${SITE_BASE}/chart-snapshot?asset=${asset}&tf=H4&cb=${cacheBuster}`;
+  // Temporary production-safe capture route: the published /phan-tich chart is already
+  // rendering candles correctly on the custom domain while /chart-snapshot awaits publish.
+  const target = `${SITE_BASE}/phan-tich?asset=${asset}&tf=H4&cb=${cacheBuster}`;
   const elementId = asset === "XAU" ? "#chart-xau" : "#chart-btc";
   const params = new URLSearchParams({
     url: target,
@@ -70,8 +70,8 @@ async function fetchChartScreenshotUrl(asset: string, attempt = 1): Promise<stri
     "viewport.width": "1280",
     "viewport.height": "760",
     "viewport.deviceScaleFactor": "2",
-    waitForSelector: "#snapshot-ready",
-    waitForTimeout: "2000",
+    waitForSelector: elementId,
+    waitForTimeout: "10000",
     overlay: "false",
     cache: "false",
   });
