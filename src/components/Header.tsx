@@ -5,6 +5,7 @@ import { Menu, X, Send, PhoneCall, TrendingUp, TrendingDown, ChevronDown, LogIn,
 import { useAuth } from '@/contexts/AuthContext';
 import { useIndicatorPermissions } from '@/hooks/useIndicatorPermissions';
 import EconomicTicker from './EconomicTicker';
+import { fetchBinanceTickers } from '@/lib/binance';
 
 type BinanceTicker = {
   symbol: string;
@@ -30,10 +31,7 @@ const useLivePrice = () => {
   useEffect(() => {
     const fetchPrices = async () => {
       try {
-        const symbols = encodeURIComponent(JSON.stringify(['BTCUSDT', 'PAXGUSDT']));
-        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/binance-proxy?symbols=${symbols}`);
-        if (!res.ok) return;
-        const data = await res.json() as BinanceTicker[];
+        const data = Object.values(await fetchBinanceTickers(['BTCUSDT', 'PAXGUSDT'])) as BinanceTicker[];
         const btcTicker = data.find((ticker) => ticker.symbol === 'BTCUSDT');
         const goldTicker = data.find((ticker) => ticker.symbol === 'PAXGUSDT');
         if (btcTicker?.lastPrice) setBtc({ price: parseFloat(btcTicker.lastPrice), change: parseFloat(btcTicker.priceChangePercent ?? '0') });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { fetchBinanceTickers } from '@/lib/binance';
 
 interface Ticker {
   symbol: string;
@@ -25,26 +25,15 @@ const MatrixLiveTicker: React.FC = () => {
 
   useEffect(() => {
     const fetchAll = async () => {
-      const results = await Promise.allSettled(
-        PAIRS.map(p =>
-          supabase.functions.invoke('binance-proxy', {
-            body: null,
-            method: 'GET',
-            headers: { 'x-symbol': p.symbol },
-          }).then(({ data, error }) => {
-            if (error) throw error;
-            return data;
-          })
-        )
-      );
+      const tickerMap = await fetchBinanceTickers(PAIRS.map((pair) => pair.symbol)).catch(() => ({}));
       setTickers(prev =>
         prev.map((t, i) => {
-          const r = results[i];
-          if (r.status === 'fulfilled' && r.value?.lastPrice) {
+          const data = tickerMap[PAIRS[i].symbol];
+          if (data?.lastPrice) {
             return {
               ...t,
-              price: parseFloat(r.value.lastPrice),
-              change: parseFloat(r.value.priceChangePercent),
+              price: parseFloat(data.lastPrice),
+              change: parseFloat(data.priceChangePercent ?? '0'),
               loading: false,
             };
           }
