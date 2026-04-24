@@ -99,7 +99,7 @@ const ChartPeriodBar: React.FC<ChartPeriodBarProps> = ({ activeTf, onSelect, rig
   const activeQuickLabel = QUICK_INTERVALS.find(q => q.tf === activeTf)?.label ?? activeTf ?? '';
 
   return (
-    <div className={`flex items-center justify-end gap-2 px-3 py-1.5 bg-[#0b0e11] border-t border-white/5 ${className || ''}`}>
+    <div className={`flex items-center justify-end gap-2 px-3 py-1.5 bg-background border-t border-border/10 ${className || ''}`}>
       {/* Right: quick intervals + dropdown + UTC */}
       <div className="flex items-center gap-1.5 shrink-0">
         <div className="hidden md:flex items-center gap-0.5">
@@ -108,9 +108,9 @@ const ChartPeriodBar: React.FC<ChartPeriodBarProps> = ({ activeTf, onSelect, rig
               key={q.label}
               onClick={() => onSelect?.(q.tf)}
               className={`px-1.5 py-1 rounded text-[10px] font-mono font-bold transition-all ${
-                activeTf === q.tf
-                  ? 'bg-[#fcd535]/15 text-[#fcd535]'
-                  : 'text-[#848e9c] hover:text-[#eaecef] hover:bg-white/5'
+                  activeTf === q.tf
+                    ? 'bg-accent/15 text-accent'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-foreground/5'
               }`}
             >
               {q.label}
@@ -122,7 +122,7 @@ const ChartPeriodBar: React.FC<ChartPeriodBarProps> = ({ activeTf, onSelect, rig
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setOpen(o => !o)}
-            className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono font-bold text-[#eaecef] bg-white/5 hover:bg-white/10 transition-all"
+            className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-mono font-bold text-foreground bg-foreground/5 hover:bg-foreground/10 transition-all"
             aria-label="Select interval"
           >
             <span>{activeQuickLabel || '1h'}</span>
@@ -130,7 +130,7 @@ const ChartPeriodBar: React.FC<ChartPeriodBarProps> = ({ activeTf, onSelect, rig
           </button>
 
           {open && (
-            <div className="absolute right-0 bottom-full mb-1.5 w-56 max-h-[420px] overflow-y-auto bg-[#1e2329] border border-white/10 rounded-md shadow-2xl z-50 py-1">
+            <div className="absolute right-0 bottom-full mb-1.5 w-56 max-h-[420px] overflow-y-auto bg-card border border-border/10 rounded-md shadow-2xl z-50 py-1">
               {INTERVAL_GROUPS.map(group => (
                 <div key={group.name}>
                   <div className="px-3 pt-2 pb-1 text-[9px] font-mono text-[#848e9c] uppercase tracking-wider">
