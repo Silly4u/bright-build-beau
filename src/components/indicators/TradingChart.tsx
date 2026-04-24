@@ -71,10 +71,11 @@ interface TradingChartProps {
   alphaEventData?: AlphaEventResult | null;
   alphaProData?: AlphaProResult | null;
   onLoadMore?: () => void;
+  priceLineLabels?: 'full' | 'minimal';
 }
 
 const TradingChart: React.FC<TradingChartProps> = ({
-  candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height = 380, label, scanning, scanLabel, timeframe, onTimeframeChange, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, proEmaData, srData, wyckoffData, alphaLHData, alphaEventData, alphaProData, onLoadMore,
+  candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height = 380, label, scanning, scanLabel, timeframe, onTimeframeChange, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, proEmaData, srData, wyckoffData, alphaLHData, alphaEventData, alphaProData, onLoadMore, priceLineLabels = 'full',
 }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -96,6 +97,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
   candlesRef.current = candles;
   onLoadMoreRef.current = onLoadMore;
+  const showPriceLineLabels = priceLineLabels === 'full';
 
   // Stable series updates: prepend history, append bars, or update the active bar without rebuilding the chart.
   useEffect(() => {
