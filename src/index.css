@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@320;330;340;400;450;480;540;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,47 +6,47 @@
 
 @layer base {
   :root {
-    --color-navy: 222 60% 8%;
-    --color-navy-mid: 220 33% 11%;
-    --color-navy-light: 217 38% 18%;
-    --color-cyan: 191 100% 50%;
-    --color-cyan-dim: 191 100% 40%;
-    --color-violet: 263 84% 55%;
-    --color-violet-light: 271 91% 65%;
-    --color-gold: 38 92% 50%;
-    --color-foreground: 226 100% 93%;
-    --color-muted: 222 16% 61%;
-    --color-border: 191 100% 50%;
+    --color-navy: 0 0% 100%;
+    --color-navy-mid: 0 0% 96%;
+    --color-navy-light: 0 0% 92%;
+    --color-cyan: 205 100% 53%;
+    --color-cyan-dim: 205 84% 45%;
+    --color-violet: 267 100% 68%;
+    --color-violet-light: 333 100% 61%;
+    --color-gold: 13 89% 53%;
+    --color-foreground: 0 0% 0%;
+    --color-muted: 220 6% 45%;
+    --color-border: 0 0% 0%;
 
-    --background: 222 60% 8%;
-    --foreground: 226 100% 93%;
-    --card: 217 38% 18%;
-    --card-foreground: 226 100% 93%;
-    --popover: 222 60% 8%;
-    --popover-foreground: 226 100% 93%;
-    --primary: 191 100% 50%;
-    --primary-foreground: 222 60% 8%;
-    --secondary: 263 84% 55%;
-    --secondary-foreground: 226 100% 93%;
-    --muted: 217 38% 18%;
-    --muted-foreground: 222 16% 61%;
-    --accent: 38 92% 50%;
-    --accent-foreground: 222 60% 8%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 267 100% 68%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 220 6% 45%;
+    --accent: 205 100% 53%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 191 100% 50%;
-    --input: 217 38% 18%;
-    --ring: 191 100% 50%;
+    --border: 0 0% 0%;
+    --input: 0 0% 92%;
+    --ring: 205 100% 53%;
     --radius: 0.75rem;
 
-    --sidebar-background: 222 60% 8%;
-    --sidebar-foreground: 226 100% 93%;
-    --sidebar-primary: 191 100% 50%;
-    --sidebar-primary-foreground: 222 60% 8%;
-    --sidebar-accent: 217 38% 18%;
-    --sidebar-accent-foreground: 226 100% 93%;
-    --sidebar-border: 191 100% 50%;
-    --sidebar-ring: 191 100% 50%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 0 0% 0%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 94%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 0%;
+    --sidebar-ring: 205 100% 53%;
   }
 }
 
