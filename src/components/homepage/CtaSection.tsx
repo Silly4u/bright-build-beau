@@ -1,13 +1,19 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import slotImage01 from '@/assets/cta-slot-01.png';
+import slotImage02 from '@/assets/cta-slot-02.png';
+import slotImage03 from '@/assets/cta-slot-03.png';
+import slotImage04 from '@/assets/cta-slot-04.png';
+import slotImage05 from '@/assets/cta-slot-05.png';
+import slotImage06 from '@/assets/cta-slot-06.png';
 
 const visualSlots = [
-  { label: 'Slot 01', className: 'lg:left-[4%] lg:top-[11%] lg:w-64 lg:h-40 lg:-rotate-[10deg]', animation: 'animate-float-card-slow' },
-  { label: 'Slot 02', className: 'lg:left-[32%] lg:top-[4%] lg:w-40 lg:h-56 lg:rotate-[7deg]', animation: 'animate-float-card-medium' },
-  { label: 'Slot 03', className: 'lg:right-[5%] lg:top-[13%] lg:w-72 lg:h-44 lg:rotate-[12deg]', animation: 'animate-float-card-delayed' },
-  { label: 'Slot 04', className: 'lg:left-[8%] lg:bottom-[10%] lg:w-72 lg:h-48 lg:rotate-[8deg]', animation: 'animate-float-card-delayed' },
-  { label: 'Slot 05', className: 'lg:left-[38%] lg:bottom-[3%] lg:w-44 lg:h-60 lg:-rotate-[6deg]', animation: 'animate-float-card-slow' },
-  { label: 'Slot 06', className: 'lg:right-[11%] lg:bottom-[12%] lg:w-56 lg:h-44 lg:-rotate-[13deg]', animation: 'animate-float-card-medium' },
+  { label: 'Slot 01', image: slotImage01, className: 'lg:left-[4%] lg:top-[11%] lg:w-64 lg:h-40 lg:-rotate-[10deg]', animation: 'animate-float-card-slow' },
+  { label: 'Slot 02', image: slotImage02, className: 'lg:left-[32%] lg:top-[4%] lg:w-40 lg:h-56 lg:rotate-[7deg]', animation: 'animate-float-card-medium' },
+  { label: 'Slot 03', image: slotImage03, className: 'lg:right-[5%] lg:top-[13%] lg:w-72 lg:h-44 lg:rotate-[12deg]', animation: 'animate-float-card-delayed' },
+  { label: 'Slot 04', image: slotImage04, className: 'lg:left-[8%] lg:bottom-[10%] lg:w-72 lg:h-48 lg:rotate-[8deg]', animation: 'animate-float-card-delayed' },
+  { label: 'Slot 05', image: slotImage05, className: 'lg:left-[38%] lg:bottom-[3%] lg:w-44 lg:h-60 lg:-rotate-[6deg]', animation: 'animate-float-card-slow' },
+  { label: 'Slot 06', image: slotImage06, className: 'lg:right-[11%] lg:bottom-[12%] lg:w-56 lg:h-44 lg:-rotate-[13deg]', animation: 'animate-float-card-medium' },
 ];
 
 const CtaSection: React.FC = () => {
@@ -41,10 +47,15 @@ const CtaSection: React.FC = () => {
               key={slot.label}
               className={`reveal-hidden relative lg:absolute ${slot.className}`}
             >
-              <div className={`${slot.animation} group relative aspect-[4/3] lg:aspect-auto lg:h-full rounded-[1.75rem] border border-border/20 bg-card/55 shadow-card-glow backdrop-blur-xl transition-transform duration-500 hover:scale-[1.025]`}>
-                <div className="absolute inset-0 rounded-[1.75rem] bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 opacity-70" />
+              <div className={`${slot.animation} group relative aspect-[4/3] lg:aspect-auto lg:h-full overflow-hidden rounded-[1.75rem] border border-border/20 bg-card/55 shadow-card-glow backdrop-blur-xl transition-transform duration-500 hover:scale-[1.025]`}>
+                <img
+                  src={slot.image}
+                  alt={`${slot.label} trading chart preview`}
+                  className="h-full w-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 rounded-[1.75rem] bg-gradient-to-br from-background/5 via-transparent to-background/35" />
                 <div className="absolute inset-[1px] rounded-[1.7rem] border border-foreground/5" />
-                <div className="absolute bottom-4 left-4 font-mono-custom text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70">{slot.label}</div>
               </div>
             </div>
           ))}
