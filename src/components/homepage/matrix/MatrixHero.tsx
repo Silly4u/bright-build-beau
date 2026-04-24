@@ -30,7 +30,7 @@ const MatrixHero: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Hero Text */}
         <div className="lg:col-span-10 flex flex-col gap-7 lg:gap-8">
-          <h1 className="text-[clamp(3rem,8vw,6.75rem)] font-bold uppercase tracking-normal leading-[0.86] text-foreground font-display max-w-[10ch]">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold uppercase tracking-normal leading-[0.86] text-foreground font-display max-w-[10ch]">
             Giao Dịch
             <br />
             <span className="text-primary drop-shadow-[0_0_30px_hsl(var(--primary)/0.28)]">
