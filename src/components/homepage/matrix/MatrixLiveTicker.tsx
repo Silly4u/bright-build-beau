@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Ticker {
   symbol: string;
@@ -26,9 +27,14 @@ const MatrixLiveTicker: React.FC = () => {
     const fetchAll = async () => {
       const results = await Promise.allSettled(
         PAIRS.map(p =>
-          fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/binance-proxy?symbol=${p.symbol}`, {
-            cache: 'no-store',
-          }).then(r => r.json())
+          supabase.functions.invoke('binance-proxy', {
+            body: null,
+            method: 'GET',
+            headers: { 'x-symbol': p.symbol },
+          }).then(({ data, error }) => {
+            if (error) throw error;
+            return data;
+          })
         )
       );
       setTickers(prev =>
