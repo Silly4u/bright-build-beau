@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { fetchBinanceTickers } from '@/lib/binance';
 
 interface CryptoTicker {
   symbol: string;
@@ -29,23 +29,11 @@ const HeroSection: React.FC = () => {
   const fetchPrices = useCallback(async () => {
     try {
       const symbols = initialTickers.map((t) => t.binanceSymbol);
-      const results = await Promise.allSettled(
-        symbols.map((sym) =>
-          supabase.functions.invoke('binance-proxy', {
-            body: null,
-            method: 'GET',
-            headers: { 'x-symbol': sym },
-          }).then(({ data, error }) => {
-            if (error) throw error;
-            return data;
-          })
-        )
-      );
+      const tickerMap = await fetchBinanceTickers(symbols);
       setTickers((prev) =>
         prev.map((ticker, idx) => {
-          const result = results[idx];
-          if (result.status === 'fulfilled' && result.value?.lastPrice) {
-            const data = result.value;
+          const data = tickerMap[symbols[idx]];
+          if (data?.lastPrice) {
             const price = parseFloat(data.lastPrice);
             const changePercent = parseFloat(data.priceChangePercent);
             const formattedPrice = price >= 1000

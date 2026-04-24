@@ -7,6 +7,12 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, OPTIONS",
 };
 
+const jsonResponse = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
 const isValidSymbol = (value: string) => /^[A-Z0-9]{2,20}$/.test(value);
 
 const parseSymbols = (value: string) => {
@@ -36,27 +42,39 @@ serve(async (req) => {
       if (!isValidSymbol(normalized)) throw new Error("Invalid 'symbol' param");
       binanceUrl = `https://api.binance.com/api/v3/ticker/24hr?symbol=${encodeURIComponent(normalized)}`;
     } else {
-      return new Response(JSON.stringify({ error: "Missing 'symbols' or 'symbol' param" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "Missing 'symbols' or 'symbol' param", fallback: false }, 400);
     }
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
-    const res = await fetch(binanceUrl, {
-      headers: { "User-Agent": "Mozilla/5.0" },
-      signal: controller.signal,
-    });
+    let res: Response;
+
+    try {
+      res = await fetch(binanceUrl, {
+        headers: { "User-Agent": "Mozilla/5.0" },
+        signal: controller.signal,
+      });
+    } catch (error) {
+      clearTimeout(timeout);
+      console.error("binance-proxy upstream fetch error:", error);
+      return jsonResponse({ error: "SERVICE_UNAVAILABLE", fallback: true, data: null });
+    }
+
     clearTimeout(timeout);
 
     if (!res.ok) {
       const text = await res.text();
       console.error("Binance API error:", res.status, text);
-      return new Response(JSON.stringify({ error: "Binance API error", status: res.status }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      const isFallbackable = res.status >= 500 || res.status === 429;
+      return jsonResponse(
+        {
+          error: isFallbackable ? "SERVICE_UNAVAILABLE" : "Binance API error",
+          status: res.status,
+          fallback: isFallbackable,
+          data: null,
+        },
+        isFallbackable ? 200 : 502,
+      );
     }
 
     const data = await res.json();
@@ -65,9 +83,6 @@ serve(async (req) => {
     });
   } catch (e) {
     console.error("binance-proxy error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: e instanceof Error ? e.message : "Unknown error", fallback: true, data: null });
   }
 });
