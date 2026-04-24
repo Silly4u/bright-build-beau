@@ -2,12 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 const visualSlots = [
-  { label: 'Magic Eden', className: 'lg:left-[7%] lg:top-[4%] lg:-rotate-12 lg:w-64 lg:h-40', shape: '[clip-path:polygon(0_0,100%_25%,92%_100%,8%_88%)]' },
-  { label: 'Ora', className: 'lg:left-1/2 lg:top-[5%] lg:-translate-x-1/2 lg:w-36 lg:h-48', shape: 'rounded-2xl' },
-  { label: 'Gamma', className: 'lg:right-[7%] lg:top-[4%] lg:rotate-12 lg:w-72 lg:h-44', shape: '[clip-path:polygon(10%_18%,100%_0,90%_100%,0_100%)]' },
-  { label: 'SwanSwap', className: 'lg:left-[10%] lg:bottom-[5%] lg:-rotate-[17deg] lg:w-60 lg:h-44', shape: 'rounded-2xl' },
-  { label: 'ARamp', className: 'lg:left-1/2 lg:bottom-[2%] lg:-translate-x-1/2 lg:w-36 lg:h-52', shape: '[clip-path:polygon(8%_0,92%_0,100%_100%,0_100%)]' },
-  { label: 'Coolchange', className: 'lg:right-[13%] lg:bottom-[7%] lg:rotate-[18deg] lg:w-48 lg:h-40', shape: 'rounded-2xl' },
+  { label: 'Slot 01', className: 'lg:left-[8%] lg:top-[10%] lg:-rotate-12 lg:w-56 lg:h-36' },
+  { label: 'Slot 02', className: 'lg:left-1/2 lg:top-[6%] lg:-translate-x-1/2 lg:w-36 lg:h-48' },
+  { label: 'Slot 03', className: 'lg:right-[8%] lg:top-[9%] lg:rotate-12 lg:w-64 lg:h-40' },
+  { label: 'Slot 04', className: 'lg:left-[10%] lg:bottom-[8%] lg:-rotate-[16deg] lg:w-60 lg:h-40' },
+  { label: 'Slot 05', className: 'lg:left-1/2 lg:bottom-[4%] lg:-translate-x-1/2 lg:w-36 lg:h-48' },
+  { label: 'Slot 06', className: 'lg:right-[12%] lg:bottom-[8%] lg:rotate-[16deg] lg:w-48 lg:h-40' },
 ];
 
 const CtaSection: React.FC = () => {
@@ -32,17 +32,16 @@ const CtaSection: React.FC = () => {
   return (
     <section ref={sectionRef} className="py-20 lg:py-28 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none bg-background" />
-      <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-border/30 pointer-events-none" />
-      <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-border/20 pointer-events-none" />
+      <div className="absolute inset-0 pointer-events-none opacity-40 matrix-grid-bg" />
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 min-h-[820px] lg:min-h-[760px]">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 min-h-[760px] lg:min-h-[720px]">
         <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:block">
           {visualSlots.map((slot) => (
             <div
               key={slot.label}
               className={`reveal-hidden relative lg:absolute ${slot.className}`}
             >
-              <div className={`aspect-[4/3] lg:aspect-auto lg:h-full ${slot.shape} border border-border/40 bg-card/75 shadow-card-glow backdrop-blur-md`} />
+              <div className="aspect-[4/3] lg:aspect-auto lg:h-full rounded-[2rem] border border-border/40 bg-card/70 shadow-card-glow backdrop-blur-md" />
               <div className="mt-3 text-center font-mono-custom text-xs text-muted-foreground">{slot.label}</div>
             </div>
           ))}
@@ -50,11 +49,11 @@ const CtaSection: React.FC = () => {
 
         <div className="absolute inset-x-6 top-1/2 -translate-y-1/2 lg:left-1/2 lg:right-auto lg:w-[440px] lg:-translate-x-1/2 text-center">
           <p className="reveal-hidden font-mono-custom text-base sm:text-lg leading-relaxed text-foreground">
-            From trading to learning, unlock
+            From trading to community, unlock
             <br className="hidden sm:block" />
-            the full potential of every setup,
+            the full potential of UNCLETRADER,
             <br className="hidden sm:block" />
-            <span className="text-muted-foreground">all in one disciplined place.</span>
+            <span className="text-muted-foreground">all in one secure place.</span>
           </p>
 
           <div className="reveal-hidden mt-8 inline-flex items-center gap-2 border border-border/50 bg-card/70 rounded-full px-5 py-2.5">
