@@ -93,18 +93,16 @@ const WhySection: React.FC = () => {
             return (
               <div
                 key={feature.title}
-                className={`reveal-hidden glass-card glass-card-hover rounded-2xl p-6 lg:p-7 min-h-[260px] flex flex-col ${feature.wide ? 'md:col-span-2 lg:col-span-3 lg:grid lg:grid-cols-[auto_1fr_auto] lg:items-center lg:gap-8' : ''}`}
+                className={`reveal-hidden glass-card glass-card-hover rounded-2xl p-6 lg:p-7 ${feature.wide ? 'md:col-span-2 lg:col-span-2' : ''}`}
                 style={{ transitionDelay: `${idx * 80}ms` }}
               >
-                <div className={`w-12 h-12 ${colors.bg} ${colors.border} border rounded-xl flex shrink-0 items-center justify-center text-xl mb-5 ${feature.wide ? 'lg:mb-0 lg:w-16 lg:h-16 lg:text-2xl' : ''}`}>
+                <div className={`w-12 h-12 ${colors.bg} ${colors.border} border rounded-xl flex items-center justify-center text-xl mb-5`}>
                   {feature.icon}
                 </div>
-                <div className={feature.wide ? 'lg:max-w-3xl' : ''}>
-                  <div className="section-label mb-2">{feature.label}</div>
-                  <h3 className="font-display font-semibold text-xl text-foreground mb-3 tracking-tight">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed mb-5">{feature.desc}</p>
-                </div>
-                <div className={`mt-auto inline-flex w-fit items-center gap-2 ${colors.bg} ${colors.border} border rounded-full px-3 py-1.5 ${feature.wide ? 'lg:mt-0 lg:justify-self-end lg:whitespace-nowrap' : ''}`}>
+                <div className="section-label mb-2">{feature.label}</div>
+                <h3 className="font-display font-semibold text-xl text-foreground mb-3 tracking-tight">{feature.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed mb-5">{feature.desc}</p>
+                <div className={`inline-flex items-center gap-2 ${colors.bg} ${colors.border} border rounded-full px-3 py-1.5`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${colors.text.replace('text', 'bg')}`} />
                   <span className={`font-mono-custom text-xs ${colors.text} font-medium`}>{feature.stat}</span>
                 </div>
