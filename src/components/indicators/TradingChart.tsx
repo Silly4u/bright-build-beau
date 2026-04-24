@@ -496,7 +496,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
           color: latestGrab.type === 'sellside' ? '#26a69a' : '#ef5350',
           lineWidth: 1,
           lineStyle: 2,
-          axisLabelVisible: true,
+          axisLabelVisible: showPriceLineLabels,
           title: latestGrab.type === 'sellside' ? '● Liq Grab Low' : '● Liq Grab High',
         } as any);
       }
@@ -515,26 +515,26 @@ const TradingChart: React.FC<TradingChartProps> = ({
           color: isLong ? '#26a69a' : '#ef5350',
           lineWidth: 2,
           lineStyle: 0,
-          axisLabelVisible: true,
+          axisLabelVisible: showPriceLineLabels,
           title: isLong ? '▲ Buy' : '▼ Sell',
         } as any);
 
         // TP/SL as price axis labels
         candleSeries.createPriceLine({
           price: trade.tp1, color: '#26a69a', lineWidth: 1, lineStyle: 2,
-          axisLabelVisible: true, title: 'TP1',
+          axisLabelVisible: false, title: 'TP1',
         } as any);
         candleSeries.createPriceLine({
           price: trade.tp2, color: '#26a69a', lineWidth: 1, lineStyle: 2,
-          axisLabelVisible: true, title: 'TP2',
+          axisLabelVisible: false, title: 'TP2',
         } as any);
         candleSeries.createPriceLine({
           price: trade.tp3, color: '#26a69a', lineWidth: 1, lineStyle: 2,
-          axisLabelVisible: true, title: 'TP3',
+          axisLabelVisible: false, title: 'TP3',
         } as any);
         candleSeries.createPriceLine({
           price: trade.slTarget, color: '#ef5350', lineWidth: 1, lineStyle: 2,
-          axisLabelVisible: true, title: 'SL',
+          axisLabelVisible: false, title: 'SL',
         } as any);
 
         // Result marker at exit
@@ -545,7 +545,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
             color: resultColor,
             lineWidth: 2,
             lineStyle: 0,
-            axisLabelVisible: true,
+            axisLabelVisible: showPriceLineLabels,
             title: `✓ ${trade.result}`,
           } as any);
         }
