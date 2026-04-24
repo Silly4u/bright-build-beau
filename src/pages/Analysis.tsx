@@ -494,6 +494,7 @@ const Analysis: React.FC = () => {
                           scanLabel={scanLabel}
                           timeframe={btcTimeframe}
                           onTimeframeChange={setBtcTimeframe}
+                          priceLineLabels="minimal"
                         />
                         <ChartPeriodBar
                           activeTf={btcTimeframe}
@@ -540,6 +541,7 @@ const Analysis: React.FC = () => {
                           scanLabel={scanLabel}
                           timeframe={goldTimeframe}
                           onTimeframeChange={setGoldTimeframe}
+                          priceLineLabels="minimal"
                         />
                         <ChartPeriodBar
                           activeTf={goldTimeframe}

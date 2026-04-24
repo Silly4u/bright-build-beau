@@ -71,10 +71,11 @@ interface TradingChartProps {
   alphaEventData?: AlphaEventResult | null;
   alphaProData?: AlphaProResult | null;
   onLoadMore?: () => void;
+  priceLineLabels?: 'full' | 'minimal';
 }
 
 const TradingChart: React.FC<TradingChartProps> = ({
-  candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height = 380, label, scanning, scanLabel, timeframe, onTimeframeChange, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, proEmaData, srData, wyckoffData, alphaLHData, alphaEventData, alphaProData, onLoadMore,
+  candles, indicators, zones, trendline, trendlineResistance, signals, enabledIndicators, height = 380, label, scanning, scanLabel, timeframe, onTimeframeChange, smcAnalysis, alphaNetData, matrixData, engineData, tpSlData, buySellData, proEmaData, srData, wyckoffData, alphaLHData, alphaEventData, alphaProData, onLoadMore, priceLineLabels = 'full',
 }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -96,6 +97,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
   candlesRef.current = candles;
   onLoadMoreRef.current = onLoadMore;
+  const showPriceLineLabels = priceLineLabels === 'full';
 
   // Stable series updates: prepend history, append bars, or update the active bar without rebuilding the chart.
   useEffect(() => {
@@ -494,7 +496,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
           color: latestGrab.type === 'sellside' ? '#26a69a' : '#ef5350',
           lineWidth: 1,
           lineStyle: 2,
-          axisLabelVisible: true,
+          axisLabelVisible: showPriceLineLabels,
           title: latestGrab.type === 'sellside' ? '● Liq Grab Low' : '● Liq Grab High',
         } as any);
       }
@@ -513,26 +515,26 @@ const TradingChart: React.FC<TradingChartProps> = ({
           color: isLong ? '#26a69a' : '#ef5350',
           lineWidth: 2,
           lineStyle: 0,
-          axisLabelVisible: true,
+          axisLabelVisible: showPriceLineLabels,
           title: isLong ? '▲ Buy' : '▼ Sell',
         } as any);
 
         // TP/SL as price axis labels
         candleSeries.createPriceLine({
           price: trade.tp1, color: '#26a69a', lineWidth: 1, lineStyle: 2,
-          axisLabelVisible: true, title: 'TP1',
+          axisLabelVisible: false, title: 'TP1',
         } as any);
         candleSeries.createPriceLine({
           price: trade.tp2, color: '#26a69a', lineWidth: 1, lineStyle: 2,
-          axisLabelVisible: true, title: 'TP2',
+          axisLabelVisible: false, title: 'TP2',
         } as any);
         candleSeries.createPriceLine({
           price: trade.tp3, color: '#26a69a', lineWidth: 1, lineStyle: 2,
-          axisLabelVisible: true, title: 'TP3',
+          axisLabelVisible: false, title: 'TP3',
         } as any);
         candleSeries.createPriceLine({
           price: trade.slTarget, color: '#ef5350', lineWidth: 1, lineStyle: 2,
-          axisLabelVisible: true, title: 'SL',
+          axisLabelVisible: false, title: 'SL',
         } as any);
 
         // Result marker at exit
@@ -543,7 +545,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
             color: resultColor,
             lineWidth: 2,
             lineStyle: 0,
-            axisLabelVisible: true,
+            axisLabelVisible: showPriceLineLabels,
             title: `✓ ${trade.result}`,
           } as any);
         }
@@ -613,7 +615,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
           color: isLong ? '#26a69a' : '#ef5350',
           lineWidth: 2,
           lineStyle: 0,
-          axisLabelVisible: true,
+          axisLabelVisible: showPriceLineLabels,
           title: isLong ? '▲ AI Buy' : '▼ AI Sell',
         } as any);
 
@@ -626,7 +628,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
           setSafeData(series, entryT, price, endT, price);
           candleSeries.createPriceLine({
             price, color: '#26a69a', lineWidth: 1, lineStyle: 2,
-            axisLabelVisible: true, title: label,
+            axisLabelVisible: false, title: label,
           } as any);
         };
 
@@ -643,7 +645,7 @@ const TradingChart: React.FC<TradingChartProps> = ({
           setSafeData(slSeries, entryT, sig.SL, endT, sig.SL);
           candleSeries.createPriceLine({
             price: sig.SL, color: '#ef5350', lineWidth: 1, lineStyle: 2,
-            axisLabelVisible: true, title: 'SL',
+            axisLabelVisible: false, title: 'SL',
           } as any);
         }
       }
