@@ -427,12 +427,12 @@ const Analysis: React.FC = () => {
           {/* ── LEFT: Charts + Commentary ── */}
           <div className="space-y-3 min-w-0">
             {/* Asset tabs */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-lg border border-border/10 bg-card/40 p-1">
               <button
                 onClick={() => setActiveAsset('BTC')}
                 className={`px-3 py-1.5 rounded-md text-xs font-bold font-mono transition-all border ${
                   activeAsset === 'BTC'
-                    ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                    ? 'bg-accent/15 border-accent/40 text-accent'
                     : 'bg-foreground/5 border-foreground/10 text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -442,7 +442,7 @@ const Analysis: React.FC = () => {
                 onClick={() => setActiveAsset('XAU')}
                 className={`px-3 py-1.5 rounded-md text-xs font-bold font-mono transition-all border ${
                   activeAsset === 'XAU'
-                    ? 'bg-yellow-500/15 border-yellow-500/40 text-yellow-300'
+                    ? 'bg-accent/15 border-accent/40 text-accent'
                     : 'bg-foreground/5 border-foreground/10 text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -458,13 +458,13 @@ const Analysis: React.FC = () => {
             </div>
 
             {/* Single chart panel */}
-            <div className="space-y-2 min-w-0">
+              <div className="space-y-3 min-w-0 rounded-lg border border-border/10 bg-background/80 p-2 shadow-card-glow">
               {activeAsset === 'BTC' ? (
                 <>
                   <div
                     id="chart-btc"
                     data-screenshot-target="btc"
-                    className="bg-[#0b0e11] border border-white/5 rounded-md overflow-hidden flex flex-col"
+                      className="bg-background border border-border/10 rounded-md overflow-hidden flex flex-col"
                     ref={btcChartRef}
                   >
                     {btcData.loading ? (
@@ -510,7 +510,7 @@ const Analysis: React.FC = () => {
                   <div
                     id="chart-xau"
                     data-screenshot-target="xau"
-                    className="bg-[#0b0e11] border border-white/5 rounded-md overflow-hidden flex flex-col"
+                      className="bg-background border border-border/10 rounded-md overflow-hidden flex flex-col"
                     ref={goldChartRef}
                   >
                     {goldData.loading ? (
