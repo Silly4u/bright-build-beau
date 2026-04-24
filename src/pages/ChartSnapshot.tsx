@@ -1,13 +1,134 @@
-import React, { useEffect, useState } from 'react';
-import TradingChart from '@/components/indicators/TradingChart';
+import React, { useEffect, useRef, useState } from 'react';
+import { createChart, ColorType, CandlestickSeries, LineSeries, type IChartApi } from 'lightweight-charts';
 import { useMarketData } from '@/hooks/useMarketData';
-import { useSmartSignals } from '@/hooks/useSmartSignal';
+import type { Candle, Indicators, Zone } from '@/hooks/useMarketData';
 
 const ENABLED_INDICATORS = [
   'bb_squeeze', 'breakout', 'breakdown', 'confluence',
   'momentum', 'vol_spike', 'rsi_div', 'sup_bounce',
   'macd_cross', 'prev_week_fib',
 ];
+
+interface SnapshotChartProps {
+  candles: Candle[];
+  indicators: Indicators | null;
+  zones: Zone[];
+  height?: number;
+  label: string;
+  onDrawn: () => void;
+}
+
+const SnapshotChart: React.FC<SnapshotChartProps> = ({ candles, indicators, zones, height = 620, label, onDrawn }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const chartRef = useRef<IChartApi | null>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || candles.length === 0) return;
+
+    const chart = createChart(container, {
+      layout: {
+        background: { type: ColorType.Solid, color: '#0b0e11' },
+        textColor: '#848e9c',
+        fontFamily: "'JetBrains Mono', 'SF Mono', 'Menlo', monospace",
+        fontSize: 11,
+      },
+      grid: {
+        vertLines: { color: 'rgba(255,255,255,0.04)' },
+        horzLines: { color: 'rgba(255,255,255,0.04)' },
+      },
+      rightPriceScale: {
+        borderColor: 'rgba(255,255,255,0.08)',
+        scaleMargins: { top: 0.08, bottom: 0.16 },
+      },
+      timeScale: {
+        borderColor: 'rgba(255,255,255,0.08)',
+        timeVisible: true,
+        secondsVisible: false,
+        barSpacing: 7,
+        rightOffset: 8,
+      },
+      width: Math.max(800, container.clientWidth),
+      height,
+    });
+    chartRef.current = chart;
+
+    const candleSeries = chart.addSeries(CandlestickSeries, {
+      upColor: '#0ecb81',
+      downColor: '#f6465d',
+      borderUpColor: '#0ecb81',
+      borderDownColor: '#f6465d',
+      wickUpColor: '#0ecb81',
+      wickDownColor: '#f6465d',
+      title: label,
+    });
+
+    const chartData = candles.map((c) => ({
+      time: Math.floor(c.time / 1000) as any,
+      open: c.open,
+      high: c.high,
+      low: c.low,
+      close: c.close,
+    }));
+    candleSeries.setData(chartData);
+
+    if (indicators?.bb) {
+      const addLine = (values: number[], color: string, width: 1 | 2 = 1) => {
+        const series = chart.addSeries(LineSeries, {
+          color,
+          lineWidth: width,
+          priceLineVisible: false,
+          lastValueVisible: false,
+        });
+        const data = values
+          .map((value, index) => ({ time: Math.floor(candles[index]?.time / 1000) as any, value }))
+          .filter((point) => Number.isFinite(point.value) && Number.isFinite(point.time));
+        if (data.length) series.setData(data);
+      };
+      addLine(indicators.bb.upper, 'rgba(66,165,245,0.9)', 1);
+      addLine(indicators.bb.middle, 'rgba(255,193,7,0.85)', 1);
+      addLine(indicators.bb.lower, 'rgba(66,165,245,0.9)', 1);
+    }
+
+    zones.slice(0, 4).forEach((zone) => {
+      const color = zone.type === 'support' ? 'rgba(38,166,154,0.55)' : 'rgba(239,83,80,0.55)';
+      [zone.top, zone.bottom].forEach((price) => {
+        const line = chart.addSeries(LineSeries, {
+          color,
+          lineWidth: 1,
+          lineStyle: 2,
+          priceLineVisible: false,
+          lastValueVisible: false,
+        });
+        line.setData([
+          { time: chartData[0].time, value: price },
+          { time: chartData[chartData.length - 1].time, value: price },
+        ]);
+      });
+    });
+
+    const visibleBars = 160;
+    const to = candles.length - 1 + 8;
+    chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, to - visibleBars), to });
+    candleSeries.priceScale().applyOptions({ autoScale: true });
+
+    const resizeObserver = new ResizeObserver(() => {
+      chart.applyOptions({ width: Math.max(800, container.clientWidth), height });
+    });
+    resizeObserver.observe(container);
+
+    const t = window.setTimeout(onDrawn, 800);
+
+    return () => {
+      window.clearTimeout(t);
+      resizeObserver.disconnect();
+      chart.remove();
+      chartRef.current = null;
+    };
+  }, [candles, indicators, zones, height, label, onDrawn]);
+
+  return <div ref={containerRef} className="w-full" style={{ height }} />;
+};
 
 /**
  * Minimal chart-only route used by the Telegram screenshot service.
@@ -23,7 +144,6 @@ const ChartSnapshot: React.FC = () => {
 
   const symbol = asset === 'XAU' ? 'XAU/USDT' : 'BTC/USDT';
   const data = useMarketData(symbol, tf);
-  const signals = useSmartSignals(data.candles, data.indicators, data.zones, symbol, data.loading);
 
   const hasChartData = data.candles.length > 0 && !data.loading;
 
@@ -33,10 +153,6 @@ const ChartSnapshot: React.FC = () => {
   const [ready, setReady] = useState(false);
   useEffect(() => {
     setReady(false);
-    if (hasChartData) {
-      const t = setTimeout(() => setReady(true), 3000);
-      return () => clearTimeout(t);
-    }
   }, [hasChartData, asset, tf]);
 
   const price = data.candles[data.candles.length - 1]?.close ?? 0;
@@ -68,16 +184,14 @@ const ChartSnapshot: React.FC = () => {
 
       <div id={chartId} className="rounded-lg border border-border bg-card overflow-hidden">
         {hasChartData ? (
-          <TradingChart
+          <SnapshotChart
             key={`${asset}-${tf}-${data.candles.length}`}
             candles={data.candles}
             indicators={data.indicators}
             zones={data.zones}
-            signals={signals.map((s: any) => ({ time: Number(s.time), type: s.type === 'sell' ? 'sell' as const : 'buy' as const }))}
-            enabledIndicators={ENABLED_INDICATORS}
             height={620}
             label={label}
-            timeframe={tf}
+            onDrawn={() => setReady(true)}
           />
         ) : (
           <div className="flex h-[662px] items-center justify-center bg-[#0b0e11] text-sm text-muted-foreground">
