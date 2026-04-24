@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { CONTACT_INFO } from '@/lib/contact';
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
@@ -43,11 +44,11 @@ const Contact: React.FC = () => {
               <h2 className="font-display font-bold text-2xl text-foreground mb-8">Thông Tin Liên Hệ</h2>
               <div className="space-y-6">
                 {[
-                  { icon: '💬', label: 'Telegram', value: '@uncletrader', href: '#' },
-                  { icon: '📧', label: 'Email', value: 'contact@uncletrader.com', href: 'mailto:contact@uncletrader.com' },
-                  { icon: '📱', label: 'Zalo', value: 'UNCLETRADER', href: '#' },
+                  { icon: '💬', label: 'Telegram', value: CONTACT_INFO.telegramHandle, href: CONTACT_INFO.telegramUrl },
+                  { icon: '📱', label: 'Zalo', value: CONTACT_INFO.zaloLabel, href: CONTACT_INFO.zaloUrl },
+                  { icon: '☎️', label: 'Điện thoại', value: CONTACT_INFO.phoneDisplay, href: CONTACT_INFO.phoneUrl },
                 ].map((item) => (
-                  <a key={item.label} href={item.href} className="glass-card glass-card-hover rounded-xl p-5 flex items-center gap-4 block">
+                  <a key={item.label} href={item.href} target={item.href.startsWith('http') ? '_blank' : undefined} rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined} className="glass-card glass-card-hover rounded-xl p-5 flex items-center gap-4 block">
                     <div className="w-12 h-12 bg-cyan-brand/10 border border-cyan-brand/20 rounded-xl flex items-center justify-center text-xl">
                       {item.icon}
                     </div>
@@ -110,7 +111,7 @@ const Contact: React.FC = () => {
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         className="crypto-input w-full rounded-xl px-4 py-3"
-                        placeholder="0912 345 678"
+                        placeholder={CONTACT_INFO.phoneDisplay}
                       />
                     </div>
                     <div>

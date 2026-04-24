@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Zap, MessageCircle, BarChart3 } from 'lucide-react';
+import { CONTACT_INFO } from '@/lib/contact';
 
 const MatrixHero: React.FC = () => {
   const [version, setVersion] = useState('V.3.0.4');
@@ -56,7 +57,7 @@ const MatrixHero: React.FC = () => {
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <a
-              href="https://t.me/uncletraderVN"
+              href={CONTACT_INFO.telegramUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-background/70 text-secondary-foreground font-bold uppercase tracking-widest text-sm lg:text-base px-6 lg:px-8 py-3 lg:py-4 border-2 border-secondary shadow-violet-glow hover:bg-secondary hover:text-secondary-foreground transition-all duration-300 inline-flex items-center gap-2"

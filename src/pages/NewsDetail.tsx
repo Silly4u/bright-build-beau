@@ -9,13 +9,14 @@ import ReactionBar from '@/components/news/ReactionBar';
 import ShareButtons from '@/components/news/ShareButtons';
 import CommentSection from '@/components/news/CommentSection';
 import NewsSidebar from '@/components/news/NewsSidebar';
+import { CONTACT_INFO } from '@/lib/contact';
 
 const STREAM_META: Record<string, { icon: string; label: string; color: string; ctaLink: string; ctaLabel: string; ctaIcon: string }> = {
-  hot: { icon: '🔥', label: 'Tin Nóng', color: 'text-rose-400', ctaLink: 'https://t.me/UNCLETRADER', ctaLabel: 'Theo dõi BOT SIGNAL Telegram', ctaIcon: '🚀' },
-  whale: { icon: '🐋', label: 'Cá Voi', color: 'text-cyan-400', ctaLink: 'https://t.me/UNCLETRADER', ctaLabel: 'Cảnh báo Cá Voi trên Telegram', ctaIcon: '🐋' },
-  macro: { icon: '🏛️', label: 'Vĩ Mô', color: 'text-violet-400', ctaLink: 'https://t.me/UNCLETRADER', ctaLabel: 'Cập nhật Vĩ Mô qua Telegram', ctaIcon: '📡' },
+  hot: { icon: '🔥', label: 'Tin Nóng', color: 'text-rose-400', ctaLink: CONTACT_INFO.telegramUrl, ctaLabel: 'Theo dõi BOT SIGNAL Telegram', ctaIcon: '🚀' },
+  whale: { icon: '🐋', label: 'Cá Voi', color: 'text-cyan-400', ctaLink: CONTACT_INFO.telegramUrl, ctaLabel: 'Cảnh báo Cá Voi trên Telegram', ctaIcon: '🐋' },
+  macro: { icon: '🏛️', label: 'Vĩ Mô', color: 'text-violet-400', ctaLink: CONTACT_INFO.telegramUrl, ctaLabel: 'Cập nhật Vĩ Mô qua Telegram', ctaIcon: '📡' },
   event: { icon: '📅', label: 'Sự Kiện', color: 'text-amber-400', ctaLink: 'https://www.okx.com/join/UNCLETRADER', ctaLabel: 'Trade ngay trên OKX — giảm 20% phí', ctaIcon: '💰' },
-  sentiment: { icon: '📊', label: 'Tâm Lý', color: 'text-emerald-400', ctaLink: 'https://t.me/UNCLETRADER', ctaLabel: 'Phân tích Tâm Lý trên Telegram', ctaIcon: '📊' },
+  sentiment: { icon: '📊', label: 'Tâm Lý', color: 'text-emerald-400', ctaLink: CONTACT_INFO.telegramUrl, ctaLabel: 'Phân tích Tâm Lý trên Telegram', ctaIcon: '📊' },
 };
 
 function renderMarkdown(content: string): React.ReactNode[] {
