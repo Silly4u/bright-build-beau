@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Phone } from 'lucide-react';
 import AppLogo from './AppLogo';
 import { CONTACT_INFO } from '@/lib/contact';
 
@@ -37,8 +38,8 @@ const Footer: React.FC = () => {
             <a href={CONTACT_INFO.zaloUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-cyan-brand transition-colors duration-200 text-xs font-bold" aria-label="Zalo">
               Zalo
             </a>
-            <a href={CONTACT_INFO.phoneUrl} className="text-muted-foreground hover:text-cyan-brand transition-colors duration-200 text-xs font-mono font-bold" aria-label="Số điện thoại">
-              {CONTACT_INFO.phoneDisplay}
+            <a href={CONTACT_INFO.phoneUrl} className="text-muted-foreground hover:text-cyan-brand transition-colors duration-200" aria-label="Gọi điện thoại">
+              <Phone size={18} strokeWidth={2.2} aria-hidden="true" />
             </a>
             <a href="#" className="text-muted-foreground hover:text-cyan-brand transition-colors duration-200" aria-label="YouTube">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
