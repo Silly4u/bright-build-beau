@@ -309,42 +309,51 @@ const Analysis: React.FC = () => {
       </div>
     );
     return (
-      <div className="glass-card rounded-xl p-4 space-y-3 border border-foreground/5">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-xs font-bold text-primary font-mono">{symbol}</span>
-          <span className="text-[10px] text-muted-foreground">AI "3 Điểm Hành Động"</span>
+      <div className="rounded-lg border border-border/10 bg-card/55 p-4 shadow-card-glow">
+        <div className="flex items-center justify-between gap-3 border-b border-border/10 pb-3 mb-3">
+          <div>
+            <span className="text-xs font-bold text-accent font-mono">{symbol}</span>
+            <div className="text-[10px] text-muted-foreground font-mono uppercase">AI "3 Điểm Hành Động"</div>
+          </div>
+          <span className="rounded-sm border border-accent/20 bg-accent/10 px-2 py-1 text-[10px] font-bold text-accent font-mono">LIVE PLAN</span>
         </div>
 
-        <div className="space-y-2.5">
-          <div className="flex items-start gap-2">
-            <span className="text-base">📈</span>
-            <div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+          <div className="rounded-md bg-background/55 border border-border/10 p-3">
+            <div className="flex items-start gap-2">
+              <span className="text-base">📈</span>
+              <div>
               <div className="text-[10px] text-muted-foreground/60 font-mono uppercase">Xu hướng hiện tại</div>
               <div className={`text-xs font-bold ${ai.trend.includes('Tăng') ? 'text-emerald-400' : 'text-red-400'}`}>
                 {ai.trend}
               </div>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-start gap-2">
-            <span className="text-base">🗝️</span>
-            <div>
+          <div className="rounded-md bg-background/55 border border-border/10 p-3">
+            <div className="flex items-start gap-2">
+              <span className="text-base">🗝️</span>
+              <div>
               <div className="text-[10px] text-muted-foreground/60 font-mono uppercase">Vùng giá then chốt</div>
               <div className="text-xs text-foreground">
                 <span className="text-emerald-400">Hỗ trợ: {formatPrice(ai.support, isGold)}</span>
                 {' — '}
                 <span className="text-red-400">Kháng cự: {formatPrice(ai.resistance, isGold)}</span>
               </div>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-start gap-2">
-            <span className="text-base">🎯</span>
-            <div>
+          <div className="rounded-md bg-background/55 border border-border/10 p-3">
+            <div className="flex items-start gap-2">
+              <span className="text-base">🎯</span>
+              <div>
               <div className="text-[10px] text-muted-foreground/60 font-mono uppercase">Kế hoạch hành động</div>
-              <div className="text-xs text-primary font-medium">{ai.action}</div>
+              <div className="text-xs text-accent font-medium">{ai.action}</div>
               <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">
                 Entry: {formatPrice(ai.entry, isGold)} | TP: {formatPrice(ai.target, isGold)} | SL: {formatPrice(ai.stopLoss, isGold)}
+              </div>
               </div>
             </div>
           </div>
