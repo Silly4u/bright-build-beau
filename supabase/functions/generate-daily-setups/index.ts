@@ -101,18 +101,19 @@ async function fetchGoldPrice(): Promise<{ price: number; change24h: number }> {
 async function generateSetups(asset: string, systemPrompt: string, userPrompt: string): Promise<any> {
   for (const model of GEMINI_MODELS) {
     try {
-      console.log(`[${asset}] Trying Vertex model: ${model}`);
-      const url = `https://${VERTEX_LOCATION}-aiplatform.googleapis.com/v1/projects/${VERTEX_PROJECT_ID}/locations/${VERTEX_LOCATION}/publishers/google/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+      console.log(`[${asset}] Trying Vertex model (predict): ${model}`);
+      const url = `https://${VERTEX_LOCATION}-aiplatform.googleapis.com/v1/projects/${VERTEX_PROJECT_ID}/locations/${VERTEX_LOCATION}/publishers/google/models/${model}:predict?key=${GEMINI_API_KEY}`;
+      // Vertex :predict format — gộp system + user prompt vào 1 message,
+      // yêu cầu trả về JSON thuần trong text vì :predict không hỗ trợ responseSchema.
+      const combinedPrompt = `${systemPrompt}\n\n${userPrompt}\n\nCHỈ trả về JSON hợp lệ theo schema sau (không markdown, không giải thích):\n${JSON.stringify(RESPONSE_SCHEMA)}`;
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemPrompt }] },
-          contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-          generationConfig: {
+          instances: [{ prompt: combinedPrompt }],
+          parameters: {
             temperature: 0.7,
-            responseMimeType: "application/json",
-            responseSchema: RESPONSE_SCHEMA,
+            maxOutputTokens: 2048,
           },
         }),
       });
