@@ -3,19 +3,11 @@ import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2/cors";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 const FINNHUB_API_KEY = Deno.env.get("FINNHUB_API_KEY") || "";
 
-// Vertex AI configuration (API Key auth)
-const VERTEX_PROJECT_ID = Deno.env.get("VERTEX_PROJECT_ID") || "project-c6fa6591-f954-4996-889";
-const VERTEX_LOCATION = Deno.env.get("VERTEX_LOCATION") || "us-central1";
-
-// Vertex AI model fallback order. Use stable Vertex model IDs.
-const GEMINI_MODELS = [
-  "gemini-2.0-flash-001",
-  "gemini-2.5-flash",
-  "gemini-1.5-flash-002",
-];
+// Cloud Run middleware (gọi Vertex AI bằng Service Account, dùng credit Google Cloud free trial)
+const CLOUD_RUN_URL = Deno.env.get("CLOUD_RUN_URL")!;
+const CLOUD_RUN_SECRET = Deno.env.get("CLOUD_RUN_SECRET")!;
 
 const RESPONSE_SCHEMA = {
   type: "object",
@@ -96,62 +88,36 @@ async function fetchGoldPrice(): Promise<{ price: number; change24h: number }> {
   throw new Error("Could not fetch gold price from any source");
 }
 
-// ---------- AI GENERATION (Gemini direct API) ----------
+// ---------- AI GENERATION (qua Cloud Run middleware) ----------
 
 async function generateSetups(asset: string, systemPrompt: string, userPrompt: string): Promise<any> {
-  for (const model of GEMINI_MODELS) {
-    try {
-      console.log(`[${asset}] Trying Vertex model (predict): ${model}`);
-      const url = `https://${VERTEX_LOCATION}-aiplatform.googleapis.com/v1/projects/${VERTEX_PROJECT_ID}/locations/${VERTEX_LOCATION}/publishers/google/models/${model}:predict?key=${GEMINI_API_KEY}`;
-      // Vertex :predict format — gộp system + user prompt vào 1 message,
-      // yêu cầu trả về JSON thuần trong text vì :predict không hỗ trợ responseSchema.
-      const combinedPrompt = `${systemPrompt}\n\n${userPrompt}\n\nCHỈ trả về JSON hợp lệ theo schema sau (không markdown, không giải thích):\n${JSON.stringify(RESPONSE_SCHEMA)}`;
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          instances: [{ prompt: combinedPrompt }],
-          parameters: {
-            temperature: 0.7,
-            maxOutputTokens: 2048,
-          },
-        }),
-      });
+  console.log(`[${asset}] Calling Cloud Run middleware...`);
+  const res = await fetch(CLOUD_RUN_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-secret": CLOUD_RUN_SECRET,
+    },
+    body: JSON.stringify({
+      systemPrompt,
+      userPrompt,
+      responseSchema: RESPONSE_SCHEMA,
+    }),
+  });
 
-      if (!res.ok) {
-        const errText = await res.text();
-        console.error(`[${asset}] Model ${model} failed: ${res.status} ${errText.slice(0, 300)}`);
-        // 429 = quota exhausted, try next model. 403 = key forbidden, no point continuing.
-        if (res.status === 403) throw new Error(`GEMINI_API_KEY forbidden (403): ${errText.slice(0, 200)}`);
-        continue;
-      }
-
-      const data = await res.json();
-      // :predict trả về dạng { predictions: [{ content: "..." } | "..."] }
-      const pred = data?.predictions?.[0];
-      const text = typeof pred === "string" ? pred : (pred?.content ?? pred?.text ?? pred?.output);
-      if (text) {
-        try {
-          const parsed = JSON.parse(text);
-          console.log(`[${asset}] Success with ${model}`);
-          return parsed;
-        } catch (e) {
-          const jsonMatch = text.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            console.log(`[${asset}] Parsed JSON via regex from ${model}`);
-            return JSON.parse(jsonMatch[0]);
-          }
-          console.error(`[${asset}] Failed to parse JSON from ${model}:`, e);
-          continue;
-        }
-      }
-      console.error(`[${asset}] Model ${model}: no text in response`, JSON.stringify(data).slice(0, 300));
-    } catch (e) {
-      console.error(`[${asset}] Model ${model} error:`, e instanceof Error ? e.message : e);
-      if (e instanceof Error && e.message.includes("forbidden")) throw e;
-    }
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error(`[${asset}] Cloud Run error ${res.status}: ${errText.slice(0, 500)}`);
+    throw new Error(`Cloud Run error ${res.status}: ${errText.slice(0, 200)}`);
   }
-  throw new Error(`All Gemini models failed for ${asset}`);
+
+  const data = await res.json();
+  if (!data.scenarios) {
+    console.error(`[${asset}] Invalid response from Cloud Run:`, JSON.stringify(data).slice(0, 300));
+    throw new Error("Cloud Run trả về dữ liệu không hợp lệ");
+  }
+  console.log(`[${asset}] Success`);
+  return data;
 }
 
 // ---------- MAIN ----------
