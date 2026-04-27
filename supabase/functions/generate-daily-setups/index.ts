@@ -3,12 +3,14 @@ import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2/cors";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const FINNHUB_API_KEY = Deno.env.get("FINNHUB_API_KEY") || "";
 
-const GEMINI_MODELS = [
-  "gemini-2.5-flash-lite",
-  "gemini-2.5-flash",
+// Lovable AI Gateway models — fallback order from cheapest/fastest to higher quality.
+const AI_MODELS = [
+  "google/gemini-2.5-flash",
+  "google/gemini-2.5-flash-lite",
+  "google/gemini-2.5-pro",
 ];
 
 const TOOL_SCHEMA = {
@@ -97,59 +99,76 @@ async function fetchGoldPrice(): Promise<{ price: number; change24h: number }> {
   throw new Error("Could not fetch gold price from any source");
 }
 
-// ---------- AI GENERATION (Gemini REST API) ----------
+// ---------- AI GENERATION (Lovable AI Gateway with tool calling) ----------
 
 async function generateSetups(asset: string, systemPrompt: string, userPrompt: string): Promise<any> {
-  const toolDecl = {
-    functionDeclarations: [{
+  const tool = {
+    type: "function" as const,
+    function: {
       name: "create_trading_setups",
       description: "Create 3 trading scenarios for an asset",
       parameters: TOOL_SCHEMA.function.parameters,
-    }],
+    },
   };
 
-  for (const model of GEMINI_MODELS) {
+  for (const model of AI_MODELS) {
     try {
       console.log(`[${asset}] Trying model: ${model}`);
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
-      const res = await fetch(url, {
+      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemPrompt }] },
-          contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-          tools: [toolDecl],
-          toolConfig: { functionCallingConfig: { mode: "ANY", allowedFunctionNames: ["create_trading_setups"] } },
-          generationConfig: { temperature: 0.7 },
+          model,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          tools: [tool],
+          tool_choice: { type: "function", function: { name: "create_trading_setups" } },
+          temperature: 0.7,
         }),
       });
 
       if (!res.ok) {
         const errText = await res.text();
-        console.error(`[${asset}] Model ${model} failed: ${res.status} ${errText}`);
+        console.error(`[${asset}] Model ${model} failed: ${res.status} ${errText.slice(0, 300)}`);
+        // 402 = out of credits, no point trying other models
+        if (res.status === 402) throw new Error("Lovable AI credit exhausted — please top up");
         continue;
       }
 
       const data = await res.json();
-      const parts = data.candidates?.[0]?.content?.parts;
-      const fnCall = parts?.find((p: any) => p.functionCall);
-      if (fnCall?.functionCall?.args) {
-        console.log(`[${asset}] Success with ${model}`);
-        return fnCall.functionCall.args;
+      const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
+      if (toolCall?.function?.arguments) {
+        try {
+          const args = JSON.parse(toolCall.function.arguments);
+          console.log(`[${asset}] Success with ${model}`);
+          return args;
+        } catch (e) {
+          console.error(`[${asset}] Failed to parse tool args from ${model}:`, e);
+          continue;
+        }
       }
 
-      // Fallback: try parsing text response as JSON
-      const textPart = parts?.find((p: any) => p.text);
-      if (textPart?.text) {
+      // Fallback: parse plain text content as JSON
+      const textContent = data?.choices?.[0]?.message?.content;
+      if (textContent) {
         try {
-          const jsonMatch = textPart.text.match(/\{[\s\S]*\}/);
-          if (jsonMatch) return JSON.parse(jsonMatch[0]);
+          const jsonMatch = textContent.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            console.log(`[${asset}] Parsed JSON from text response (${model})`);
+            return JSON.parse(jsonMatch[0]);
+          }
         } catch {}
       }
 
-      console.error(`[${asset}] Model ${model}: no function call in response`);
+      console.error(`[${asset}] Model ${model}: no tool call in response`);
     } catch (e) {
-      console.error(`[${asset}] Model ${model} error:`, e);
+      console.error(`[${asset}] Model ${model} error:`, e instanceof Error ? e.message : e);
+      if (e instanceof Error && e.message.includes("credit exhausted")) throw e;
     }
   }
   throw new Error(`All AI models failed for ${asset}`);
@@ -260,7 +279,8 @@ ${!isCrypto ? "Với XAU: phân tích dựa trên USD, lãi suất, địa chín
     });
   } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const msg = error instanceof Error ? error.message : "Unknown error";
+    return new Response(JSON.stringify({ error: msg }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
