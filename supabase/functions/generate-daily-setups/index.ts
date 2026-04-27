@@ -127,14 +127,15 @@ async function generateSetups(asset: string, systemPrompt: string, userPrompt: s
       }
 
       const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      // :predict trả về dạng { predictions: [{ content: "..." } | "..."] }
+      const pred = data?.predictions?.[0];
+      const text = typeof pred === "string" ? pred : (pred?.content ?? pred?.text ?? pred?.output);
       if (text) {
         try {
           const parsed = JSON.parse(text);
           console.log(`[${asset}] Success with ${model}`);
           return parsed;
         } catch (e) {
-          // Try to extract JSON object from text
           const jsonMatch = text.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             console.log(`[${asset}] Parsed JSON via regex from ${model}`);
@@ -144,7 +145,7 @@ async function generateSetups(asset: string, systemPrompt: string, userPrompt: s
           continue;
         }
       }
-      console.error(`[${asset}] Model ${model}: no text in response`);
+      console.error(`[${asset}] Model ${model}: no text in response`, JSON.stringify(data).slice(0, 300));
     } catch (e) {
       console.error(`[${asset}] Model ${model} error:`, e instanceof Error ? e.message : e);
       if (e instanceof Error && e.message.includes("forbidden")) throw e;
