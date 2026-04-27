@@ -3,19 +3,11 @@ import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2/cors";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 const FINNHUB_API_KEY = Deno.env.get("FINNHUB_API_KEY") || "";
 
-// Vertex AI configuration (API Key auth)
-const VERTEX_PROJECT_ID = Deno.env.get("VERTEX_PROJECT_ID") || "project-c6fa6591-f954-4996-889";
-const VERTEX_LOCATION = Deno.env.get("VERTEX_LOCATION") || "us-central1";
-
-// Vertex AI model fallback order. Use stable Vertex model IDs.
-const GEMINI_MODELS = [
-  "gemini-2.0-flash-001",
-  "gemini-2.5-flash",
-  "gemini-1.5-flash-002",
-];
+// Cloud Run middleware (gọi Vertex AI bằng Service Account, dùng credit Google Cloud free trial)
+const CLOUD_RUN_URL = Deno.env.get("CLOUD_RUN_URL")!;
+const CLOUD_RUN_SECRET = Deno.env.get("CLOUD_RUN_SECRET")!;
 
 const RESPONSE_SCHEMA = {
   type: "object",
