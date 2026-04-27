@@ -6,34 +6,38 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 const FINNHUB_API_KEY = Deno.env.get("FINNHUB_API_KEY") || "";
 
-// Gemini models — fallback order from cheapest/fastest to higher quality.
+// Vertex AI configuration (API Key auth)
+const VERTEX_PROJECT_ID = Deno.env.get("VERTEX_PROJECT_ID") || "project-c6fa6591-f954-4996-889";
+const VERTEX_LOCATION = Deno.env.get("VERTEX_LOCATION") || "us-central1";
+
+// Vertex AI model fallback order. Use stable Vertex model IDs.
 const GEMINI_MODELS = [
+  "gemini-2.0-flash-001",
   "gemini-2.5-flash",
-  "gemini-2.5-flash-lite",
-  "gemini-2.5-pro",
+  "gemini-1.5-flash-002",
 ];
 
 const RESPONSE_SCHEMA = {
-  type: "OBJECT",
+  type: "object",
   properties: {
     scenarios: {
-      type: "ARRAY",
+      type: "array",
       items: {
-        type: "OBJECT",
+        type: "object",
         properties: {
-          scenario: { type: "STRING", enum: ["A", "B", "C"] },
-          title: { type: "STRING" },
-          condition: { type: "STRING" },
-          action: { type: "STRING" },
-          invalidation: { type: "STRING" },
-          probability: { type: "STRING", enum: ["high", "medium", "low"] },
-          targets: { type: "ARRAY", items: { type: "NUMBER" } },
+          scenario: { type: "string", enum: ["A", "B", "C"] },
+          title: { type: "string" },
+          condition: { type: "string" },
+          action: { type: "string" },
+          invalidation: { type: "string" },
+          probability: { type: "string", enum: ["high", "medium", "low"] },
+          targets: { type: "array", items: { type: "number" } },
         },
         required: ["scenario", "title", "condition", "action", "invalidation", "probability", "targets"],
       },
     },
-    market_context: { type: "STRING" },
-    ai_summary: { type: "STRING" },
+    market_context: { type: "string" },
+    ai_summary: { type: "string" },
   },
   required: ["scenarios", "market_context", "ai_summary"],
 };
@@ -97,8 +101,8 @@ async function fetchGoldPrice(): Promise<{ price: number; change24h: number }> {
 async function generateSetups(asset: string, systemPrompt: string, userPrompt: string): Promise<any> {
   for (const model of GEMINI_MODELS) {
     try {
-      console.log(`[${asset}] Trying model: ${model}`);
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+      console.log(`[${asset}] Trying Vertex model: ${model}`);
+      const url = `https://${VERTEX_LOCATION}-aiplatform.googleapis.com/v1/projects/${VERTEX_PROJECT_ID}/locations/${VERTEX_LOCATION}/publishers/google/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
