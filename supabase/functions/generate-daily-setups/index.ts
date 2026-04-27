@@ -3,46 +3,39 @@ import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2/cors";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
+const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
 const FINNHUB_API_KEY = Deno.env.get("FINNHUB_API_KEY") || "";
 
-// Lovable AI Gateway models — fallback order from cheapest/fastest to higher quality.
-const AI_MODELS = [
-  "google/gemini-2.5-flash",
-  "google/gemini-2.5-flash-lite",
-  "google/gemini-2.5-pro",
+// Gemini models — fallback order from cheapest/fastest to higher quality.
+const GEMINI_MODELS = [
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.5-pro",
 ];
 
-const TOOL_SCHEMA = {
-  type: "function" as const,
-  function: {
-    name: "create_trading_setups",
-    description: "Create 3 trading scenarios for an asset",
-    parameters: {
-      type: "object",
-      properties: {
-        scenarios: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              scenario: { type: "string", enum: ["A", "B", "C"] },
-              title: { type: "string" },
-              condition: { type: "string" },
-              action: { type: "string" },
-              invalidation: { type: "string" },
-              probability: { type: "string", enum: ["high", "medium", "low"] },
-              targets: { type: "array", items: { type: "number" } },
-            },
-            required: ["scenario", "title", "condition", "action", "invalidation", "probability", "targets"],
-          },
+const RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    scenarios: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          scenario: { type: "STRING", enum: ["A", "B", "C"] },
+          title: { type: "STRING" },
+          condition: { type: "STRING" },
+          action: { type: "STRING" },
+          invalidation: { type: "STRING" },
+          probability: { type: "STRING", enum: ["high", "medium", "low"] },
+          targets: { type: "ARRAY", items: { type: "NUMBER" } },
         },
-        market_context: { type: "string" },
-        ai_summary: { type: "string" },
+        required: ["scenario", "title", "condition", "action", "invalidation", "probability", "targets"],
       },
-      required: ["scenarios", "market_context", "ai_summary"],
     },
+    market_context: { type: "STRING" },
+    ai_summary: { type: "STRING" },
   },
+  required: ["scenarios", "market_context", "ai_summary"],
 };
 
 // ---------- DATA FETCHERS ----------
@@ -99,79 +92,60 @@ async function fetchGoldPrice(): Promise<{ price: number; change24h: number }> {
   throw new Error("Could not fetch gold price from any source");
 }
 
-// ---------- AI GENERATION (Lovable AI Gateway with tool calling) ----------
+// ---------- AI GENERATION (Gemini direct API) ----------
 
 async function generateSetups(asset: string, systemPrompt: string, userPrompt: string): Promise<any> {
-  const tool = {
-    type: "function" as const,
-    function: {
-      name: "create_trading_setups",
-      description: "Create 3 trading scenarios for an asset",
-      parameters: TOOL_SCHEMA.function.parameters,
-    },
-  };
-
-  for (const model of AI_MODELS) {
+  for (const model of GEMINI_MODELS) {
     try {
       console.log(`[${asset}] Trying model: ${model}`);
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+      const res = await fetch(url, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-          ],
-          tools: [tool],
-          tool_choice: { type: "function", function: { name: "create_trading_setups" } },
-          temperature: 0.7,
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+          generationConfig: {
+            temperature: 0.7,
+            responseMimeType: "application/json",
+            responseSchema: RESPONSE_SCHEMA,
+          },
         }),
       });
 
       if (!res.ok) {
         const errText = await res.text();
         console.error(`[${asset}] Model ${model} failed: ${res.status} ${errText.slice(0, 300)}`);
-        // 402 = out of credits, no point trying other models
-        if (res.status === 402) throw new Error("Lovable AI credit exhausted — please top up");
+        // 429 = quota exhausted, try next model. 403 = key forbidden, no point continuing.
+        if (res.status === 403) throw new Error(`GEMINI_API_KEY forbidden (403): ${errText.slice(0, 200)}`);
         continue;
       }
 
       const data = await res.json();
-      const toolCall = data?.choices?.[0]?.message?.tool_calls?.[0];
-      if (toolCall?.function?.arguments) {
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) {
         try {
-          const args = JSON.parse(toolCall.function.arguments);
+          const parsed = JSON.parse(text);
           console.log(`[${asset}] Success with ${model}`);
-          return args;
+          return parsed;
         } catch (e) {
-          console.error(`[${asset}] Failed to parse tool args from ${model}:`, e);
+          // Try to extract JSON object from text
+          const jsonMatch = text.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            console.log(`[${asset}] Parsed JSON via regex from ${model}`);
+            return JSON.parse(jsonMatch[0]);
+          }
+          console.error(`[${asset}] Failed to parse JSON from ${model}:`, e);
           continue;
         }
       }
-
-      // Fallback: parse plain text content as JSON
-      const textContent = data?.choices?.[0]?.message?.content;
-      if (textContent) {
-        try {
-          const jsonMatch = textContent.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            console.log(`[${asset}] Parsed JSON from text response (${model})`);
-            return JSON.parse(jsonMatch[0]);
-          }
-        } catch {}
-      }
-
-      console.error(`[${asset}] Model ${model}: no tool call in response`);
+      console.error(`[${asset}] Model ${model}: no text in response`);
     } catch (e) {
       console.error(`[${asset}] Model ${model} error:`, e instanceof Error ? e.message : e);
-      if (e instanceof Error && e.message.includes("credit exhausted")) throw e;
+      if (e instanceof Error && e.message.includes("forbidden")) throw e;
     }
   }
-  throw new Error(`All AI models failed for ${asset}`);
+  throw new Error(`All Gemini models failed for ${asset}`);
 }
 
 // ---------- MAIN ----------
