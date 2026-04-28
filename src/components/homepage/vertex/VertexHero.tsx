@@ -5,7 +5,7 @@ import { ArrowUpRight, Sparkles, MessageCircle } from 'lucide-react';
 import { CONTACT_INFO } from '@/lib/contact';
 import sphereLogo from '@/assets/vertex-sphere.png';
 import heroCoin from '@/assets/hero-coin-3d.png';
-import heroShape from '@/assets/hero-shape.jpg';
+import heroShape from '@/assets/hero-chart.png';
 
 const VertexHero: React.FC = () => {
   const ref = useRef<HTMLElement>(null);
@@ -218,21 +218,25 @@ const VertexHero: React.FC = () => {
             </motion.div>
           </motion.div>
 
-          {/* Abstract shape */}
+          {/* Trading chart preview */}
           <motion.div
             style={{ x: tx3, y: ty3 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.1, duration: 1.2 }}
-            className="absolute top-1/3 right-0 sm:right-2"
+            className="absolute top-1/4 right-0 sm:right-2"
           >
-            <motion.img
-              src={heroShape}
-              alt="3D abstract"
-              animate={{ rotate: [0, 8, 0], y: [0, -10, 0] }}
-              transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-              className="w-24 sm:w-32 lg:w-40 rounded-3xl shadow-2xl object-cover"
-            />
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+              className="glass rounded-2xl p-1.5 shadow-2xl border border-white/10 overflow-hidden"
+            >
+              <img
+                src={heroShape}
+                alt="Live trading signals chart"
+                className="w-56 sm:w-72 lg:w-96 rounded-xl object-cover"
+              />
+            </motion.div>
           </motion.div>
         </div>
       </motion.div>
