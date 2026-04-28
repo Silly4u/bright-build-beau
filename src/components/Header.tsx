@@ -1,17 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import AppLogo from './AppLogo';
-import { Menu, X, Send, PhoneCall, TrendingUp, TrendingDown, ChevronDown, LogIn, LogOut, Shield } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Menu, X, LogIn, LogOut, Shield, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIndicatorPermissions } from '@/hooks/useIndicatorPermissions';
-import EconomicTicker from './EconomicTicker';
-import { fetchBinanceTickers } from '@/lib/binance';
-
-type BinanceTicker = {
-  symbol: string;
-  lastPrice?: string;
-  priceChangePercent?: string;
-};
+import sphereLogo from '@/assets/vertex-sphere.png';
 
 const navLinks = [
   { href: '/', label: 'Trang Chủ' },
@@ -19,131 +12,90 @@ const navLinks = [
   { href: '/phan-tich', label: 'Phân Tích' },
   { href: '/indicators', label: 'Indicators' },
   { href: '/lich-kinh-te', label: 'Lịch Kinh Tế' },
-  { href: '/tu-dien', label: 'Từ Điển' },
   { href: '/services', label: 'Dịch Vụ' },
   { href: '/contact', label: 'Liên Hệ' },
 ];
 
-const useLivePrice = () => {
-  const [btc, setBtc] = useState({ price: 0, change: 0 });
-  const [gold, setGold] = useState({ price: 0, change: 0 });
-
-  useEffect(() => {
-    const fetchPrices = async () => {
-      try {
-        const data = Object.values(await fetchBinanceTickers(['BTCUSDT', 'PAXGUSDT'])) as BinanceTicker[];
-        const btcTicker = data.find((ticker) => ticker.symbol === 'BTCUSDT');
-        const goldTicker = data.find((ticker) => ticker.symbol === 'PAXGUSDT');
-        if (btcTicker?.lastPrice) setBtc({ price: parseFloat(btcTicker.lastPrice), change: parseFloat(btcTicker.priceChangePercent ?? '0') });
-        if (goldTicker?.lastPrice) setGold({ price: parseFloat(goldTicker.lastPrice), change: parseFloat(goldTicker.priceChangePercent ?? '0') });
-      } catch { /* silent */ }
-    };
-    fetchPrices();
-    const interval = setInterval(fetchPrices, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return { btc, gold };
-};
-
-const PriceBadge = ({ symbol, icon, price, change }: { symbol: string; icon: string; price: number; change: number }) => {
-  const isPositive = change >= 0;
-  return (
-    <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-foreground/[0.03] border border-foreground/[0.06] hover:bg-foreground/[0.06] transition-colors cursor-default">
-      <span className="text-sm">{icon}</span>
-      <span className="text-[11px] font-bold text-foreground/80 font-mono">{symbol}</span>
-      <span className="text-[11px] font-mono font-bold text-foreground">
-        {price > 0 ? `$${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '...'}
-      </span>
-      <span className={`flex items-center gap-0.5 text-[10px] font-mono font-bold ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
-        {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-        {isPositive ? '+' : ''}{change.toFixed(2)}%
-      </span>
-    </div>
-  );
-};
-
 const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { btc, gold } = useLivePrice();
   const { user, signOut } = useAuth();
   const { isSuperAdmin } = useIndicatorPermissions();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close mobile menu on route change
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [location.pathname]);
+  useEffect(() => { setOpen(false); }, [location.pathname]);
 
   return (
-    <header
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-        scrolled ? 'nav-blur shadow-2xl shadow-background/50' : 'bg-background/80 backdrop-blur-md'
-      }`}
-    >
-
-      {/* ── MAIN NAV BAR ── */}
-      <div className="max-w-7xl mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between h-14 lg:h-16">
+    <>
+      <motion.header
+        initial={{ y: -40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
+        className={`fixed top-3 md:top-5 left-1/2 -translate-x-1/2 w-[96%] max-w-6xl z-50 rounded-full transition-all duration-500 ${
+          scrolled ? 'glass-strong' : 'glass'
+        }`}
+      >
+        <div className="flex items-center justify-between px-3 md:px-5 py-2 md:py-2.5">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-            <AppLogo size={32} className="group-hover:scale-110 transition-transform duration-300" />
-            <div className="flex flex-col">
-              <span className="font-display font-extrabold text-lg tracking-tight text-foreground group-hover:text-primary transition-colors duration-300 leading-none">
+            <img
+              src={sphereLogo}
+              alt="UncleTrader"
+              className="w-8 h-8 md:w-9 md:h-9 object-contain drop-shadow-[0_0_12px_rgba(217,38,169,0.45)] transition-transform duration-700 group-hover:rotate-180"
+            />
+            <div className="hidden sm:flex flex-col leading-none">
+              <span className="font-display text-sm md:text-base font-semibold tracking-tight text-foreground">
                 UNCLETRADER
               </span>
-              <span className="text-[8px] font-mono text-muted-foreground/40 tracking-[0.2em] uppercase leading-none mt-0.5">
+              <span className="text-[8px] font-mono text-white/40 tracking-[0.2em] uppercase mt-1">
                 Smart Money Analysis
               </span>
             </div>
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-0.5">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   to={link.href}
-                  className={`relative px-3 py-2 rounded-lg text-[13px] font-semibold tracking-wide transition-all duration-300 ${
+                  className={`px-3 py-1.5 rounded-full text-[12.5px] font-medium transition-all ${
                     isActive
-                      ? 'text-primary bg-primary/10'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]'
+                      ? 'text-foreground bg-white/10'
+                      : 'text-white/65 hover:text-foreground hover:bg-white/5'
                   }`}
                 >
                   {link.label}
-                  {isActive && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-primary" />
-                  )}
                 </Link>
               );
             })}
           </nav>
 
-          {/* Desktop CTAs */}
-          <div className="hidden lg:flex items-center gap-2">
+          {/* Right side */}
+          <div className="flex items-center gap-1.5">
             {isSuperAdmin && (
               <Link
                 to="/admin"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition-all duration-300"
+                className="hidden md:inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-bold text-amber-300 bg-amber-400/10 border border-amber-400/30 hover:bg-amber-400/20 transition-all"
               >
-                <Shield className="w-3.5 h-3.5" />
+                <Shield className="w-3 h-3" />
                 Admin
               </Link>
             )}
             {user ? (
               <button
                 onClick={async () => { await signOut(); navigate('/'); }}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-bold text-foreground/80 bg-foreground/[0.04] border border-foreground/[0.08] hover:bg-foreground/[0.08] transition-all duration-300"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11.5px] font-semibold text-white/80 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 Đăng Xuất
@@ -151,78 +103,65 @@ const Header: React.FC = () => {
             ) : (
               <Link
                 to="/auth"
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-bold text-primary-foreground bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/20"
+                className="hidden sm:inline-flex btn-primary items-center gap-1.5 px-4 py-2 rounded-full text-[12px]"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 Đăng Nhập
+                <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
             )}
+            <button
+              onClick={() => setOpen((v) => !v)}
+              className="lg:hidden ml-1 p-2 rounded-full text-white/80 hover:text-white hover:bg-white/5 transition"
+              aria-label="Toggle menu"
+            >
+              {open ? <X size={18} /> : <Menu size={18} />}
+            </button>
           </div>
-
-          {/* Mobile Menu Toggle */}
-          <button
-            className="lg:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-foreground/[0.05] transition-all"
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu"
-          >
-            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
         </div>
-      </div>
 
-      {/* ── ECONOMIC TICKER ── */}
-      <EconomicTicker />
-
-      {/* ── MOBILE MENU ── */}
-      <div
-        className={`lg:hidden overflow-hidden transition-all duration-400 ease-in-out ${
-          menuOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
-        }`}
-      >
-        <div className="px-4 pb-4">
-          <div className="glass-card rounded-xl p-3 space-y-1 border border-foreground/[0.06]">
+        {/* Mobile menu */}
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="lg:hidden px-3 pb-3 pt-1 flex flex-col gap-1"
+          >
             {navLinks.map((link) => {
               const isActive = location.pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   to={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  className={`flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                    isActive
-                      ? 'text-primary bg-primary/10'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]'
+                  onClick={() => setOpen(false)}
+                  className={`px-4 py-2.5 rounded-2xl text-sm font-medium ${
+                    isActive ? 'text-foreground bg-white/10' : 'text-white/75 hover:text-white hover:bg-white/5'
                   }`}
                 >
                   {link.label}
                 </Link>
               );
             })}
-
-            <div className="pt-2 mt-2 border-t border-foreground/[0.06] flex flex-col gap-2">
-              {user ? (
-                <button
-                  onClick={async () => { await signOut(); navigate('/'); setMenuOpen(false); }}
-                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-foreground/80 bg-foreground/[0.04] border border-foreground/[0.08]"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Đăng Xuất
-                </button>
-              ) : (
-                <Link
-                  to="/auth"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-primary-foreground bg-gradient-to-r from-primary to-secondary"
-                >
-                  <LogIn className="w-4 h-4" />
-                  Đăng Nhập / Đăng Ký
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+            {user ? (
+              <button
+                onClick={async () => { await signOut(); navigate('/'); setOpen(false); }}
+                className="mt-2 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold bg-white/5 border border-white/10"
+              >
+                <LogOut className="w-4 h-4" /> Đăng Xuất
+              </button>
+            ) : (
+              <Link
+                to="/auth"
+                onClick={() => setOpen(false)}
+                className="btn-primary mt-2 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-sm"
+              >
+                <LogIn className="w-4 h-4" /> Đăng Nhập / Đăng Ký
+              </Link>
+            )}
+          </motion.div>
+        )}
+      </motion.header>
+    </>
   );
 };
 
