@@ -75,8 +75,8 @@ serve(async (req) => {
       total_mcap_change: global?.market_cap_change_percentage_24h_usd || null,
     };
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not set");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not set");
 
     const systemPrompt = `Bạn là trader chuyên nghiệp viết Morning Brief tiếng Việt cho cộng đồng trader BTC/Vàng. 
 Văn phong: súc tích, chuyên nghiệp, có hành động cụ thể.
@@ -100,28 +100,21 @@ Sinh JSON với 3 phần:
    - stop (stop loss)
    - probability (xác suất % theo đánh giá)`;
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "morning_brief",
-            description: "Generate morning trading brief",
-            parameters: {
+    const aiResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+          generationConfig: {
+            temperature: 0.4,
+            responseMimeType: "application/json",
+            responseSchema: {
               type: "object",
               properties: {
-                recap: { type: "string", description: "Recap of last 24h, 3-4 lines" },
-                outlook: { type: "string", description: "Outlook for next 24h, 3-4 lines" },
+                recap: { type: "string" },
+                outlook: { type: "string" },
                 scenarios: {
                   type: "array",
                   items: {
@@ -141,31 +134,25 @@ Sinh JSON với 3 phần:
               required: ["recap", "outlook", "scenarios"],
             },
           },
-        }],
-        tool_choice: { type: "function", function: { name: "morning_brief" } },
-      }),
-    });
+        }),
+      }
+    );
 
     if (!aiResponse.ok) {
       const txt = await aiResponse.text();
-      console.error("AI error:", aiResponse.status, txt);
+      console.error("Gemini error:", aiResponse.status, txt);
       if (aiResponse.status === 429) {
         return new Response(JSON.stringify({ error: "rate_limited" }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "credit_required" }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error(`AI failed: ${aiResponse.status}`);
+      throw new Error(`Gemini failed: ${aiResponse.status}`);
     }
 
     const aiData = await aiResponse.json();
-    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) throw new Error("No tool call returned");
-    const parsed = JSON.parse(toolCall.function.arguments);
+    const content = aiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    if (!content) throw new Error("No content returned from Gemini");
+    const parsed = JSON.parse(content);
 
     // Upsert into DB
     const { data: saved, error: upsertErr } = await supabase

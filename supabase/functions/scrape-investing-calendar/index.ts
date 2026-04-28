@@ -149,11 +149,10 @@ async function fetchViaJina(url: string): Promise<string> {
   return await res.text();
 }
 
-// ─── AI extraction with fallback chain ───
+// ─── AI extraction using Gemini API direct ───
 async function extractWithAI(
   markdown: string,
-  apiKey: string,
-  models: string[],
+  geminiKey: string,
   dateHint: string
 ): Promise<any[] | null> {
   const systemPrompt = `You are a strict economic-calendar extractor. Return ONLY a valid JSON array, no markdown fences, no explanation.
@@ -219,70 +218,35 @@ ${markdown}`;
     return null;
   };
 
-  // ─── Try Gemini direct FIRST (Lovable AI often rate-limited / out of credits) ───
-  const geminiKey = Deno.env.get("GEMINI_API_KEY");
-  if (geminiKey) {
-    const geminiModels = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
-    for (const gm of geminiModels) {
-      console.log(`Trying Gemini direct: ${gm}`);
-      try {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${gm}:generateContent?key=${geminiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
-              generationConfig: { temperature: 0.05, responseMimeType: "application/json" },
-            }),
-          }
-        );
-        if (!res.ok) {
-          console.error(`Gemini ${gm} failed: ${res.status} - ${(await res.text()).slice(0, 200)}`);
-          continue;
-        }
-        const data = await res.json();
-        const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        const events = parseContent(content);
-        if (events && events.length > 0) {
-          console.log(`Gemini ${gm} extracted ${events.length} events`);
-          return events;
-        }
-      } catch (e) {
-        console.error(`Gemini ${gm} error:`, e);
-      }
-    }
-  }
-
-  // ─── FALLBACK: Lovable AI Gateway ───
-  for (const model of models) {
-    console.log(`Trying model (Lovable fallback): ${model}`);
+  // ─── Gemini API direct (Google AI Studio) ───
+  const geminiModels = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
+  for (const gm of geminiModels) {
+    console.log(`Trying Gemini direct: ${gm}`);
     try {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-          ],
-          temperature: 0.05,
-        }),
-      });
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${gm}:generateContent?key=${geminiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+            generationConfig: { temperature: 0.05, responseMimeType: "application/json" },
+          }),
+        }
+      );
       if (!res.ok) {
-        console.error(`Lovable ${model} failed: ${res.status}`);
+        console.error(`Gemini ${gm} failed: ${res.status} - ${(await res.text()).slice(0, 200)}`);
         continue;
       }
       const data = await res.json();
-      const content = data.choices?.[0]?.message?.content || "";
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
       const events = parseContent(content);
       if (events && events.length > 0) {
-        console.log(`Lovable ${model} extracted ${events.length} events`);
+        console.log(`Gemini ${gm} extracted ${events.length} events`);
         return events;
       }
     } catch (e) {
-      console.error(`Lovable ${model} error:`, e);
+      console.error(`Gemini ${gm} error:`, e);
     }
   }
 
@@ -292,7 +256,7 @@ ${markdown}`;
 // ─── Second AI pass: re-validate importance for HIGH events ───
 async function validateImportance(
   events: any[],
-  apiKey: string
+  geminiKey: string
 ): Promise<any[]> {
   // Only re-check events flagged HIGH (cheapest, highest impact on UX)
   const highEvents = events.filter(e => e.importance === 3);
@@ -320,30 +284,10 @@ ${list}
 
 Respond ONLY with JSON array of {"index": number, "importance": 1|2|3} for each. No explanation.`;
 
-  // Helper: try Lovable then Gemini direct
   const callAI = async (): Promise<string | null> => {
     try {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0,
-        }),
-      });
-      if (res.ok) {
-        const d = await res.json();
-        return d.choices?.[0]?.message?.content || null;
-      }
-      console.warn("Validate Lovable failed:", res.status);
-    } catch (e) { console.warn("Validate Lovable err:", e); }
-
-    const gKey = Deno.env.get("GEMINI_API_KEY");
-    if (!gKey) return null;
-    try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${gKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -397,8 +341,8 @@ serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -454,11 +398,7 @@ serve(async (req) => {
 
     console.log(`Mode: ${mode}, vnToday: ${vnToday}, targets: ${targets.length}`);
 
-    const MODELS = [
-      "google/gemini-2.5-flash",
-      "google/gemini-2.5-flash-lite",
-      "openai/gpt-5-nano",
-    ];
+
 
     // Process all targets in PARALLEL (Jina + Gemini direct support concurrent calls)
     const results = await Promise.all(targets.map(async (t) => {
@@ -476,7 +416,7 @@ serve(async (req) => {
         const tableStart = candidates.length ? Math.min(...candidates) : 0;
         const trimmed = md.slice(tableStart, tableStart + 50000);
 
-        const partial = await extractWithAI(trimmed, LOVABLE_API_KEY, MODELS, t.dateHint);
+        const partial = await extractWithAI(trimmed, GEMINI_API_KEY, t.dateHint);
         if (partial && partial.length > 0) {
           for (const ev of partial) if (!ev.date) ev.date = t.dateHint;
           console.log(`  → ${t.dateHint}: +${partial.length} events`);
@@ -495,7 +435,7 @@ serve(async (req) => {
     console.log(`Total events extracted: ${events.length}`);
 
     // ─── Second pass: validate HIGH importance ───
-    events = await validateImportance(events, LOVABLE_API_KEY);
+    events = await validateImportance(events, GEMINI_API_KEY);
 
     // Upsert
     let inserted = 0, updated = 0, skipped = 0, importanceRevised = 0;

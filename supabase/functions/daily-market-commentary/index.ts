@@ -247,32 +247,33 @@ Yêu cầu phân tích: Liên hệ giá hiện tại với các mức Fibonacci 
 }
 
 async function generateCommentary(apiKey: string, bundle: any, dxy: any): Promise<string> {
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: buildPrompt(bundle, dxy) },
-      ],
-    }),
-  });
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: `${SYSTEM_PROMPT}\n\n${buildPrompt(bundle, dxy)}` }] }],
+        generationConfig: { temperature: 0.5 },
+      }),
+    }
+  );
   if (!res.ok) {
-    if (res.status === 402) throw new Error("credit_error");
     if (res.status === 429) throw new Error("rate_limited");
-    throw new Error(`AI gateway ${res.status}`);
+    const txt = await res.text();
+    console.error("Gemini error:", res.status, txt);
+    throw new Error(`Gemini ${res.status}`);
   }
   const j = await res.json();
-  return j?.choices?.[0]?.message?.content ?? "";
+  return j?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 }
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -289,8 +290,8 @@ serve(async (req) => {
     console.log("[daily-commentary] Bundles ready. BTC:", !!btcBundle, "XAU:", !!xauBundle, "DXY:", !!dxy);
 
     const [btcCommentary, xauCommentary] = await Promise.all([
-      btcBundle ? generateCommentary(LOVABLE_API_KEY, btcBundle, dxy) : Promise.resolve(""),
-      xauBundle ? generateCommentary(LOVABLE_API_KEY, xauBundle, dxy) : Promise.resolve(""),
+      btcBundle ? generateCommentary(GEMINI_API_KEY, btcBundle, dxy) : Promise.resolve(""),
+      xauBundle ? generateCommentary(GEMINI_API_KEY, xauBundle, dxy) : Promise.resolve(""),
     ]);
 
     const today = new Date().toISOString().slice(0, 10);
