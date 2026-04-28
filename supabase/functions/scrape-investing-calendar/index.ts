@@ -398,11 +398,7 @@ serve(async (req) => {
 
     console.log(`Mode: ${mode}, vnToday: ${vnToday}, targets: ${targets.length}`);
 
-    const MODELS = [
-      "google/gemini-2.5-flash",
-      "google/gemini-2.5-flash-lite",
-      "openai/gpt-5-nano",
-    ];
+
 
     // Process all targets in PARALLEL (Jina + Gemini direct support concurrent calls)
     const results = await Promise.all(targets.map(async (t) => {
