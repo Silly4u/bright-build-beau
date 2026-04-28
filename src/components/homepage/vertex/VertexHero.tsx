@@ -15,6 +15,26 @@ const VertexHero: React.FC = () => {
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const y = useTransform(scrollYProgress, [0, 1], [0, 80]);
 
+  const [btc, setBtc] = useState<{ price: number | null; change: number | null }>({ price: null, change: null });
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        const map = await fetchBinanceTickers(['BTCUSDT']);
+        const t = map['BTCUSDT'];
+        if (mounted && t?.lastPrice) {
+          setBtc({
+            price: parseFloat(t.lastPrice),
+            change: parseFloat(t.priceChangePercent ?? '0'),
+          });
+        }
+      } catch { /* keep last */ }
+    };
+    load();
+    const id = setInterval(load, 15000);
+    return () => { mounted = false; clearInterval(id); };
+  }, []);
+
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const sx = useSpring(mx, { stiffness: 80, damping: 18, mass: 0.4 });
