@@ -149,11 +149,10 @@ async function fetchViaJina(url: string): Promise<string> {
   return await res.text();
 }
 
-// ─── AI extraction with fallback chain ───
+// ─── AI extraction using Gemini API direct ───
 async function extractWithAI(
   markdown: string,
-  apiKey: string,
-  models: string[],
+  geminiKey: string,
   dateHint: string
 ): Promise<any[] | null> {
   const systemPrompt = `You are a strict economic-calendar extractor. Return ONLY a valid JSON array, no markdown fences, no explanation.
