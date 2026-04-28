@@ -1,8 +1,9 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
 import { ArrowUpRight, Sparkles, MessageCircle } from 'lucide-react';
 import { CONTACT_INFO } from '@/lib/contact';
+import { fetchBinanceTickers } from '@/lib/binance';
 import sphereLogo from '@/assets/vertex-sphere.png';
 import heroCoin from '@/assets/hero-coin-3d.png';
 import heroShape from '@/assets/hero-chart.png';
