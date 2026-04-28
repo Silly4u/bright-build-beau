@@ -220,17 +220,21 @@ const TradingChart: React.FC<TradingChartProps> = ({
       },
       rightPriceScale: {
         borderColor,
-        scaleMargins: { top: 0.02, bottom: 0.18 },
+        // More breathing room at top for upper-band labels (BB Upper, etc.)
+        // and a small bottom margin so candles fill the chart area better.
+        scaleMargins: { top: 0.12, bottom: 0.08 },
         textColor: '#848e9c',
         entireTextOnly: true,
+        autoScale: true,
       },
       timeScale: {
         borderColor,
         timeVisible: true,
         secondsVisible: false,
-        barSpacing: 7,
+        // Wider candles so price action is readable on large displays
+        barSpacing: 9,
         minBarSpacing: 3,
-        rightOffset: 8,
+        rightOffset: 12,
         fixLeftEdge: false,
         fixRightEdge: false,
       },
