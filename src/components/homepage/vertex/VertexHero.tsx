@@ -4,7 +4,7 @@ import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'fram
 import { ArrowUpRight, Sparkles, MessageCircle } from 'lucide-react';
 import { CONTACT_INFO } from '@/lib/contact';
 import sphereLogo from '@/assets/vertex-sphere.png';
-import heroCoin from '@/assets/hero-coin.jpg';
+import heroCoin from '@/assets/hero-coin-3d.png';
 import heroShape from '@/assets/hero-shape.jpg';
 
 const VertexHero: React.FC = () => {
@@ -191,10 +191,10 @@ const VertexHero: React.FC = () => {
           >
             <motion.img
               src={heroCoin}
-              alt="3D coin"
-              animate={{ y: [0, 12, 0], rotate: [0, 4, 0] }}
+              alt="Bitcoin 3D coin"
+              animate={{ y: [0, 12, 0], rotate: [0, 6, 0] }}
               transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-              className="w-28 sm:w-36 lg:w-44 rounded-3xl object-cover shadow-2xl"
+              className="w-32 sm:w-44 lg:w-56 object-contain drop-shadow-[0_20px_60px_rgba(217,38,169,0.45)]"
             />
           </motion.div>
 
