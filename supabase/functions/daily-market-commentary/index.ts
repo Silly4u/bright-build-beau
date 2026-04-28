@@ -290,8 +290,8 @@ serve(async (req) => {
     console.log("[daily-commentary] Bundles ready. BTC:", !!btcBundle, "XAU:", !!xauBundle, "DXY:", !!dxy);
 
     const [btcCommentary, xauCommentary] = await Promise.all([
-      btcBundle ? generateCommentary(LOVABLE_API_KEY, btcBundle, dxy) : Promise.resolve(""),
-      xauBundle ? generateCommentary(LOVABLE_API_KEY, xauBundle, dxy) : Promise.resolve(""),
+      btcBundle ? generateCommentary(GEMINI_API_KEY, btcBundle, dxy) : Promise.resolve(""),
+      xauBundle ? generateCommentary(GEMINI_API_KEY, xauBundle, dxy) : Promise.resolve(""),
     ]);
 
     const today = new Date().toISOString().slice(0, 10);
