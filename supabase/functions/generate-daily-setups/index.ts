@@ -7,7 +7,7 @@ const FINNHUB_API_KEY = Deno.env.get("FINNHUB_API_KEY") || "";
 
 // Gọi thẳng Gemini API bằng GEMINI_API_KEY (Google AI Studio free tier)
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
-const GEMINI_MODEL = "gemini-2.0-flash-exp";
+const GEMINI_MODEL = "gemini-2.0-flash";
 
 const RESPONSE_SCHEMA = {
   type: "object",
