@@ -224,7 +224,7 @@ const VertexHero: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.1, duration: 1.2 }}
-            className="absolute top-1/4 right-0 sm:right-2"
+            className="absolute top-1/4 right-12 sm:right-16 lg:right-24"
           >
             <motion.div
               animate={{ y: [0, -8, 0] }}
