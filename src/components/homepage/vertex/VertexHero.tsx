@@ -187,7 +187,7 @@ const VertexHero: React.FC = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.9, duration: 0.9 }}
-            className="absolute top-1/3 right-0 sm:right-2"
+            className="absolute bottom-4 right-2 sm:right-8"
           >
             <motion.img
               src={heroCoin}
@@ -224,7 +224,7 @@ const VertexHero: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.1, duration: 1.2 }}
-            className="absolute bottom-4 right-2 sm:right-8"
+            className="absolute top-1/3 right-0 sm:right-2"
           >
             <motion.img
               src={heroShape}
