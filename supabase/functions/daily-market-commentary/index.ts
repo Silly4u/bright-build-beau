@@ -247,24 +247,25 @@ Yêu cầu phân tích: Liên hệ giá hiện tại với các mức Fibonacci 
 }
 
 async function generateCommentary(apiKey: string, bundle: any, dxy: any): Promise<string> {
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: buildPrompt(bundle, dxy) },
-      ],
-    }),
-  });
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: `${SYSTEM_PROMPT}\n\n${buildPrompt(bundle, dxy)}` }] }],
+        generationConfig: { temperature: 0.5 },
+      }),
+    }
+  );
   if (!res.ok) {
-    if (res.status === 402) throw new Error("credit_error");
     if (res.status === 429) throw new Error("rate_limited");
-    throw new Error(`AI gateway ${res.status}`);
+    const txt = await res.text();
+    console.error("Gemini error:", res.status, txt);
+    throw new Error(`Gemini ${res.status}`);
   }
   const j = await res.json();
-  return j?.choices?.[0]?.message?.content ?? "";
+  return j?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 }
 
 serve(async (req) => {
