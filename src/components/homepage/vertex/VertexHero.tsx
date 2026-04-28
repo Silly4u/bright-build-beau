@@ -234,7 +234,7 @@ const VertexHero: React.FC = () => {
               <img
                 src={heroShape}
                 alt="Live trading signals chart"
-                className="w-28 sm:w-36 lg:w-48 rounded-xl object-cover"
+                className="w-20 sm:w-24 lg:w-32 rounded-xl object-cover"
               />
             </motion.div>
           </motion.div>
