@@ -1,71 +1,101 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Phone } from 'lucide-react';
-import AppLogo from './AppLogo';
+import { Send, Phone, MessageCircle } from 'lucide-react';
 import { CONTACT_INFO } from '@/lib/contact';
+import sphereLogo from '@/assets/vertex-sphere.png';
+
+const COLUMNS = [
+  {
+    title: 'Sản phẩm',
+    links: [
+      { label: 'Tin Tức', href: '/tin-tuc' },
+      { label: 'Phân Tích', href: '/phan-tich' },
+      { label: 'Indicators', href: '/indicators' },
+      { label: 'Lịch Kinh Tế', href: '/lich-kinh-te' },
+    ],
+  },
+  {
+    title: 'Cộng đồng',
+    links: [
+      { label: 'Dịch Vụ', href: '/services' },
+      { label: 'Từ Điển', href: '/tu-dien' },
+      { label: 'Liên Hệ', href: '/contact' },
+    ],
+  },
+];
 
 const Footer: React.FC = () => {
   return (
-    <footer className="border-t border-cyan-brand/10 py-10 px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
-            <div className="flex items-center gap-2">
-              <AppLogo size={28} />
-              <span className="font-display font-bold text-base tracking-tight text-foreground">
-                UNCLETRADER
-              </span>
+    <footer className="relative py-16 md:py-20 z-10 border-t border-white/5">
+      <div className="max-w-7xl mx-auto px-6 md:px-10">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-10">
+          <div className="col-span-2 md:col-span-5">
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <img src={sphereLogo} alt="UncleTrader" className="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(217,38,169,0.45)]" />
+              <span className="font-display text-xl font-semibold">UNCLETRADER</span>
+            </Link>
+            <p className="mt-4 text-sm text-white/50 max-w-sm leading-relaxed">
+              Giao dịch có chiến lược. Tín hiệu Smart Money, indicator chuyên nghiệp và cộng đồng trader Việt — tất cả trong một hệ sinh thái.
+            </p>
+            <div className="mt-6 flex items-center gap-2">
+              <a
+                href={CONTACT_INFO.telegramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Telegram"
+                className="w-10 h-10 rounded-full glass flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition"
+              >
+                <Send size={16} />
+              </a>
+              <a
+                href={CONTACT_INFO.zaloUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Zalo"
+                className="w-10 h-10 rounded-full glass flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition"
+              >
+                <MessageCircle size={16} />
+              </a>
+              <a
+                href={CONTACT_INFO.phoneUrl}
+                aria-label="Phone"
+                className="w-10 h-10 rounded-full glass flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition"
+              >
+                <Phone size={16} />
+              </a>
             </div>
-            <nav className="flex items-center gap-6">
-              <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200">
-                Trang Chủ
-              </Link>
-              <Link to="/services" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200">
-                Dịch Vụ
-              </Link>
-              <Link to="/contact" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200">
-                Liên Hệ
-              </Link>
-            </nav>
           </div>
 
-          <div className="flex items-center gap-5">
-            <a href={CONTACT_INFO.telegramUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-cyan-brand transition-colors duration-200" aria-label="Telegram">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-              </svg>
-            </a>
-            <a href={CONTACT_INFO.zaloUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-cyan-brand transition-colors duration-200 text-xs font-bold" aria-label="Zalo">
-              Zalo
-            </a>
-            <a href={CONTACT_INFO.phoneUrl} className="text-muted-foreground hover:text-cyan-brand transition-colors duration-200" aria-label="Gọi điện thoại">
-              <Phone size={18} strokeWidth={2.2} aria-hidden="true" />
-            </a>
-            <a href="#" className="text-muted-foreground hover:text-cyan-brand transition-colors duration-200" aria-label="YouTube">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-              </svg>
-            </a>
-            <a href="#" className="text-muted-foreground hover:text-cyan-brand transition-colors duration-200" aria-label="Facebook">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-              </svg>
-            </a>
-            <span className="text-muted-foreground text-sm hidden sm:block">© 2026 UNCLETRADER</span>
+          {COLUMNS.map((c) => (
+            <div key={c.title} className="md:col-span-2">
+              <div className="font-mono text-xs uppercase tracking-[0.25em] text-white/45">{c.title}</div>
+              <ul className="mt-4 flex flex-col gap-2.5">
+                {c.links.map((l) => (
+                  <li key={l.label}>
+                    <Link to={l.href} className="text-sm text-white/70 hover:text-white transition-colors">
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+
+          <div className="md:col-span-3">
+            <div className="font-mono text-xs uppercase tracking-[0.25em] text-white/45">Liên hệ</div>
+            <ul className="mt-4 flex flex-col gap-2.5 text-sm text-white/70">
+              <li>Telegram: <a href={CONTACT_INFO.telegramUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white">{CONTACT_INFO.telegramHandle}</a></li>
+              <li>Zalo: <a href={CONTACT_INFO.zaloUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white">{CONTACT_INFO.zaloLabel}</a></li>
+              <li>Hotline: <a href={CONTACT_INFO.phoneUrl} className="hover:text-white">{CONTACT_INFO.phoneDisplay}</a></li>
+            </ul>
           </div>
         </div>
 
-        <div className="mt-5 pt-5 border-t border-cyan-brand/5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span className="text-muted-foreground text-xs sm:hidden">© 2026 UNCLETRADER. All rights reserved.</span>
-          <span className="text-muted-foreground text-xs hidden sm:block">All rights reserved.</span>
-          <div className="flex items-center gap-4">
-            <Link to="/contact" className="text-muted-foreground text-xs hover:text-foreground transition-colors">
-              Chính Sách Bảo Mật
-            </Link>
-            <Link to="/contact" className="text-muted-foreground text-xs hover:text-foreground transition-colors">
-              Điều Khoản Sử Dụng
-            </Link>
-          </div>
+        <div className="mt-14 pt-6 border-t border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+          <span className="text-xs text-white/40 font-mono">
+            © {new Date().getFullYear()} UNCLETRADER · Trading có rủi ro. Đừng đầu tư nhiều hơn số tiền bạn có thể mất.
+          </span>
+          <span className="text-xs text-white/40 font-mono">Made with motion in Vietnam.</span>
         </div>
       </div>
     </footer>
