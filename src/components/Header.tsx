@@ -162,13 +162,6 @@ const Header: React.FC = () => {
           </motion.div>
         )}
       </motion.header>
-
-      {/* Economic ticker — sits at top edge */}
-      <div className="fixed top-0 left-0 right-0 z-40 pointer-events-none">
-        <div className="pointer-events-auto">
-          <EconomicTicker />
-        </div>
-      </div>
     </>
   );
 };
