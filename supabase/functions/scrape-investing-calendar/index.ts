@@ -218,70 +218,35 @@ ${markdown}`;
     return null;
   };
 
-  // ─── Try Gemini direct FIRST (Lovable AI often rate-limited / out of credits) ───
-  const geminiKey = Deno.env.get("GEMINI_API_KEY");
-  if (geminiKey) {
-    const geminiModels = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
-    for (const gm of geminiModels) {
-      console.log(`Trying Gemini direct: ${gm}`);
-      try {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${gm}:generateContent?key=${geminiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
-              generationConfig: { temperature: 0.05, responseMimeType: "application/json" },
-            }),
-          }
-        );
-        if (!res.ok) {
-          console.error(`Gemini ${gm} failed: ${res.status} - ${(await res.text()).slice(0, 200)}`);
-          continue;
-        }
-        const data = await res.json();
-        const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        const events = parseContent(content);
-        if (events && events.length > 0) {
-          console.log(`Gemini ${gm} extracted ${events.length} events`);
-          return events;
-        }
-      } catch (e) {
-        console.error(`Gemini ${gm} error:`, e);
-      }
-    }
-  }
-
-  // ─── FALLBACK: Lovable AI Gateway ───
-  for (const model of models) {
-    console.log(`Trying model (Lovable fallback): ${model}`);
+  // ─── Gemini API direct (Google AI Studio) ───
+  const geminiModels = ["gemini-2.5-flash", "gemini-2.5-flash-lite"];
+  for (const gm of geminiModels) {
+    console.log(`Trying Gemini direct: ${gm}`);
     try {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-          ],
-          temperature: 0.05,
-        }),
-      });
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${gm}:generateContent?key=${geminiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+            generationConfig: { temperature: 0.05, responseMimeType: "application/json" },
+          }),
+        }
+      );
       if (!res.ok) {
-        console.error(`Lovable ${model} failed: ${res.status}`);
+        console.error(`Gemini ${gm} failed: ${res.status} - ${(await res.text()).slice(0, 200)}`);
         continue;
       }
       const data = await res.json();
-      const content = data.choices?.[0]?.message?.content || "";
+      const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
       const events = parseContent(content);
       if (events && events.length > 0) {
-        console.log(`Lovable ${model} extracted ${events.length} events`);
+        console.log(`Gemini ${gm} extracted ${events.length} events`);
         return events;
       }
     } catch (e) {
-      console.error(`Lovable ${model} error:`, e);
+      console.error(`Gemini ${gm} error:`, e);
     }
   }
 
