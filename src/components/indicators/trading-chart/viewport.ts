@@ -4,9 +4,9 @@ export interface LogicalRangeSnapshot {
 }
 
 export const HISTORY_LOAD_TRIGGER_BARS = 25;
-const DEFAULT_VISIBLE_BARS = 160;
+const DEFAULT_VISIBLE_BARS = 120;
 const LIVE_EDGE_THRESHOLD_BARS = 12;
-const LIVE_RIGHT_OFFSET_BARS = 8;
+const LIVE_RIGHT_OFFSET_BARS = 12;
 
 export function getInitialLogicalRange(totalBars: number): LogicalRangeSnapshot {
   const to = Math.max(0, totalBars - 1) + LIVE_RIGHT_OFFSET_BARS;
