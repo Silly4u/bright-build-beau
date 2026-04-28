@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { Menu, X, LogIn, LogOut, Shield, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIndicatorPermissions } from '@/hooks/useIndicatorPermissions';
-import EconomicTicker from './EconomicTicker';
 import sphereLogo from '@/assets/vertex-sphere.png';
 
 const navLinks = [
