@@ -5,9 +5,9 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const FINNHUB_API_KEY = Deno.env.get("FINNHUB_API_KEY") || "";
 
-// Cloud Run middleware (gọi Vertex AI bằng Service Account, dùng credit Google Cloud free trial)
-const CLOUD_RUN_URL = Deno.env.get("CLOUD_RUN_URL")!;
-const CLOUD_RUN_SECRET = Deno.env.get("CLOUD_RUN_SECRET")!;
+// Gọi thẳng Gemini API bằng GEMINI_API_KEY (Google AI Studio free tier)
+const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
+const GEMINI_MODEL = "gemini-2.0-flash-exp";
 
 const RESPONSE_SCHEMA = {
   type: "object",
