@@ -435,7 +435,7 @@ serve(async (req) => {
     console.log(`Total events extracted: ${events.length}`);
 
     // ─── Second pass: validate HIGH importance ───
-    events = await validateImportance(events, LOVABLE_API_KEY);
+    events = await validateImportance(events, GEMINI_API_KEY);
 
     // Upsert
     let inserted = 0, updated = 0, skipped = 0, importanceRevised = 0;
