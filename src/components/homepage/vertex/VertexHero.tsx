@@ -1,8 +1,9 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
 import { ArrowUpRight, Sparkles, MessageCircle } from 'lucide-react';
 import { CONTACT_INFO } from '@/lib/contact';
+import { fetchBinanceTickers } from '@/lib/binance';
 import sphereLogo from '@/assets/vertex-sphere.png';
 import heroCoin from '@/assets/hero-coin-3d.png';
 import heroShape from '@/assets/hero-chart.png';
@@ -13,6 +14,26 @@ const VertexHero: React.FC = () => {
   const scale = useTransform(scrollYProgress, [0, 1], [1, 0.85]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const y = useTransform(scrollYProgress, [0, 1], [0, 80]);
+
+  const [btc, setBtc] = useState<{ price: number | null; change: number | null }>({ price: null, change: null });
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        const map = await fetchBinanceTickers(['BTCUSDT']);
+        const t = map['BTCUSDT'];
+        if (mounted && t?.lastPrice) {
+          setBtc({
+            price: parseFloat(t.lastPrice),
+            change: parseFloat(t.priceChangePercent ?? '0'),
+          });
+        }
+      } catch { /* keep last */ }
+    };
+    load();
+    const id = setInterval(load, 15000);
+    return () => { mounted = false; clearInterval(id); };
+  }, []);
 
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -213,8 +234,12 @@ const VertexHero: React.FC = () => {
             >
               <span className="w-2 h-2 rounded-full bg-[#00D2D3] animate-pulse" />
               <span className="font-mono text-xs text-white/80">BTC</span>
-              <span className="font-display text-sm font-semibold">$103,418</span>
-              <span className="font-mono text-xs text-[#00D2D3]">+1.42%</span>
+              <span className="font-display text-sm font-semibold tabular-nums">
+                {btc.price !== null ? `$${btc.price.toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '...'}
+              </span>
+              <span className={`font-mono text-xs ${(btc.change ?? 0) >= 0 ? 'text-[#00D2D3]' : 'text-[#FF5B22]'}`}>
+                {btc.change !== null ? `${btc.change >= 0 ? '+' : ''}${btc.change.toFixed(2)}%` : '...'}
+              </span>
             </motion.div>
           </motion.div>
 
