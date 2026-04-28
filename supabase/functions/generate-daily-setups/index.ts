@@ -5,9 +5,9 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const FINNHUB_API_KEY = Deno.env.get("FINNHUB_API_KEY") || "";
 
-// Cloud Run middleware (gọi Vertex AI bằng Service Account, dùng credit Google Cloud free trial)
-const CLOUD_RUN_URL = Deno.env.get("CLOUD_RUN_URL")!;
-const CLOUD_RUN_SECRET = Deno.env.get("CLOUD_RUN_SECRET")!;
+// Gọi thẳng Gemini API bằng GEMINI_API_KEY (Google AI Studio free tier)
+const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY")!;
+const GEMINI_MODEL = "gemini-2.0-flash-exp";
 
 const RESPONSE_SCHEMA = {
   type: "object",
@@ -88,33 +88,42 @@ async function fetchGoldPrice(): Promise<{ price: number; change24h: number }> {
   throw new Error("Could not fetch gold price from any source");
 }
 
-// ---------- AI GENERATION (qua Cloud Run middleware) ----------
+// ---------- AI GENERATION (gọi thẳng Gemini API) ----------
 
 async function generateSetups(asset: string, systemPrompt: string, userPrompt: string): Promise<any> {
-  console.log(`[${asset}] Calling Cloud Run middleware...`);
-  const res = await fetch(CLOUD_RUN_URL, {
+  console.log(`[${asset}] Calling Gemini API (${GEMINI_MODEL})...`);
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+
+  const res = await fetch(url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-secret": CLOUD_RUN_SECRET,
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      systemPrompt,
-      userPrompt,
-      responseSchema: RESPONSE_SCHEMA,
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+      generationConfig: {
+        temperature: 0.7,
+        responseMimeType: "application/json",
+        responseSchema: RESPONSE_SCHEMA,
+      },
     }),
   });
 
   if (!res.ok) {
     const errText = await res.text();
-    console.error(`[${asset}] Cloud Run error ${res.status}: ${errText.slice(0, 500)}`);
-    throw new Error(`Cloud Run error ${res.status}: ${errText.slice(0, 200)}`);
+    console.error(`[${asset}] Gemini error ${res.status}: ${errText.slice(0, 500)}`);
+    throw new Error(`Gemini error ${res.status}: ${errText.slice(0, 200)}`);
   }
 
-  const data = await res.json();
+  const json = await res.json();
+  const text = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) {
+    console.error(`[${asset}] Empty Gemini response:`, JSON.stringify(json).slice(0, 300));
+    throw new Error("Gemini trả về dữ liệu rỗng");
+  }
+
+  const data = JSON.parse(text);
   if (!data.scenarios) {
-    console.error(`[${asset}] Invalid response from Cloud Run:`, JSON.stringify(data).slice(0, 300));
-    throw new Error("Cloud Run trả về dữ liệu không hợp lệ");
+    throw new Error("Gemini trả về dữ liệu không hợp lệ (thiếu scenarios)");
   }
   console.log(`[${asset}] Success`);
   return data;
