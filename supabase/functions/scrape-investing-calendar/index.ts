@@ -416,7 +416,7 @@ serve(async (req) => {
         const tableStart = candidates.length ? Math.min(...candidates) : 0;
         const trimmed = md.slice(tableStart, tableStart + 50000);
 
-        const partial = await extractWithAI(trimmed, LOVABLE_API_KEY, MODELS, t.dateHint);
+        const partial = await extractWithAI(trimmed, GEMINI_API_KEY, t.dateHint);
         if (partial && partial.length > 0) {
           for (const ev of partial) if (!ev.date) ev.date = t.dateHint;
           console.log(`  → ${t.dateHint}: +${partial.length} events`);
