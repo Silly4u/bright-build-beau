@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Menu, X, LogIn, LogOut, Shield, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIndicatorPermissions } from '@/hooks/useIndicatorPermissions';
-import sphereLogo from '@/assets/vertex-sphere.png';
+import sphereLogo from '@/assets/uncletrader-logo.png';
 
 const navLinks = [
   { href: '/', label: 'Trang Chủ' },
@@ -49,7 +49,7 @@ const Header: React.FC = () => {
             <img
               src={sphereLogo}
               alt="UncleTrader"
-              className="w-8 h-8 md:w-9 md:h-9 object-contain drop-shadow-[0_0_12px_rgba(217,38,169,0.45)] transition-transform duration-700 group-hover:rotate-180"
+              className="w-8 h-8 md:w-9 md:h-9 object-cover rounded-full ring-1 ring-white/15 drop-shadow-[0_0_12px_rgba(245,158,11,0.45)] transition-transform duration-700 group-hover:rotate-[360deg]"
             />
             <div className="hidden sm:flex flex-col leading-none">
               <span className="font-display text-sm md:text-base font-semibold tracking-tight text-foreground">
