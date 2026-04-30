@@ -4,7 +4,7 @@ import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'fram
 import { ArrowUpRight, Sparkles, MessageCircle } from 'lucide-react';
 import { CONTACT_INFO } from '@/lib/contact';
 import { fetchBinanceTickers } from '@/lib/binance';
-import sphereLogo from '@/assets/vertex-btc-sphere.png';
+import sphereLogo from '@/assets/vertex-hero-sphere.png';
 import heroCoin from '@/assets/vertex-eth-coin.png';
 import heroShape from '@/assets/hero-chart.png';
 
