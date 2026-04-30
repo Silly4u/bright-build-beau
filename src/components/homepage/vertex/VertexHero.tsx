@@ -163,7 +163,7 @@ const VertexHero: React.FC = () => {
           >
             <motion.img
               src={sphereLogo}
-              alt="UncleTrader sphere"
+              alt="Bitcoin 3D sphere"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 1.2, ease: [0.2, 0.8, 0.2, 1], delay: 0.4 }}
@@ -212,7 +212,7 @@ const VertexHero: React.FC = () => {
           >
             <motion.img
               src={heroCoin}
-              alt="Bitcoin 3D coin"
+              alt="Ethereum 3D coin"
               animate={{ y: [0, 12, 0], rotate: [0, 6, 0] }}
               transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
               className="w-32 sm:w-44 lg:w-56 object-contain drop-shadow-[0_20px_60px_rgba(217,38,169,0.45)]"
