@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Menu, X, LogIn, LogOut, Shield, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIndicatorPermissions } from '@/hooks/useIndicatorPermissions';
-import sphereLogo from '@/assets/vertex-sphere.png';
+import sphereLogo from '@/assets/uncletrader-logo.png';
 
 const navLinks = [
   { href: '/', label: 'Trang Chủ' },
