@@ -163,7 +163,7 @@ const VertexHero: React.FC = () => {
           >
             <motion.img
               src={sphereLogo}
-              alt="Bitcoin 3D sphere"
+              alt="Iridescent 3D sphere"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 1.2, ease: [0.2, 0.8, 0.2, 1], delay: 0.4 }}
