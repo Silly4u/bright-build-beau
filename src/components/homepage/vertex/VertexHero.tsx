@@ -87,11 +87,11 @@ const VertexHero: React.FC = () => {
             transition={{ delay: 0.3, duration: 0.9, ease: [0.2, 0.8, 0.2, 1] }}
             className="font-display mt-5 text-5xl sm:text-6xl lg:text-7xl xl:text-[5.2rem] leading-[0.95] font-bold"
           >
-            Giao dịch,{' '}
-            <span className="text-accent-gradient">có chiến lược.</span>
+            Giao dịch{' '}
+            <span className="text-accent-gradient">có chiến lược</span>
             <br />
             <span className="text-white/85">Cho </span>
-            <em className="not-italic font-display">trader Việt.</em>
+            <em className="not-italic font-display">trader Việt</em>
           </motion.h1>
 
           <motion.p
