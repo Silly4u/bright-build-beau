@@ -39,11 +39,11 @@ const Header: React.FC = () => {
         initial={{ y: -40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
-        className={`fixed top-3 md:top-5 left-1/2 -translate-x-1/2 w-[calc(100%-20px)] sm:w-[calc(100%-28px)] lg:w-[calc(100%-40px)] max-w-[1200px] z-50 rounded-[28px] transition-all duration-500 ${
+        className={`fixed top-3 md:top-5 left-1/2 -translate-x-1/2 w-[calc(100%-20px)] sm:w-[calc(100%-28px)] lg:w-[calc(100%-40px)] max-w-[1400px] z-50 rounded-[28px] transition-all duration-500 ${
           scrolled ? 'glass-strong' : 'glass'
         }`}
       >
-        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 px-3 sm:px-4 lg:px-5 py-1.5 md:py-2 min-w-0">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-3 sm:px-4 lg:px-5 py-1.5 md:py-2 min-w-0">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group min-w-0 max-w-full">
             <img
@@ -69,7 +69,7 @@ const Header: React.FC = () => {
                 <Link
                   key={link.href}
                   to={link.href}
-                  className={`px-1.5 xl:px-2.5 2xl:px-3 py-1.5 rounded-full text-[10.5px] xl:text-[11.5px] 2xl:text-[12.5px] font-medium transition-all whitespace-nowrap ${
+                  className={`px-2 xl:px-2.5 2xl:px-3 py-1.5 rounded-full text-[11px] xl:text-[12px] 2xl:text-[13px] font-medium transition-all whitespace-nowrap ${
                     isActive
                       ? 'text-foreground bg-white/10'
                       : 'text-white/65 hover:text-foreground hover:bg-white/5'
