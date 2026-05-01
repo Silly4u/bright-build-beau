@@ -39,7 +39,7 @@ const Header: React.FC = () => {
         initial={{ y: -40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
-        className={`fixed top-3 md:top-5 left-1/2 -translate-x-1/2 w-[calc(100%-20px)] sm:w-[calc(100%-28px)] lg:w-[calc(100%-40px)] max-w-[1400px] z-50 rounded-[28px] transition-all duration-500 ${
+        className={`fixed top-3 md:top-5 left-2.5 right-2.5 sm:left-3.5 sm:right-3.5 lg:left-5 lg:right-5 2xl:left-auto 2xl:w-[1400px] z-50 rounded-[28px] transition-all duration-500 ${
           scrolled ? 'glass-strong' : 'glass'
         }`}
       >
