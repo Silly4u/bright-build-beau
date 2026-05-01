@@ -39,37 +39,37 @@ const Header: React.FC = () => {
         initial={{ y: -40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
-        className={`fixed top-3 md:top-5 left-1/2 -translate-x-1/2 w-[96%] max-w-[1180px] z-50 rounded-full transition-all duration-500 ${
+        className={`fixed top-3 md:top-5 left-1/2 -translate-x-1/2 w-[calc(100%-20px)] sm:w-[calc(100%-28px)] lg:w-[calc(100%-40px)] max-w-[1200px] z-50 rounded-[28px] transition-all duration-500 ${
           scrolled ? 'glass-strong' : 'glass'
         }`}
       >
-        <div className="flex items-center justify-between gap-2 px-3 md:px-4 py-1.5 md:py-2">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 px-3 sm:px-4 lg:px-5 py-1.5 md:py-2 min-w-0">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group shrink-0 min-w-0">
+          <Link to="/" className="flex items-center gap-2 group min-w-0 max-w-full">
             <img
               src={sphereLogo}
               alt="UncleTrader"
-              className="w-7 h-7 md:w-8 md:h-8 object-cover rounded-full ring-1 ring-white/15 drop-shadow-[0_0_12px_rgba(245,158,11,0.45)] transition-transform duration-700 group-hover:rotate-[360deg] shrink-0"
+              className="w-7 h-7 lg:w-8 lg:h-8 object-cover rounded-full ring-1 ring-white/15 drop-shadow-[0_0_12px_rgba(245,158,11,0.45)] transition-transform duration-700 group-hover:rotate-[360deg] shrink-0"
             />
-            <div className="hidden sm:flex flex-col leading-none min-w-0">
-              <span className="font-display text-[13px] xl:text-sm font-semibold tracking-tight text-foreground truncate">
+            <div className="flex flex-col leading-none min-w-0">
+              <span className="font-display text-[12px] sm:text-[13px] xl:text-sm font-semibold tracking-tight text-foreground truncate">
                 UNCLETRADER
               </span>
-              <span className="hidden xl:block text-[8px] font-mono text-white/40 tracking-[0.2em] uppercase mt-1">
+              <span className="hidden 2xl:block text-[8px] font-mono text-white/40 tracking-[0.2em] uppercase mt-1 truncate">
                 Smart Money Analysis
               </span>
             </div>
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-0.5 min-w-0">
+          <nav className="hidden lg:flex items-center justify-center gap-0.5 min-w-0 overflow-hidden">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   to={link.href}
-                  className={`px-2 xl:px-2.5 py-1.5 rounded-full text-[11.5px] xl:text-[12.5px] font-medium transition-all whitespace-nowrap ${
+                  className={`px-1.5 xl:px-2.5 2xl:px-3 py-1.5 rounded-full text-[10.5px] xl:text-[11.5px] 2xl:text-[12.5px] font-medium transition-all whitespace-nowrap ${
                     isActive
                       ? 'text-foreground bg-white/10'
                       : 'text-white/65 hover:text-foreground hover:bg-white/5'
@@ -82,7 +82,7 @@ const Header: React.FC = () => {
           </nav>
 
           {/* Right side */}
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center justify-end gap-1 shrink-0 min-w-fit">
             {isSuperAdmin && (
               <Link
                 to="/admin"
@@ -95,7 +95,7 @@ const Header: React.FC = () => {
             {user ? (
               <button
                 onClick={async () => { await signOut(); navigate('/'); }}
-                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-semibold text-white/80 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all whitespace-nowrap"
+                className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-semibold text-white/80 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all whitespace-nowrap"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span className="hidden xl:inline">Đăng Xuất</span>
@@ -103,7 +103,7 @@ const Header: React.FC = () => {
             ) : (
               <Link
                 to="/auth"
-                className="hidden sm:inline-flex btn-primary items-center gap-1.5 px-3 py-1.5 rounded-full text-[11.5px] whitespace-nowrap"
+                className="hidden md:inline-flex btn-primary items-center gap-1.5 px-2.5 xl:px-3 py-1.5 rounded-full text-[11px] xl:text-[11.5px] whitespace-nowrap"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 Đăng Nhập
@@ -112,7 +112,7 @@ const Header: React.FC = () => {
             )}
             <button
               onClick={() => setOpen((v) => !v)}
-              className="lg:hidden ml-1 p-2 rounded-full text-white/80 hover:text-white hover:bg-white/5 transition"
+              className="lg:hidden p-2 rounded-full text-white/80 hover:text-white hover:bg-white/5 transition shrink-0"
               aria-label="Toggle menu"
             >
               {open ? <X size={18} /> : <Menu size={18} />}
