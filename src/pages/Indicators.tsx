@@ -191,98 +191,131 @@ const Indicators: React.FC = () => {
     <main className="min-h-screen bg-[#0b0e11]">
       <Header />
 
-      {/* ═══ BINANCE-STYLE TOP BAR ═══ */}
+      {/* ═══ TRADINGVIEW-STYLE TOP BAR ═══ */}
       <div className="pt-24 px-1.5 lg:px-3">
-        <div className="bg-[#161a1e] border-b border-[#2b3139] px-3 py-2 flex flex-wrap items-center gap-2 text-xs">
-          {/* Symbol + Price */}
-          <div className="flex items-center gap-3 pr-4 border-r border-[#2b3139]">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ backgroundColor: `${activePairInfo.color}20` }}>
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: activePairInfo.color }} />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-bold text-[#eaecef] font-mono leading-tight">{activePair}</span>
-                <span className="text-[9px] text-[#848e9c] font-mono">Perpetual</span>
-              </div>
+        {/* Row 1: Big price + bid/ask */}
+        <div className="bg-[#0b0e11] border-x border-t border-[#2b3139] rounded-t-md px-4 py-2.5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: `${activePairInfo.color}25` }}>
+              <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: activePairInfo.color }} />
             </div>
-            <div className="flex flex-col items-end ml-2">
-              <span className={`text-lg font-bold font-mono leading-tight ${priceChange >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'}`}>
-                {marketData.loading ? '...' : `$${livePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            <span className={`text-[26px] font-bold font-mono leading-none tabular-nums ${priceChange >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'}`}>
+              {marketData.loading ? '...' : `$${livePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            </span>
+            {!marketData.loading && (
+              <span className={`flex items-center gap-1 text-[13px] font-mono font-semibold ${priceChange >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'}`}>
+                <span className="text-base leading-none">{priceChange >= 0 ? '↗' : '↘'}</span>
+                {priceChange >= 0 ? '+' : ''}{(prevCandle ? livePrice - prevCandle.close : 0).toFixed(2)}
+                <span className="text-[#848e9c]">({priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%)</span>
               </span>
-              {!marketData.loading && (
-                <span className={`text-[11px] font-mono font-bold ${priceChange >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'}`}>
-                  {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%
-                </span>
-              )}
-            </div>
+            )}
+          </div>
+          {/* Bid/Ask/Last */}
+          <div className="hidden sm:flex items-baseline gap-4 text-[13px] font-mono tabular-nums shrink-0">
+            <span className="text-[#eaecef] font-semibold">${lastCandle ? lastCandle.low.toFixed(2) : '—'}</span>
+            <span className="text-[#0ecb81] font-semibold">${lastCandle ? lastCandle.high.toFixed(2) : '—'}</span>
+            <span className="text-[#f6465d] font-semibold">${lastCandle ? lastCandle.open.toFixed(2) : '—'}</span>
+          </div>
+        </div>
+
+        {/* Row 2: Chart toolbar */}
+        <div className="bg-[#161a1e] border border-[#2b3139] rounded-b-md px-2 py-1.5 flex items-center gap-1.5 text-xs overflow-x-auto">
+          {/* Symbol search (PairSelector trigger) */}
+          <div className="flex items-center">
+            <PairSelector
+              pairs={PAIRS}
+              activePair={activePair}
+              onSelect={setActivePair}
+            />
           </div>
 
-          {/* Market stats */}
-          <div className="flex items-center gap-4 px-3 border-r border-[#2b3139]">
-            <div className="flex flex-col">
-              <span className="text-[9px] text-[#848e9c] font-mono">24h High</span>
-              <span className="text-[11px] text-[#eaecef] font-mono font-medium">
-                {lastCandle ? `$${lastCandle.high.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[9px] text-[#848e9c] font-mono">24h Low</span>
-              <span className="text-[11px] text-[#eaecef] font-mono font-medium">
-                {lastCandle ? `$${lastCandle.low.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'}
-              </span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[9px] text-[#848e9c] font-mono">24h Vol</span>
-              <span className="text-[11px] text-[#eaecef] font-mono font-medium">
-                {lastCandle ? `${(lastCandle.volume / 1e6).toFixed(2)}M` : '—'}
-              </span>
-            </div>
-          </div>
+          {/* "+" add compare */}
+          <button
+            onClick={() => setActiveView(activeView === 'multi' ? 'single' : 'multi')}
+            className="w-7 h-7 flex items-center justify-center rounded text-[#848e9c] hover:text-[#eaecef] hover:bg-[#2b3139] transition-colors shrink-0"
+            title="So sánh nhiều chart"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
 
-          {/* Coin pair selector — dropdown with arrow (TradingView-style) */}
-          <PairSelector
-            pairs={PAIRS}
-            activePair={activePair}
-            onSelect={setActivePair}
-          />
+          <div className="w-px h-5 bg-[#2b3139] mx-0.5" />
 
-          <div className="w-px h-5 bg-[#2b3139]" />
-
-          {/* Timeframe — quick buttons + full dropdown (TradingView-style) */}
-          <div className="flex items-center gap-1">
+          {/* Quick timeframes */}
+          <div className="flex items-center gap-0.5 shrink-0">
             {TIMEFRAMES.map(tf => (
               <button key={tf} onClick={() => setActiveTimeframe(tf)}
-                className={`hidden sm:inline-flex px-2.5 py-1.5 rounded font-mono font-bold text-[11px] transition-all ${
+                className={`px-2 py-1 rounded font-mono font-semibold text-[12px] transition-all ${
                   activeTimeframe === tf
-                    ? 'bg-[#fcd535]/10 text-[#fcd535]'
-                    : 'text-[#848e9c] hover:text-[#eaecef] hover:bg-[#2b3139]'
+                    ? 'bg-[#2b3139] text-[#eaecef]'
+                    : 'text-[#848e9c] hover:text-[#eaecef] hover:bg-[#2b3139]/60'
                 }`}>
-                {tf}
+                {tf === 'M15' ? '15m' : tf === 'H1' ? '1h' : tf === 'H4' ? '4h' : tf === 'D1' ? 'D' : tf}
               </button>
             ))}
             <TimeframeSelector activeTf={activeTimeframe} onSelect={setActiveTimeframe} />
           </div>
 
-          <div className="w-px h-5 bg-[#2b3139] hidden md:block" />
+          <div className="w-px h-5 bg-[#2b3139] mx-0.5" />
+
+          {/* Chart type icons (visual only — placeholders) */}
+          <button className="w-7 h-7 flex items-center justify-center rounded text-[#848e9c] hover:text-[#eaecef] hover:bg-[#2b3139] transition-colors shrink-0" title="Loại chart">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+            </svg>
+          </button>
+          <button className="w-7 h-7 flex items-center justify-center rounded text-[#fcd535] bg-[#2b3139] shrink-0" title="Nến Nhật">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <rect x="5" y="6" width="3" height="12" rx="0.5" />
+              <line x1="6.5" y1="3" x2="6.5" y2="6" stroke="currentColor" strokeWidth="1.5" />
+              <line x1="6.5" y1="18" x2="6.5" y2="21" stroke="currentColor" strokeWidth="1.5" />
+              <rect x="14" y="9" width="3" height="8" rx="0.5" />
+              <line x1="15.5" y1="5" x2="15.5" y2="9" stroke="currentColor" strokeWidth="1.5" />
+              <line x1="15.5" y1="17" x2="15.5" y2="20" stroke="currentColor" strokeWidth="1.5" />
+            </svg>
+          </button>
+          <button className="hidden md:flex w-7 h-7 items-center justify-center rounded text-[#848e9c] hover:text-[#eaecef] hover:bg-[#2b3139] transition-colors shrink-0" title="Line">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l6-6 4 4 8-8" />
+            </svg>
+          </button>
+
+          <div className="w-px h-5 bg-[#2b3139] mx-0.5" />
+
+          {/* Indicators button */}
+          <button
+            onClick={() => setSidebarOpen(o => !o)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[12px] font-mono font-semibold text-[#eaecef] hover:bg-[#2b3139] transition-colors shrink-0"
+            title="Chỉ báo"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18M7 14l4-4 4 4 5-5" />
+            </svg>
+            <span>Các chỉ báo</span>
+            {enabledIds.length > 0 && (
+              <span className="text-[10px] bg-[#fcd535]/15 text-[#fcd535] px-1.5 rounded">{enabledIds.length}</span>
+            )}
+          </button>
 
           {/* View tabs + Share */}
-          <div className="flex items-center gap-1.5 ml-auto">
-            <div className="flex items-center gap-1 bg-[#0b0e11] border border-[#2b3139] rounded p-0.5">
+          <div className="flex items-center gap-1.5 ml-auto shrink-0">
+            <div className="flex items-center gap-0.5 bg-[#0b0e11] border border-[#2b3139] rounded p-0.5">
               <button
                 onClick={() => setActiveView('single')}
-                className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold transition-all ${
+                className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all ${
                   activeView === 'single' ? 'bg-[#fcd535] text-[#0b0e11]' : 'text-[#848e9c] hover:text-[#eaecef]'
                 }`}
               >
-                📊 Single
+                Single
               </button>
               <button
                 onClick={() => setActiveView('multi')}
-                className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold transition-all ${
+                className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all ${
                   activeView === 'multi' ? 'bg-[#fcd535] text-[#0b0e11]' : 'text-[#848e9c] hover:text-[#eaecef]'
                 }`}
               >
-                🎯 Multi-chart
+                Multi
               </button>
             </div>
             <ShareSnapshot pair={activePair} timeframe={activeTimeframe} enabledIndicators={enabledIds} />
