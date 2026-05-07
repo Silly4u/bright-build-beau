@@ -9,6 +9,7 @@ import sphereLogo from '@/assets/uncletrader-logo.png';
 const navLinks = [
   { href: '/', label: 'Trang Chủ' },
   { href: '/tin-tuc', label: 'Tin Tức' },
+  { href: '/co-phieu', label: 'Cổ Phiếu' },
   { href: '/phan-tich', label: 'Phân Tích' },
   { href: '/indicators', label: 'Indicators' },
   { href: '/lich-kinh-te', label: 'Lịch Kinh Tế' },
