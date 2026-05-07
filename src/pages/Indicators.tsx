@@ -46,6 +46,12 @@ const PAIRS = [
   { symbol: 'WLD/USDT', label: 'WLD', color: '#1DB4D5' },
   { symbol: 'HYPE/USDT', label: 'HYPE', color: '#A855F7' },
   { symbol: 'PEPE/USDT', label: 'PEPE', color: '#4CAF50' },
+  // Top futures volume tháng (Binance/Bybit/Hyperliquid ~30D)
+  { symbol: 'SUI/USDT', label: 'SUI', color: '#4DA2FF' },
+  { symbol: 'ENA/USDT', label: 'ENA', color: '#FF5C00' },
+  { symbol: 'FARTCOIN/USDT', label: 'FART', color: '#FFB347' },
+  { symbol: 'AVAX/USDT', label: 'AVAX', color: '#E84142' },
+  { symbol: 'LINK/USDT', label: 'LINK', color: '#2A5ADA' },
 ];
 
 const TIMEFRAMES = ['M15', 'H1', 'H4', 'D1'];

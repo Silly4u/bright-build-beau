@@ -46,6 +46,11 @@ const SYMBOL_MAP: Record<string, string> = {
   'WLD/USDT': 'WLDUSDT',
   'HYPE/USDT': 'HYPEUSDT',
   'PEPE/USDT': 'PEPEUSDT',
+  'SUI/USDT': 'SUIUSDT',
+  'ENA/USDT': 'ENAUSDT',
+  'FARTCOIN/USDT': 'FARTCOINUSDT',
+  'AVAX/USDT': 'AVAXUSDT',
+  'LINK/USDT': 'LINKUSDT',
 };
 
 const TF_TO_BINANCE: Record<string, string> = {
