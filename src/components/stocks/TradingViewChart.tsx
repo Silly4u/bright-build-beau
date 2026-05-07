@@ -39,6 +39,9 @@ const TradingViewChart: React.FC<Props> = ({ symbol, height = 520, watchlist }) 
       save_image: false,
       calendar: false,
       watchlist: watchlist && watchlist.length ? watchlist : undefined,
+      compareSymbols: watchlist && watchlist.length
+        ? watchlist.filter(s => s !== symbol).map(s => ({ symbol: s, position: 'NewPriceScale' }))
+        : undefined,
       details: true,
       withdateranges: true,
       support_host: 'https://www.tradingview.com',
