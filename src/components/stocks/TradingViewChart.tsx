@@ -3,9 +3,10 @@ import React, { useEffect, useRef } from 'react';
 interface Props {
   symbol: string; // e.g. NASDAQ:NVDA
   height?: number;
+  watchlist?: string[]; // TradingView symbols to show in the "+" / watchlist panel
 }
 
-const TradingViewChart: React.FC<Props> = ({ symbol, height = 520 }) => {
+const TradingViewChart: React.FC<Props> = ({ symbol, height = 520, watchlist }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
