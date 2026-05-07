@@ -38,10 +38,13 @@ const TradingViewChart: React.FC<Props> = ({ symbol, height = 520, watchlist }) 
       allow_symbol_change: true,
       save_image: false,
       calendar: false,
+      watchlist: watchlist && watchlist.length ? watchlist : undefined,
+      details: true,
+      withdateranges: true,
       support_host: 'https://www.tradingview.com',
     });
     containerRef.current.appendChild(script);
-  }, [symbol]);
+  }, [symbol, watchlist]);
 
   return (
     <div
