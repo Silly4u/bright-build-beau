@@ -60,14 +60,12 @@ const Stocks: React.FC = () => {
     return { gainers, losers, avg, totalVol };
   }, [quotes]);
 
+  useEffect(() => {
+    document.title = 'Cổ Phiếu Mỹ - NVDA, TSLA, AAPL Real-time | UncleTrader';
+  }, []);
+
   return (
     <div className="min-h-screen bg-background relative">
-      <Helmet>
-        <title>Cổ Phiếu Mỹ - NVDA, TSLA, AAPL Real-time | UncleTrader</title>
-        <meta name="description" content="Theo dõi giá cổ phiếu Mỹ real-time: NVDA, TSLA, AAPL, MSFT, GOOGL, AMZN, META... Heatmap, biểu đồ TradingView và tin tức tiếng Việt được AI dịch." />
-        <link rel="canonical" href="https://tbndigital.xyz/co-phieu" />
-      </Helmet>
-
       <Header />
 
       <main className="pt-24 md:pt-28 pb-16 px-3 sm:px-4 lg:px-6 max-w-[1600px] mx-auto">
