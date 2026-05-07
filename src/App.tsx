@@ -14,6 +14,7 @@ import EconomicCalendar from "./pages/EconomicCalendar.tsx";
 import Dictionary from "./pages/Dictionary.tsx";
 import DictionaryDetail from "./pages/DictionaryDetail.tsx";
 import NewsDetail from "./pages/NewsDetail.tsx";
+import Stocks from "./pages/Stocks.tsx";
 import AnalysisDetail from "./pages/AnalysisDetail.tsx";
 import Auth from "./pages/Auth.tsx";
 import AdminPanel from "./pages/AdminPanel.tsx";
