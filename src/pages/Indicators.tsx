@@ -225,7 +225,7 @@ const Indicators: React.FC = () => {
         </div>
 
         {/* Row 2: Chart toolbar */}
-        <div className="bg-[#161a1e] border border-[#2b3139] rounded-b-md px-2 py-1.5 flex items-center gap-1.5 text-xs overflow-x-auto">
+        <div className="bg-[#161a1e] border border-[#2b3139] rounded-b-md px-2 py-1.5 flex items-center gap-1.5 text-xs flex-wrap">
           {/* Symbol search (PairSelector trigger) */}
           <div className="flex items-center">
             <PairSelector
