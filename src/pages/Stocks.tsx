@@ -131,13 +131,8 @@ const Stocks: React.FC = () => {
           <StockHeatmap quotes={quotes} onSelect={setSelected} />
         </section>
 
-        {/* Main grid: Watchlist | Chart + Selected info | News */}
-        <section className="grid grid-cols-1 lg:grid-cols-[280px_1fr] xl:grid-cols-[280px_1fr_340px] gap-3" style={{ minHeight: 600 }}>
-          {/* Left: watchlist */}
-          <div className="lg:max-h-[820px]">
-            <StockWatchlist quotes={quotes} selected={selected} onSelect={setSelected} loading={loading} />
-          </div>
-
+        {/* Main grid: Chart + Selected info | News */}
+        <section className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-3" style={{ minHeight: 600 }}>
           {/* Center: chart */}
           <div className="flex flex-col gap-3">
             {/* Selected stock header */}
@@ -169,8 +164,14 @@ const Stocks: React.FC = () => {
               </div>
             )}
 
-            {/* TradingView chart */}
-            {selectedStock && <TradingViewChart symbol={selectedStock.tvSymbol} height={520} />}
+            {/* TradingView chart with all 21 tickers in built-in watchlist (the "+" panel) */}
+            {selectedStock && (
+              <TradingViewChart
+                symbol={selectedStock.tvSymbol}
+                height={600}
+                watchlist={STOCKS.map(s => s.tvSymbol)}
+              />
+            )}
 
             {/* News for selected ticker - mobile/tablet shows here */}
             <div className="xl:hidden">
@@ -179,7 +180,7 @@ const Stocks: React.FC = () => {
           </div>
 
           {/* Right: news (desktop only column) */}
-          <div className="hidden xl:block lg:max-h-[820px]">
+          <div className="hidden xl:block xl:max-h-[820px]">
             <StockNewsFeed ticker={selected} limit={20} />
           </div>
         </section>
