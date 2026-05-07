@@ -164,35 +164,7 @@ const Stocks: React.FC = () => {
               </div>
             )}
 
-            {/* Quick ticker chips - 21 mã, click để đổi chart */}
-            <div className="glass-card rounded-xl p-2 flex flex-wrap gap-1.5">
-              {STOCKS.map(s => {
-                const q = quotes[s.symbol];
-                const up = (q?.changePercent ?? 0) >= 0;
-                const isActive = selected === s.ticker;
-                return (
-                  <button
-                    key={s.ticker}
-                    onClick={() => setSelected(s.ticker)}
-                    title={s.name}
-                    className={`px-2 py-1 rounded text-[10px] font-mono font-bold border transition-colors flex items-center gap-1 ${
-                      isActive
-                        ? 'bg-cyan-brand/20 border-cyan-brand text-cyan-brand'
-                        : 'bg-white/[0.03] border-white/10 text-foreground hover:border-cyan-brand/40'
-                    }`}
-                  >
-                    {s.ticker}
-                    {q && (
-                      <span className={`tabular-nums ${up ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {up ? '+' : ''}{q.changePercent.toFixed(1)}%
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* TradingView chart */}
+            {/* TradingView chart with all 21 tickers in built-in watchlist (the "+" panel) */}
             {selectedStock && (
               <TradingViewChart
                 symbol={selectedStock.tvSymbol}
