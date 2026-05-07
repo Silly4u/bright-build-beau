@@ -410,6 +410,54 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_news: {
+        Row: {
+          ai_translated: boolean
+          created_at: string
+          external_id: string | null
+          full_content: string | null
+          id: string
+          image_url: string | null
+          original_title: string | null
+          published_at: string
+          source: string
+          summary: string | null
+          symbol: string
+          title: string
+          url: string | null
+        }
+        Insert: {
+          ai_translated?: boolean
+          created_at?: string
+          external_id?: string | null
+          full_content?: string | null
+          id?: string
+          image_url?: string | null
+          original_title?: string | null
+          published_at?: string
+          source?: string
+          summary?: string | null
+          symbol: string
+          title: string
+          url?: string | null
+        }
+        Update: {
+          ai_translated?: boolean
+          created_at?: string
+          external_id?: string | null
+          full_content?: string | null
+          id?: string
+          image_url?: string | null
+          original_title?: string | null
+          published_at?: string
+          source?: string
+          summary?: string | null
+          symbol?: string
+          title?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
