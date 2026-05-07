@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import StockHeatmap from '@/components/stocks/StockHeatmap';
-import StockWatchlist, { type Quote } from '@/components/stocks/StockWatchlist';
+import { type Quote } from '@/components/stocks/StockWatchlist';
 import StockNewsFeed from '@/components/stocks/StockNewsFeed';
 import TradingViewChart from '@/components/stocks/TradingViewChart';
 import { STOCKS, getStockByTicker, isUSMarketOpen } from '@/lib/stocks';
