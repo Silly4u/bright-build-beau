@@ -54,7 +54,16 @@ const Academy: React.FC = () => {
           </div>
 
           <h1 className="font-display text-3xl md:text-4xl font-bold mb-4 leading-tight">{selected.title}</h1>
-          <p className="text-white/70 text-lg leading-relaxed mb-10">{selected.intro}</p>
+          <p className="text-white/70 text-lg leading-relaxed mb-6">{selected.intro}</p>
+
+          {selected.history && (
+            <div className="mb-10 rounded-2xl p-5 bg-white/5 border border-white/10">
+              <h3 className="font-display text-sm font-bold mb-2 inline-flex items-center gap-2 text-white/80 uppercase tracking-widest">
+                <History className="w-4 h-4" /> Bối cảnh lịch sử
+              </h3>
+              <p className="text-white/65 text-sm leading-relaxed">{selected.history}</p>
+            </div>
+          )}
 
           <div className="space-y-8">
             {selected.sections.map((s, i) => (
@@ -67,7 +76,12 @@ const Academy: React.FC = () => {
                 className="glass rounded-2xl p-6 border border-white/5"
               >
                 <h2 className="font-display text-xl font-semibold mb-3 text-amber-200">{s.heading}</h2>
-                <p className="text-white/75 leading-relaxed">{s.body}</p>
+                {s.image && (
+                  <div className="mb-4 rounded-xl overflow-hidden ring-1 ring-white/10">
+                    <img src={s.image} alt={s.heading} loading="lazy" className="w-full object-cover" />
+                  </div>
+                )}
+                <p className="text-white/75 leading-relaxed whitespace-pre-line">{s.body}</p>
                 {s.bullets && (
                   <ul className="mt-4 space-y-2">
                     {s.bullets.map((b, j) => (
@@ -77,6 +91,22 @@ const Academy: React.FC = () => {
                       </li>
                     ))}
                   </ul>
+                )}
+                {s.example && (
+                  <div className="mt-4 rounded-xl p-4 bg-emerald-400/5 border border-emerald-400/20">
+                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-300 mb-1.5">
+                      <Lightbulb className="w-3.5 h-3.5" /> Ví dụ thực chiến
+                    </div>
+                    <p className="text-sm text-white/75 leading-relaxed whitespace-pre-line">{s.example}</p>
+                  </div>
+                )}
+                {s.pitfall && (
+                  <div className="mt-3 rounded-xl p-4 bg-rose-400/5 border border-rose-400/20">
+                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-rose-300 mb-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5" /> Sai lầm thường gặp
+                    </div>
+                    <p className="text-sm text-white/75 leading-relaxed whitespace-pre-line">{s.pitfall}</p>
+                  </div>
                 )}
               </motion.section>
             ))}
@@ -95,6 +125,42 @@ const Academy: React.FC = () => {
               ))}
             </ul>
           </div>
+
+          {selected.checklist && selected.checklist.length > 0 && (
+            <div className="mt-6 rounded-2xl p-6 bg-gradient-to-br from-emerald-500/10 to-emerald-500/0 border border-emerald-400/20">
+              <h3 className="font-display text-lg font-bold mb-4 inline-flex items-center gap-2 text-emerald-200">
+                <ListChecks className="w-4 h-4" /> Checklist trước khi vào lệnh
+              </h3>
+              <ul className="space-y-2">
+                {selected.checklist.map((c, i) => (
+                  <li key={i} className="flex gap-3 text-sm text-white/80">
+                    <span className="mt-0.5 w-4 h-4 rounded border border-emerald-400/40 shrink-0" />
+                    <span>{c}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {selected.faqs && selected.faqs.length > 0 && (
+            <div className="mt-6 rounded-2xl p-6 bg-white/5 border border-white/10">
+              <h3 className="font-display text-lg font-bold mb-2 inline-flex items-center gap-2 text-white/90">
+                <HelpCircle className="w-4 h-4 text-amber-300" /> Câu hỏi thường gặp
+              </h3>
+              <Accordion type="single" collapsible className="w-full">
+                {selected.faqs.map((f, i) => (
+                  <AccordionItem key={i} value={`faq-${i}`} className="border-white/10">
+                    <AccordionTrigger className="text-left text-sm text-white/85 hover:no-underline">
+                      {f.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-sm text-white/65 leading-relaxed whitespace-pre-line">
+                      {f.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+          )}
         </main>
         <Footer />
       </div>
