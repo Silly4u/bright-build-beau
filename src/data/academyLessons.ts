@@ -1,6 +1,19 @@
 import academyHero from '@/assets/academy-hero.jpg';
-import bullishCont from '@/assets/academy-bullish-continuation.jpg';
-import bearishCont from '@/assets/academy-bearish-continuation.jpg';
+import coverContinuation from '@/assets/lesson-continuation-candles.jpg';
+import coverReversal from '@/assets/lesson-reversal-candles.jpg';
+import coverSmc from '@/assets/lesson-smc.jpg';
+import coverWyckoff from '@/assets/lesson-wyckoff.jpg';
+import coverRisk from '@/assets/lesson-risk-management.jpg';
+import coverFib from '@/assets/lesson-fibonacci.jpg';
+import coverElliott from '@/assets/lesson-elliott-wave.jpg';
+import coverRsiMacd from '@/assets/lesson-rsi-macd.jpg';
+import coverPsychology from '@/assets/lesson-psychology.jpg';
+import coverIchimoku from '@/assets/lesson-ichimoku.jpg';
+import coverOrderflow from '@/assets/lesson-orderflow.jpg';
+import coverVolumeProfile from '@/assets/lesson-volume-profile.jpg';
+import coverIct from '@/assets/lesson-ict-liquidity.jpg';
+import coverGex from '@/assets/lesson-gamma-exposure.jpg';
+import coverRiskPro from '@/assets/lesson-risk-pro.jpg';
 
 export interface LessonSection {
   heading: string;
@@ -43,7 +56,7 @@ export const LESSONS: Lesson[] = [
       'Bộ sưu tập đầy đủ các mẫu nến tiếp diễn xu hướng — từ Rising/Falling Three Methods, Tasuki Gap đến Three Line Strike, kèm cách giao dịch thực chiến.',
     duration: '25 phút',
     level: 'Trung cấp',
-    cover: bullishCont,
+    cover: coverContinuation,
     intro:
       'Mẫu nến tiếp diễn (continuation pattern) là tín hiệu cho biết xu hướng hiện tại có khả năng cao tiếp tục sau giai đoạn nghỉ ngắn. Khác với mẫu đảo chiều, các mẫu này xuất hiện GIỮA xu hướng và là cơ hội vào lệnh thuận xu hướng với rủi ro thấp. Bài học tổng hợp 34 mẫu nến tiếp diễn quan trọng nhất, chia theo nhóm để bạn dễ ghi nhớ và áp dụng.',
     sections: [
@@ -104,7 +117,7 @@ export const LESSONS: Lesson[] = [
       'Hammer, Shooting Star, Engulfing, Morning/Evening Star — những mẫu nến giúp bạn bắt đỉnh đáy chính xác.',
     duration: '20 phút',
     level: 'Cơ bản',
-    cover: bearishCont,
+    cover: coverReversal,
     intro:
       'Mẫu nến đảo chiều xuất hiện ở cuối xu hướng và báo hiệu khả năng đảo chiều. Đây là công cụ cốt lõi của Price Action mà mọi trader cần thuộc lòng.',
     sections: [
@@ -143,7 +156,7 @@ export const LESSONS: Lesson[] = [
       'Order Block, Fair Value Gap, Liquidity, BOS, CHOCH — hiểu cách "cá mập" thực sự giao dịch.',
     duration: '35 phút',
     level: 'Nâng cao',
-    cover: academyHero,
+    cover: coverSmc,
     intro:
       'Smart Money Concepts (SMC) là phương pháp giao dịch theo dấu chân của tổ chức lớn — những người tạo ra xu hướng. Thay vì đoán theo đám đông, SMC dạy bạn nhận ra nơi smart money đang gom hàng và xả hàng.',
     sections: [
@@ -182,7 +195,7 @@ export const LESSONS: Lesson[] = [
       '4 pha thị trường: Tích lũy, Tăng giá, Phân phối, Giảm giá. Spring và Upthrust là tín hiệu vàng.',
     duration: '30 phút',
     level: 'Nâng cao',
-    cover: academyHero,
+    cover: coverWyckoff,
     intro:
       'Richard Wyckoff phát triển phương pháp này từ đầu thế kỷ 20, dựa trên quan sát hành vi của "Composite Man" (đại diện cho dòng tiền lớn). Đến nay vẫn là một trong những framework mạnh nhất để hiểu chu kỳ thị trường.',
     sections: [
@@ -217,7 +230,7 @@ export const LESSONS: Lesson[] = [
       'Position sizing, R:R ratio, drawdown control. 90% trader thua không phải vì sai chiến lược mà vì sai quản lý vốn.',
     duration: '15 phút',
     level: 'Cơ bản',
-    cover: bearishCont,
+    cover: coverRisk,
     intro:
       'Bạn có thể đúng 70% tín hiệu nhưng vẫn cháy tài khoản nếu quản lý vốn sai. Bài học này là nền tảng bắt buộc cho mọi trader.',
     sections: [
@@ -252,7 +265,7 @@ export const LESSONS: Lesson[] = [
       'Tỷ lệ vàng 0.618, vùng "golden pocket" 0.5–0.618, extension 1.272/1.618 — công cụ định lượng pullback và mục tiêu giá chính xác.',
     duration: '22 phút',
     level: 'Trung cấp',
-    cover: bullishCont,
+    cover: coverFib,
     intro:
       'Fibonacci không phải "ma thuật". Nó là công cụ thống kê mô tả tỷ lệ pullback và mở rộng mà thị trường lặp lại do hành vi đám đông và thuật toán đặt lệnh tại các mức tâm lý. Bài này dạy bạn vẽ Fibonacci đúng cách, kết hợp confluence và tránh các bẫy phổ biến.',
     history:
@@ -327,7 +340,7 @@ export const LESSONS: Lesson[] = [
       '5 sóng đẩy + 3 sóng điều chỉnh. Quy tắc bất di bất dịch, các mẫu sóng phổ biến và cách áp dụng vào giao dịch thực chiến.',
     duration: '40 phút',
     level: 'Nâng cao',
-    cover: bearishCont,
+    cover: coverElliott,
     intro:
       'Lý thuyết Sóng Elliott cho rằng thị trường di chuyển theo các mẫu sóng lặp lại do tâm lý đám đông. Mặc dù bị chỉ trích về tính chủ quan, đây vẫn là framework mạnh để hiểu cấu trúc thị trường ở mọi timeframe.',
     history:
@@ -412,7 +425,7 @@ export const LESSONS: Lesson[] = [
       'RSI quá mua/quá bán, divergence; MACD crossover, histogram. Cách kết hợp 2 chỉ báo này thành hệ thống winrate cao.',
     duration: '20 phút',
     level: 'Cơ bản',
-    cover: academyHero,
+    cover: coverRsiMacd,
     intro:
       '90% trader dùng RSI và MACD SAI — coi RSI > 70 là bán, RSI < 30 là mua. Bài này dạy cách dùng đúng: tập trung vào DIVERGENCE và xu hướng động lượng, không phải mức số học.',
     history:
@@ -486,7 +499,7 @@ export const LESSONS: Lesson[] = [
       'FOMO, Revenge Trading, Loss Aversion, Overconfidence — 4 con quỷ giết chết tài khoản của 95% trader. Cách nhận diện và chế ngự.',
     duration: '18 phút',
     level: 'Cơ bản',
-    cover: bullishCont,
+    cover: coverPsychology,
     intro:
       'Mark Douglas, tác giả "Trading in the Zone", từng nói: "Trading 80% là tâm lý, 20% là chiến lược". Bạn có thể có chiến lược tốt nhất thế giới nhưng vẫn cháy nếu không kiểm soát được cảm xúc.',
     history:
@@ -571,7 +584,7 @@ export const LESSONS: Lesson[] = [
       'Mây Kumo, Tenkan, Kijun, Chikou Span — chỉ báo Nhật Bản 5-trong-1 cho phép xác định xu hướng, S/R, momentum chỉ trong 1 cái nhìn.',
     duration: '25 phút',
     level: 'Trung cấp',
-    cover: bearishCont,
+    cover: coverIchimoku,
     intro:
       'Ichimoku Kinko Hyo (一目均衡表 — "biểu đồ cân bằng trong nháy mắt") là hệ thống tích hợp xu hướng + động lượng + S/R + tín hiệu vào/ra trong 1 chỉ báo duy nhất. Phù hợp với swing trader trên H4–D1.',
     history:
@@ -651,7 +664,7 @@ export const LESSONS: Lesson[] = [
       'Phân tích delta, imbalance, absorption và stacked imbalances trên footprint chart. Cách Bookmap/Sierra/ATAS hiển thị dòng lệnh thực và 7 setup pro thường dùng trên ES, NQ, BTC.',
     duration: '45 phút',
     level: 'Nâng cao',
-    cover: bullishCont,
+    cover: coverOrderflow,
     intro:
       'Order Flow là việc đọc CHÍNH XÁC ai đang mua và ai đang bán tại từng mức giá — không phải đoán qua nến. Footprint chart hiển thị bid volume vs ask volume bên trong mỗi nến, cho phép bạn thấy được "dấu chân" của Big Money: họ đang absorb (hấp thụ) lệnh đối thủ, hay đang exhaust (kiệt sức)? Đây là layer cao cấp nhất của price action — thứ mà các prop trader ở Jane Street, Jump, Cumberland đều dùng.',
     history:
@@ -808,7 +821,7 @@ export const LESSONS: Lesson[] = [
       'POC, Value Area, HVN/LVN, Volume Composite, TPO Initial Balance, Single Prints. Cách Steidlmayer xây Market Profile và 9 setup pro trên ES, NQ, CL, Gold, BTC.',
     duration: '50 phút',
     level: 'Nâng cao',
-    cover: bullishCont,
+    cover: coverVolumeProfile,
     intro:
       'Volume Profile (VP) và Market Profile (MP/TPO) là 2 cách trực quan hóa AUCTION THEORY — nguyên lý cho rằng thị trường là cuộc đấu giá liên tục, di chuyển từ vùng thiếu cân bằng sang vùng cân bằng. Đây là framework PRO duy nhất giúp bạn biết: vùng nào institutional THỰC SỰ tham gia, vùng nào chỉ là "fluff" của retail.',
     history:
@@ -958,7 +971,7 @@ export const LESSONS: Lesson[] = [
       'Liquidity pools, FVG, IFVG, Breaker Block, Mitigation, OTE, PD Array, Killzones, Silver Bullet. Hệ thống ICT đầy đủ của Michael Huddleston cho Forex/Indices/Crypto.',
     duration: '55 phút',
     level: 'Nâng cao',
-    cover: bullishCont,
+    cover: coverIct,
     intro:
       'ICT (Inner Circle Trader) là framework do Michael J. Huddleston phát triển từ kinh nghiệm 30 năm trading interbank forex. Cốt lõi: Smart Money (banks, hedge funds) cần LIQUIDITY để fill lệnh khổng lồ — họ chủ động "săn" stop loss của retail để tạo liquidity. Bài này hệ thống hóa 12 concepts ICT quan trọng nhất, áp dụng cho Forex, Indices (NAS100, US30) và Crypto.',
     history:
@@ -1118,7 +1131,7 @@ export const LESSONS: Lesson[] = [
       'Gamma Exposure (GEX), Vanna, Charm, Dealer Positioning, Max Pain, 0DTE flow, Charm dump. Hiểu cách MM hedge để dự đoán SPX/NDX/QQQ — framework SpotGamma & SqueezeMetrics.',
     duration: '50 phút',
     level: 'Nâng cao',
-    cover: bullishCont,
+    cover: coverGex,
     intro:
       'Sau 2020, options chiếm hơn 50% volume danh nghĩa của S&P 500 (theo Goldman Sachs research 2024). 0DTE (zero days to expiry) chiếm 50% volume options SPX hằng ngày. Điều này nghĩa là SPX/NDX không còn được "định giá" bởi spot flow — mà bởi DEALER HEDGING. Hiểu Gamma Exposure (GEX), Vanna, Charm là cách duy nhất để dự đoán intraday move của indices Mỹ trong môi trường hậu COVID.',
     history:
@@ -1267,7 +1280,7 @@ export const LESSONS: Lesson[] = [
       'Kelly Criterion, fractional Kelly, R-multiple system, portfolio heat, correlation matrix, drawdown management, tail risk hedging. Framework từ Van Tharp, Ed Seykota, Paul Tudor Jones.',
     duration: '40 phút',
     level: 'Nâng cao',
-    cover: bullishCont,
+    cover: coverRiskPro,
     intro:
       'Hơn 90% pro trader thất bại không phải vì hệ thống tệ, mà vì position sizing sai. Một edge 60% win rate có thể blow account nếu sizing 25% capital/trade. Bài này hệ thống hóa risk management cấp institutional: từ Kelly Criterion (do John Kelly 1956 phát minh cho Bell Labs), R-multiple của Van Tharp, đến portfolio heat của Ed Seykota và tail risk hedging kiểu Universa Investments.',
     history:
