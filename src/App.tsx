@@ -19,6 +19,7 @@ import AnalysisDetail from "./pages/AnalysisDetail.tsx";
 import Auth from "./pages/Auth.tsx";
 import AdminPanel from "./pages/AdminPanel.tsx";
 import ChartSnapshot from "./pages/ChartSnapshot.tsx";
+import Academy from "./pages/Academy.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,8 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/chart-snapshot" element={<ChartSnapshot />} />
+            <Route path="/hoc-vien" element={<Academy />} />
+            <Route path="/academy" element={<Academy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
