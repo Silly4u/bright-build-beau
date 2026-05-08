@@ -642,6 +642,779 @@ export const LESSONS: Lesson[] = [
       },
     ],
   },
+  // ===================== PRO TRADER LESSONS =====================
+  {
+    slug: 'order-flow-footprint',
+    category: 'Pro Trader',
+    title: 'Order Flow & Footprint Chart — Đọc Dòng Lệnh Như Market Maker',
+    excerpt:
+      'Phân tích delta, imbalance, absorption và stacked imbalances trên footprint chart. Cách Bookmap/Sierra/ATAS hiển thị dòng lệnh thực và 7 setup pro thường dùng trên ES, NQ, BTC.',
+    duration: '45 phút',
+    level: 'Nâng cao',
+    cover: bullishCont,
+    intro:
+      'Order Flow là việc đọc CHÍNH XÁC ai đang mua và ai đang bán tại từng mức giá — không phải đoán qua nến. Footprint chart hiển thị bid volume vs ask volume bên trong mỗi nến, cho phép bạn thấy được "dấu chân" của Big Money: họ đang absorb (hấp thụ) lệnh đối thủ, hay đang exhaust (kiệt sức)? Đây là layer cao cấp nhất của price action — thứ mà các prop trader ở Jane Street, Jump, Cumberland đều dùng.',
+    history:
+      'Footprint được Trevor Harnett (MarketDelta, 2003) phát minh sau khi CME chuyển từ pit trading sang điện tử (Globex). Trước đó trader dùng "tape reading" trên ticker giấy của Edwin Lefèvre (Reminiscences of a Stock Operator, 1923). Khi liquidity di chuyển vào order book, các nền tảng như Sierra Chart, ATAS, Bookmap và TradingView (footprint beta 2024) đã chuẩn hóa cách hiển thị bid×ask volume. Trong crypto, Tensor Charts và Exocharts là 2 công cụ hàng đầu cho BTC/ETH spot + perp.',
+    sections: [
+      {
+        heading: '1. Bid Volume vs Ask Volume — Khái niệm gốc',
+        body:
+          'Mỗi giao dịch thực hiện cần 1 bên MARKET ORDER (chủ động) và 1 bên LIMIT ORDER (bị động). Khi market buy chạm vào limit sell tại ask → +1 cho ask volume. Khi market sell chạm limit buy tại bid → +1 cho bid volume. Footprint hiển thị 2 con số này tại MỖI mức giá trong nến.\n\nDelta = Ask Volume − Bid Volume. Delta dương → người mua chủ động hơn. Delta âm → người bán chủ động hơn. Nhưng delta KHÔNG đồng nghĩa với hướng giá — đây là điểm pro trader khác biệt với newbie.',
+        bullets: [
+          'Cumulative Delta (CVD) — tổng delta theo thời gian, dùng tìm divergence với giá',
+          'Delta % = Delta / Total Volume × 100 — đo cường độ áp đảo',
+          'Max Delta / Min Delta trong 1 nến — đo "intra-bar pressure"',
+        ],
+        example:
+          'BTC nến H1 đỏ giảm $400 nhưng delta = +2,500 (mua chủ động lấn át). Đây là signal ABSORPTION — limit sellers đang hấp thụ tất cả lệnh mua. Khi sellers cạn, giá sẽ bật mạnh. Setup này đã hoạt động rất rõ tại đáy BTC $61,200 ngày 1/8/2024.',
+        pitfall:
+          'Không dùng delta thô mà bỏ qua bối cảnh. Delta +5,000 trên uptrend = bình thường (chase). Delta +5,000 sau khi giá giảm 2% và không break low = signal đảo chiều.',
+      },
+      {
+        heading: '2. Imbalance — Mất cân bằng theo đường chéo',
+        body:
+          'Imbalance xuất hiện khi tại 1 mức giá, ask volume vượt bid volume ở mức giá CAO HƠN nó >300% (hoặc ngược lại — bid > ask của mức thấp hơn). Đây là dấu hiệu một bên đã "ăn sạch" liquidity và sẵn sàng đẩy giá tiếp.\n\nNgưỡng chuẩn ngành: 300% trên ES/NQ futures, 400% trên crypto (do volatility cao hơn). ATAS mặc định 200% — quá nhạy, hãy nâng lên.',
+        bullets: [
+          'Buy imbalance: ask[N] / bid[N-1] ≥ 3 → demand áp đảo',
+          'Sell imbalance: bid[N] / ask[N+1] ≥ 3 → supply áp đảo',
+          'Stacked Imbalances ≥ 3 mức liên tiếp = signal mạnh, vùng đó thành S/R',
+          'Stacked ≥ 5 = institutional footprint, gần như chắc chắn quay lại test',
+        ],
+        example:
+          'NQ trên timeframe 5m: 4 stacked buy imbalances liên tiếp tại 20,150–20,158 lúc mở cửa NY. Đây là vùng "được khẳng định" — pullback về đó là entry long với SL dưới 20,148. R:R thường đạt 4:1 vì có institutional flow đỡ.',
+        pitfall:
+          'Imbalance ở vùng low volume node (LVN) trên Volume Profile thường giả — không có liquidity nền. Chỉ tin imbalance xuất hiện tại HVN hoặc Value Area boundaries.',
+      },
+      {
+        heading: '3. Absorption — Khi limit orders nuốt chửng market orders',
+        body:
+          'Absorption là PATTERN QUAN TRỌNG NHẤT trong order flow. Định nghĩa: volume rất lớn được giao dịch tại 1 mức giá nhưng giá KHÔNG di chuyển ra khỏi mức đó. Có nghĩa là lệnh limit ở phía đối diện đủ dày để "hấp thụ" mọi lệnh thị trường tấn công.\n\nDấu hiệu trên Footprint: 1 cell có volume gấp 5–10 lần các cell xung quanh, nến đóng cửa gần mức đó (râu dài về phía bị tấn công). Trên Bookmap: dải sáng đậm dày trên DOM tại level đó.',
+        bullets: [
+          'Buy Absorption (đáy): bid volume cực lớn, giá test xuống nhưng không phá → đảo chiều tăng',
+          'Sell Absorption (đỉnh): ask volume cực lớn, giá test lên không phá → đảo chiều giảm',
+          'Volume cluster + nến doji/pin bar = absorption signal mạnh nhất',
+          'Confirm bằng CVD divergence: giá làm low mới nhưng CVD không',
+        ],
+        example:
+          'ES futures 9/2024: tại 5,720 xuất hiện cell volume 18,000 contracts (trung bình 1,500/cell). Giá chạm 5,720 5 lần trong 30 phút mà không phá. CVD giảm dần (sellers exhausted). Long entry 5,722, SL 5,718, target 5,745 — chạm trong 90 phút.',
+        pitfall:
+          'Absorption ở giữa range = bẫy. Tín hiệu chỉ có giá trị ở EXTREMES (HVN của session, VWAP bands ±2σ, hoặc swing high/low rõ ràng).',
+      },
+      {
+        heading: '4. Exhaustion — Khi market orders cạn kiệt',
+        body:
+          'Ngược với absorption, exhaustion là khi 1 bên ATTACK liên tục với volume LỚN nhưng giá di chuyển CÀNG LÚC CÀNG ÍT. Như đấm vào tường — lực còn nhưng tay đã mỏi.\n\nNhận diện: volume cao nhưng range nến co lại, delta dương lớn nhưng close gần open, bid/ask spread mở rộng (market makers rút lui).',
+        bullets: [
+          'Volume tăng + range giảm = climax (đỉnh hoặc đáy)',
+          'Climax sau 3+ nến cùng hướng = setup đảo chiều cao xác suất',
+          'Kết hợp với Wyckoff: SC (Selling Climax) hoặc BC (Buying Climax)',
+        ],
+      },
+      {
+        heading: '5. Cumulative Volume Delta (CVD) Divergence',
+        body:
+          'CVD = tích lũy delta từ đầu session. Nó đo "ai thắng" cuộc chiến market orders trong cả phiên. Khi giá tạo high mới mà CVD KHÔNG tạo high mới → bearish divergence. Mua chủ động yếu dần dù giá còn lên = thanh khoản đang được phân phối cho retail.',
+        bullets: [
+          'Bearish CVD divergence ở đỉnh range = setup short',
+          'Bullish CVD divergence ở đáy range = setup long',
+          'CVD perp vs CVD spot (crypto): divergence cho thấy ai đang đẩy giá thật sự',
+          'Hidden divergence: giá làm HL nhưng CVD làm LL = strong continuation',
+        ],
+        example:
+          'BTC 10/2024: giá làm HH $69,800 nhưng spot CVD đi ngang, perp CVD lập HH mạnh. Nghĩa là chỉ có leverage longs (perp) đẩy giá, spot không xác nhận. 18 giờ sau giá flush về $66,200.',
+      },
+      {
+        heading: '6. POC trong nến và Volume Clusters',
+        body:
+          'POC (Point of Control) trong từng nến = mức giá có volume lớn nhất bên trong nến đó. Khi nhiều POC liên tiếp xếp ngang nhau → tạo "magnet level" — giá có xu hướng quay lại test. Khi POC dịch chuyển dần lên (rising POC) trong uptrend → trend khỏe.',
+        bullets: [
+          'POC migration up = trend bullish được xác nhận',
+          'POC ở giữa nến = balance, ở đỉnh nến = exhaustion buyer, ở đáy = exhaustion seller',
+          'Volume cluster (3+ POC cùng level) trở thành intraday support/resistance',
+        ],
+      },
+      {
+        heading: '7. Setup Pro: Iceberg Detection',
+        body:
+          'Iceberg order là lệnh limit khổng lồ chỉ hiển thị 1 phần nhỏ trên DOM, refresh liên tục khi bị ăn. Đây là dấu hiệu CHẮC CHẮN của institutional player. Phát hiện iceberg = cơ hội piggy-back theo họ.\n\nDấu hiệu: 1 level liên tục bị "đánh" mà bid/ask size hiển thị nhỏ nhưng volume traded tại đó cực lớn (>10x size hiển thị).',
+        bullets: [
+          'Bookmap heatmap: dải sáng "tái hiện" liên tục dù bị xuyên = iceberg refresh',
+          'Footprint: cell volume 20× trung bình mà nến không phá level',
+          'Strategy: vào lệnh CÙNG hướng iceberg, SL chỉ 1–2 tick phía sau iceberg level',
+        ],
+        example:
+          'ES 5,650: iceberg buy phát hiện qua 8 lần refresh liên tiếp trong 20 phút, mỗi lần 200 contracts hiển thị nhưng đã ăn 4,800 thật. Long 5,651, SL 5,648, TP 5,672. Iceberg = "floor" không bị phá.',
+        pitfall:
+          'Spoofing: 1 số HFT đặt lệnh giả lớn rồi rút (illegal nhưng vẫn xảy ra). Cách lọc: iceberg THẬT sẽ có volume traded khớp; spoofing chỉ HIỂN THỊ size mà không có trade.',
+      },
+      {
+        heading: '8. Công cụ và setup khuyên dùng',
+        body:
+          'Phần mềm chuyên: Bookmap (heatmap + DOM, $99–199/tháng), Sierra Chart (footprint chuyên sâu, $36/tháng), ATAS (Nga, mạnh footprint, $59/tháng), Exocharts (crypto, $40/tháng). Data feed: Rithmic/CQG cho futures (chính xác từng tick), Bybit/Binance WebSocket cho crypto.\n\nTradingView footprint mới (2024) hỗ trợ ES/NQ/CL/Gold + crypto top, đủ dùng cho retail.',
+        bullets: [
+          'Timeframe pro thường dùng: 30 second, 1 min, 5 min cho intraday futures',
+          'Crypto: 1m–5m cho scalp, 15m cho swing',
+          'Imbalance threshold: 300% futures, 400% crypto, 200% forex',
+          'Cell aggregation: 0.25 ES, 0.25 NQ, 1 USD BTC, 0.1 ETH',
+        ],
+      },
+    ],
+    takeaways: [
+      'Order flow đọc HÀNH ĐỘNG thực tại từng mức giá, không suy đoán qua nến',
+      'Delta = ask vol − bid vol; CVD = tích lũy delta cả session',
+      'Absorption: volume cao + giá không di chuyển = đảo chiều',
+      'Stacked imbalances ≥3 = institutional footprint, vùng đó thành S/R bền',
+      'Iceberg detection cho phép piggy-back theo Smart Money',
+      'Luôn lọc tín hiệu order flow bằng bối cảnh (HVN/LVN, VWAP, session high/low)',
+    ],
+    checklist: [
+      'Tôi đang ở khung 1m–5m phù hợp với footprint?',
+      'Có HVN/Value Area Edge gần đây làm bối cảnh?',
+      'Cell volume tại mức cần phân tích có gấp ≥5x trung bình?',
+      'Delta có xác nhận hay phân kỳ với hướng nến?',
+      'Stacked imbalances ≥ 3 đã hình thành chưa?',
+      'CVD spot có xác nhận chuyển động giá perp (nếu crypto)?',
+      'SL có đặt sau iceberg/absorption level (1–2 tick) không?',
+    ],
+    faqs: [
+      {
+        question: 'Tôi cần data feed gì để xem order flow?',
+        answer:
+          'Futures (ES/NQ/CL): cần CME bundle qua Rithmic ($35/tháng) hoặc CQG. Crypto: WebSocket trực tiếp Binance/Bybit/OKX là MIỄN PHÍ và chính xác hơn cả TradingView. Forex: KHÔNG có order flow đáng tin (decentralized) — chỉ Currency Futures (6E, 6J trên CME) mới có.',
+      },
+      {
+        question: 'Order flow có dùng được trên crypto không?',
+        answer:
+          'CỰC TỐT trên perp (Bybit, Binance Futures) vì exchange tập trung. Spot khó hơn vì fragmented. Tensor Charts và Exocharts đã giải quyết bằng cách aggregate top 5 sàn.',
+      },
+      {
+        question: 'Cần bao lâu để master order flow?',
+        answer:
+          'Tối thiểu 6 tháng học liên tục + 1,000+ giờ screen time với footprint. Đây là kỹ năng "muscle memory" — không thể học tắt. Bắt đầu chỉ với 1 cặp (ES hoặc BTC), 1 timeframe (1m), 1 setup (absorption tại HVN).',
+      },
+      {
+        question: 'Có cần kết hợp với chỉ báo khác không?',
+        answer:
+          'CÓ — Volume Profile (xác định HVN/LVN), VWAP (anchor mean), Market Profile (TPO, IB). Tránh các indicator lagging (MA, MACD, RSI) vì sẽ làm bạn rối.',
+      },
+    ],
+  },
+  {
+    slug: 'volume-profile-market-profile',
+    category: 'Pro Trader',
+    title: 'Volume Profile & Market Profile (TPO) — Auction Theory Toàn Tập',
+    excerpt:
+      'POC, Value Area, HVN/LVN, Volume Composite, TPO Initial Balance, Single Prints. Cách Steidlmayer xây Market Profile và 9 setup pro trên ES, NQ, CL, Gold, BTC.',
+    duration: '50 phút',
+    level: 'Nâng cao',
+    cover: bullishCont,
+    intro:
+      'Volume Profile (VP) và Market Profile (MP/TPO) là 2 cách trực quan hóa AUCTION THEORY — nguyên lý cho rằng thị trường là cuộc đấu giá liên tục, di chuyển từ vùng thiếu cân bằng sang vùng cân bằng. Đây là framework PRO duy nhất giúp bạn biết: vùng nào institutional THỰC SỰ tham gia, vùng nào chỉ là "fluff" của retail.',
+    history:
+      'J. Peter Steidlmayer (CBOT, 1984) phát minh Market Profile khi CBOT cần cách giúp non-pit trader hiểu giao dịch trong pit. Ông dùng chữ cái A–Z (TPO = Time Price Opportunity) để mark mỗi 30 phút giá xuất hiện ở đâu. Sau này Don Jones, Jim Dalton (Mind Over Markets, 1993) phổ biến hóa. Volume Profile là phiên bản tiến hóa: dùng VOLUME thay vì TIME — phù hợp hơn với electronic markets. Sierra Chart, Bookmap, ATAS, TradingView Premium đều hỗ trợ.',
+    sections: [
+      {
+        heading: '1. Auction Theory — Nền tảng triết lý',
+        body:
+          'Thị trường có 2 trạng thái: BALANCE (cân bằng — giá dao động trong range, buyer = seller) và IMBALANCE (mất cân bằng — trending, một bên áp đảo). Mục đích của auction là tìm "fair value" — mức giá mà cả 2 bên đồng ý giao dịch nhiều nhất.\n\n80% thời gian thị trường ở balance. 20% là imbalance (trend). Pro trader ăn tiền lớn ở giai đoạn TRANSITION giữa hai trạng thái này.',
+        bullets: [
+          'Balance → range trade (fade extremes)',
+          'Imbalance → trend trade (breakout, momentum)',
+          'Transition (rotation → directional) = setup R:R cao nhất',
+        ],
+      },
+      {
+        heading: '2. Volume Profile — Anatomy',
+        body:
+          'VP plot phân bố volume theo TRỤC GIÁ (ngang) thay vì trục thời gian (dọc). Các thành phần chính:\n\n• POC (Point of Control): mức giá có volume lớn nhất — "fair value" của period đó\n• VAH (Value Area High) & VAL (Value Area Low): biên trên/dưới của Value Area chứa 70% tổng volume\n• HVN (High Volume Node): cụm volume lớn — vùng "magnet", giá trở lại nhiều lần\n• LVN (Low Volume Node): "khoảng trống" — giá chạy nhanh qua vì ít liquidity',
+        bullets: [
+          'Value Area 70% = 1 standard deviation của distribution (giả định normal)',
+          'POC trở thành S/R cực mạnh ở session sau',
+          'Naked POC (POC chưa được test lại) = magnet, 80% sẽ được test trong 5 ngày',
+          'LVN giữa 2 HVN = "barrier" — phá qua = setup continuation mạnh',
+        ],
+        example:
+          'ES daily: POC hôm trước 5,680, VAH 5,705, VAL 5,665. Sáng nay open 5,690 (trong VA). Giá giảm chạm VAL 5,665 → bounce mạnh (VAL = institutional bid). Long 5,667 SL 5,660 TP POC 5,680 → +13 ticks ($162.50/contract).',
+        pitfall:
+          'Dùng VP của period quá ngắn (vài giờ) cho intraday — không đủ data. Tối thiểu 1 ngày RTH cho ES, 1 tuần cho crypto.',
+      },
+      {
+        heading: '3. Profile Shapes — 5 dạng cốt lõi',
+        body:
+          'Hình dạng VP/TPO tiết lộ trạng thái auction. Pro trader phân loại nhanh để chọn chiến lược:',
+        bullets: [
+          'D-Profile (Normal/Balanced): chuông đối xứng → balance, fade extremes',
+          'P-Profile (P-shape): bulge ở trên → short covering rally, thường thất bại — fade từ trên',
+          'b-Profile: bulge ở dưới → long liquidation, thường bottom — buy từ dưới',
+          'B-Profile (Double Distribution): 2 bulge, LVN ở giữa → trending day, vào theo break LVN',
+          'Trend Day / Thin Profile: kéo dài 1 chiều, ít overlap → momentum, không fade',
+        ],
+        example:
+          'NQ ngày 5/11/2024 (post-election): B-profile rõ rệt với 2 distribution 20,400 và 20,800, LVN 20,600. Phá 20,600 → giá lao thẳng đến distribution 2. Long 20,605 SL 20,580 TP 20,790 = R:R 7:1.',
+      },
+      {
+        heading: '4. Market Profile (TPO) — Khác gì VP?',
+        body:
+          'MP dùng THỜI GIAN (mỗi TPO = 30 phút), VP dùng VOLUME. MP cho biết "giá ở mức nào BAO LÂU" → đo "acceptance". VP cho biết "giá nào được giao dịch BAO NHIÊU" → đo "interest".\n\nMP có khái niệm độc đáo:\n• IB (Initial Balance): range của 60 phút đầu phiên — định khung đầu cho institutional\n• IB Extension: phá IB → directional day\n• Single Prints: chỉ 1 chữ cái xuất hiện ở 1 mức → "gap" trong TPO, magnet cao\n• Poor High / Poor Low: nhiều TPO chạm cùng đỉnh/đáy mà không vượt → unfinished business, sẽ test lại',
+        bullets: [
+          'IB lớn (>50% range trung bình) → range day, fade IB highs/lows',
+          'IB nhỏ → khả năng cao trend day, vào theo break',
+          'Range Extension lên + xuống cùng ngày = neutral day (rotation)',
+          'Single prints sẽ được "lấp" trong 3–5 phiên',
+        ],
+      },
+      {
+        heading: '5. Volume Composite — VP cho khung lớn',
+        body:
+          'Composite Profile = gộp VP nhiều ngày/tuần/tháng để xác định KEY LEVELS dài hạn. Đây là "bản đồ" mà Smart Money dùng cho swing trades.',
+        bullets: [
+          'Composite tuần: dùng cho daytrade khung 5–15m',
+          'Composite tháng: dùng cho swing khung H1–H4',
+          'Composite năm: dùng cho position khung daily',
+          'HVN dài hạn = institutional accumulation/distribution zone',
+        ],
+        example:
+          'BTC composite Q3 2024: HVN lớn nhất 64,800 (3 tuần consolidation). Khi giá phá xuống 62k và bounce về 64,800 → đó chính là VWAP của Smart Money buy zone, R:R 5:1 nếu long với SL 64,200.',
+      },
+      {
+        heading: '6. Setup Pro 1: Open Drive vs Open Auction',
+        body:
+          '15–30 phút đầu phiên là quan trọng nhất. Pro phân loại:\n\n• Open Drive: giá lập tức bứt khỏi yesterday range, không pull back → trend day, đu theo\n• Open Test Drive: test 1 hướng rồi reverse → đảo chiều mạnh, fade test extreme\n• Open Auction in Range: dao động trong yesterday VA → balance day, fade VAH/VAL\n• Open Auction out of Range: open ngoài VA nhưng accept lại → expand range mới',
+        example:
+          'ES 9:30 EST mở $5,720 (above VAH $5,710 hôm trước). 10:00 quay vào VA → Open Auction Out of Range failed → short rotation về POC $5,690. Setup ngắn 30 ticks.',
+      },
+      {
+        heading: '7. Setup Pro 2: VAH/VAL Rejection',
+        body:
+          'Khi giá test VAH (hoặc VAL) lần đầu trong phiên → high probability rejection vì đó là biên acceptance. 70% thời gian giá quay về POC sau khi test edge.\n\nXác suất tăng nếu: (1) test với volume thấp dần (exhaustion), (2) có absorption candle, (3) HTF (H4/D1) ở vùng tương ứng.',
+        bullets: [
+          'Entry: ngay sau pin bar/engulfing tại VAH/VAL',
+          'SL: 1 ATR(14) bên ngoài VAH/VAL',
+          'TP1: POC, TP2: opposite VA edge',
+          'Skip nếu IB extension đã >2× IB (trend mode đã xác lập)',
+        ],
+      },
+      {
+        heading: '8. Setup Pro 3: Failed Auction (Excess vs No Excess)',
+        body:
+          'Excess = đỉnh/đáy có "tail dài" trên TPO (single prints liên tiếp) — institutional rejection mạnh, ÍT khả năng test lại. No Excess = đỉnh/đáy "thẳng" không có tail — UNFINISHED, giá sẽ test lại.\n\nPro short trên No Excess high vào ngày sau, long trên No Excess low.',
+        example:
+          'CL crude oil: hôm trước high $74.20 không có excess (3 TPO chạm đều đặn). Hôm sau giá test lại $74.15 và reject → short $74.10 SL $74.40 TP $73.50, hit trong 4 giờ.',
+      },
+      {
+        heading: '9. Setup Pro 4: Composite POC Magnet',
+        body:
+          'Khi giá đi xa khỏi composite POC tuần/tháng > 2 ATR(20) mà không có catalyst mới → Magnet effect. Mean reversion về POC trong 3–7 phiên.\n\nĐây là setup ưa thích của hedge fund vì high probability + R:R rõ ràng.',
+        pitfall:
+          'KHÔNG dùng setup này khi có macro event (FOMC, NFP, CPI) trong 24h — catalyst sẽ override mean reversion.',
+      },
+    ],
+    takeaways: [
+      'Auction theory: thị trường tìm fair value, di chuyển giữa balance ↔ imbalance',
+      'POC = giá có volume lớn nhất; VA = 70% volume; HVN/LVN = magnet/gap',
+      'Profile shapes (D, P, b, B, Trend) cho biết chiến lược nên dùng',
+      'IB và Single Prints chỉ có ở Market Profile (TPO), không có ở Volume Profile',
+      'Composite Profile xác định key levels dài hạn cho swing',
+      'Naked POC có 80% xác suất test lại trong 5 ngày',
+    ],
+    checklist: [
+      'Đã xác định hôm nay là Trend Day hay Range Day chưa?',
+      'POC, VAH, VAL hôm trước ở đâu?',
+      'Có Naked POC nào chưa test trong 5 ngày qua?',
+      'IB đã hình thành chưa, lớn hay nhỏ so với 20 ngày?',
+      'Composite POC tuần đang ở mức nào, distance hiện tại?',
+      'Profile shape phiên hiện tại là gì (D/P/b/B/Trend)?',
+      'Có Single Prints chưa lấp gần đây không?',
+    ],
+    faqs: [
+      {
+        question: 'VP hay MP — nên dùng cái nào?',
+        answer:
+          'Cả hai bổ sung cho nhau. VP cho thấy WHERE volume xảy ra (microstructure). MP cho thấy WHEN/HOW LONG giá ở đó (acceptance). Pro thường overlay cả hai trên 1 chart. Nếu chỉ chọn 1 cho crypto → VP (vì crypto 24/7, TPO 30 phút mất ý nghĩa).',
+      },
+      {
+        question: 'Value Area có phải lúc nào cũng là 70% không?',
+        answer:
+          'Mặc định 70% (1 standard deviation). Bạn có thể đổi 68% (theo CBOT chuẩn) hoặc 80% cho chiến lược conservative. Đừng đổi liên tục — phải nhất quán.',
+      },
+      {
+        question: 'VP cho session nào trên crypto khi không có RTH?',
+        answer:
+          'Crypto thường dùng "UTC daily" (00:00–24:00 UTC) hoặc "weekly" (Sun 00:00 UTC). Một số trader dùng session theo region: Asia (00–08 UTC), London (08–16), NY (13–21). Test trên backtest để chọn — BTC phản ứng tốt với weekly profile hơn daily.',
+      },
+      {
+        question: 'Anchored VWAP có thay được Volume Profile không?',
+        answer:
+          'KHÔNG — chúng đo 2 thứ khác nhau. VWAP cho mean của volume theo thời gian. VP cho phân bố volume theo giá. Pro dùng cả hai: VWAP làm anchor, VP để tìm điểm vào.',
+      },
+    ],
+  },
+  {
+    slug: 'liquidity-ict-concepts',
+    category: 'Pro Trader',
+    title: 'Liquidity & ICT Concepts — Smart Money Hunt Stop Như Thế Nào',
+    excerpt:
+      'Liquidity pools, FVG, IFVG, Breaker Block, Mitigation, OTE, PD Array, Killzones, Silver Bullet. Hệ thống ICT đầy đủ của Michael Huddleston cho Forex/Indices/Crypto.',
+    duration: '55 phút',
+    level: 'Nâng cao',
+    cover: bullishCont,
+    intro:
+      'ICT (Inner Circle Trader) là framework do Michael J. Huddleston phát triển từ kinh nghiệm 30 năm trading interbank forex. Cốt lõi: Smart Money (banks, hedge funds) cần LIQUIDITY để fill lệnh khổng lồ — họ chủ động "săn" stop loss của retail để tạo liquidity. Bài này hệ thống hóa 12 concepts ICT quan trọng nhất, áp dụng cho Forex, Indices (NAS100, US30) và Crypto.',
+    history:
+      'Michael Huddleston từng là junior trader tại sàn forex, học từ Larry Williams và tape reading của Richard Wyckoff. Ông tổng hợp khái niệm "liquidity engineering" từ 1996, công bố public 2010 trên YouTube với mentorship 2016–2022. Mặc dù gây tranh cãi (nhiều cáo buộc cherry-pick), framework ICT đã ảnh hưởng đến cả thế hệ prop trader, đặc biệt FTMO/MyForexFunds passers.',
+    sections: [
+      {
+        heading: '1. Liquidity là gì và ở đâu',
+        body:
+          'Liquidity = pending orders (stop losses + breakout buys/sells) tích tụ tại các mức giá rõ ràng. Smart Money cần liquidity vì họ giao dịch size lớn — không thể fill mà không "đánh động" thị trường. Họ chủ động đẩy giá đến vùng liquidity để fill, sau đó đảo chiều thật sự.\n\nVùng liquidity điển hình: trên equal highs (buy stops), dưới equal lows (sell stops), trên/dưới swing high/low rõ ràng, trên trendline (trendline liquidity).',
+        bullets: [
+          'Buy Side Liquidity (BSL): trên equal highs, swing highs — chứa buy stops của shorts',
+          'Sell Side Liquidity (SSL): dưới equal lows, swing lows — chứa sell stops của longs',
+          'Trendline Liquidity: dưới đường nối swing lows trong uptrend',
+          'Asia Range Liquidity: high/low của Asia session — bị quét trong London',
+        ],
+        example:
+          'EURUSD có 3 đỉnh equal tại 1.0850. Đây là cluster buy stops khổng lồ. Smart Money đẩy giá lên 1.0852 (quét stops), drop mạnh 80 pips về 1.0770. Đây là Liquidity Sweep + Reversal — pattern ICT signature.',
+      },
+      {
+        heading: '2. Fair Value Gap (FVG) / Imbalance',
+        body:
+          'FVG = vùng giá mà thị trường di chuyển QUÁ NHANH, để lại "khoảng trống" không được giao dịch đầy đủ. Nhận diện qua 3 nến: nếu wick của nến 1 không overlap với wick nến 3 → khoảng giữa = FVG (bullish hoặc bearish).\n\nFVG là magnet — giá có xu hướng quay lại "fill" (lấp đầy) FVG để rebalance liquidity. Đây là vùng entry pro thường dùng.',
+        bullets: [
+          'Bullish FVG: low của nến 3 > high của nến 1 → vùng [high nến 1, low nến 3] = demand zone',
+          'Bearish FVG: high của nến 3 < low của nến 1 → vùng [high nến 3, low nến 1] = supply zone',
+          'IFVG (Inverted FVG): FVG bị phá hoàn toàn → đảo vai trò support/resistance',
+          'BPR (Balanced Price Range): 2 FVG ngược chiều chồng lên nhau → vùng cực mạnh',
+        ],
+        example:
+          'NAS100 H1: bullish FVG hình thành 19,800–19,830 sau impulse mạnh. 2 ngày sau giá pullback chạm 19,825 → bounce mạnh +200 điểm. Long 19,827 SL 19,790 TP 20,030.',
+        pitfall:
+          'KHÔNG phải FVG nào cũng được fill. FVG ngược trend lớn (HTF) thường giữ lâu. FVG cùng trend HTF có khả năng fill cao hơn.',
+      },
+      {
+        heading: '3. Order Block (OB) & Breaker Block',
+        body:
+          'Order Block = nến cuối cùng NGƯỢC HƯỚNG trước impulse mạnh. Đó là nơi institutional đã đặt lệnh limit cuối cùng trước khi đẩy giá. Khi giá quay về OB → high probability bounce.\n\nBreaker Block = OB bị "phá" và sau đó được test lại từ phía ngược. Ví dụ: bearish OB bị break lên trên (giá tăng vượt) → khi giá quay xuống test, OB đó trở thành SUPPORT.',
+        bullets: [
+          'Bullish OB: nến đỏ cuối trước impulse tăng mạnh',
+          'Bearish OB: nến xanh cuối trước impulse giảm mạnh',
+          'OB chỉ valid khi nó tạo BOS (Break of Structure)',
+          'Mitigated OB = đã được test và phản ứng → giảm độ tin cậy',
+          'Unmitigated OB = chưa test → setup chính của ICT',
+        ],
+        example:
+          'BTC H4: bearish OB tại 68,500–68,800 (nến xanh trước drop về 64k). 5 ngày sau giá hồi 68,650 → reject mạnh, drop 4k. Short setup hoàn hảo với SL trên 68,850.',
+      },
+      {
+        heading: '4. PD Array — Premium & Discount',
+        body:
+          'ICT chia mọi range thành 2 nửa qua đường EQ (Equilibrium = 50% Fibonacci):\n• Premium (50–100%): vùng "đắt" → chỉ short\n• Discount (0–50%): vùng "rẻ" → chỉ long\n\nKhi giá trade ở Premium của HTF range → tìm setup short. Ở Discount → tìm setup long. Đây là filter cực mạnh để loại 70% setup tệ.',
+        bullets: [
+          'OTE Zone (Optimal Trade Entry): Fibonacci 0.618–0.79 trong discount/premium',
+          'Sweet spot ICT: 0.705 (giữa 0.618 và 0.79)',
+          'Kết hợp OTE + FVG + OB cùng vùng = "triple confluence"',
+        ],
+      },
+      {
+        heading: '5. Market Structure — BOS vs CHoCH (MSS)',
+        body:
+          'BOS (Break of Structure) = giá phá swing high/low cùng hướng trend hiện tại → trend tiếp diễn.\nCHoCH (Change of Character) hay MSS (Market Structure Shift) = giá phá swing NGƯỢC trend → đảo chiều.\n\nQuy tắc ICT: chờ MSS trên LTF (M5/M15) để confirm reversal đã start trên HTF (H1/H4). Đây là "trigger" để vào lệnh.',
+        bullets: [
+          'BOS bullish: phá swing high gần nhất',
+          'CHoCH bullish: phá swing high của downtrend leg → đảo chiều lên',
+          'MSS thường đi kèm với FVG mới — đó là entry zone lý tưởng',
+        ],
+        example:
+          'GBPUSD downtrend H1. M5 hình thành CHoCH lên trên (phá micro high). Một bullish FVG hình thành ngay sau CHoCH tại 1.2680. Long 1.2682 SL 1.2670 TP 1.2730 = 4R.',
+      },
+      {
+        heading: '6. Killzones — Thời điểm vàng của Smart Money',
+        body:
+          'Smart Money active nhất tại các "killzone" (giờ NY):\n• Asian Killzone: 20:00–00:00 (range building)\n• London Killzone: 02:00–05:00 (high volatility, sweep Asia)\n• NY Killzone AM: 07:00–10:00 (sweep London, set day direction)\n• London Close: 10:00–12:00 (reversal frequent)\n• NY PM: 13:30–16:00 (continuation hoặc fade)\n\nSilver Bullet: 10:00–11:00 NY — 1 setup trong 1 giờ, cực high probability theo ICT.',
+        bullets: [
+          'Trade trong killzone, KHÔNG trade dead hours',
+          'Mỗi killzone có 1 "purpose" riêng (sweep, expand, reverse)',
+          'Silver Bullet: chỉ trade FVG đầu tiên hình thành sau 10:00 NY',
+        ],
+      },
+      {
+        heading: '7. Liquidity Sweep & Stop Hunt',
+        body:
+          'Pattern ICT classic: giá quét NGOÀI swing high/low (lấy liquidity) → quay đầu mạnh ngược lại. Đây là "fingerprint" của Smart Money.\n\nNhận diện: nến quét vượt level X pip nhưng đóng cửa quay lại bên trong (long wick). Volume thường spike.',
+        bullets: [
+          'Sweep + MSS trên LTF = setup A+ của ICT',
+          'Stop hunt thường xảy ra trước news (CPI, NFP) 5–15 phút',
+          'Asia high/low bị sweep trong London 80% thời gian',
+        ],
+        example:
+          'XAUUSD ngày NFP: 8:25 NY (5 phút trước số liệu) sweep low Asia 2,640 xuống 2,637 → reverse mạnh lên 2,665 sau news. Setup long từ 2,640 sau sweep, SL 2,635, TP 2,665 = 5R trong 90 phút.',
+      },
+      {
+        heading: '8. Power of 3 (PO3) / AMD',
+        body:
+          'Mỗi phiên/ngày/tuần thường theo cấu trúc 3 pha:\n• Accumulation: range hẹp đầu phiên (Asia)\n• Manipulation: sweep ngược hướng thật (London open)\n• Distribution: di chuyển hướng thật (NY session)\n\nPro trader đợi pha Manipulation (sweep liquidity) rồi vào ngược hướng sweep — đó là pha Distribution thật.',
+        example:
+          'EURUSD: Asia range 1.0820–1.0840. London 02:00 sweep xuống 1.0810 (manipulation). NY 08:00 reverse lên 1.0890 (distribution). Long 1.0815 sau sweep, SL 1.0800, TP 1.0880 = 4R.',
+      },
+      {
+        heading: '9. Daily Bias — Xác định hướng ngày',
+        body:
+          'Trước mỗi ngày, ICT trader xác định "bias" (hướng) bằng:\n• Vị trí giá so với HTF PD Array (Premium/Discount H4–D1)\n• Liquidity nào còn unmitigated trên HTF\n• Trạng thái PO3 hôm trước\n• News risk\n\nBias đúng → tránh fade trend, chỉ trade theo hướng. Bias sai → cắt lỗ nhanh, không gồng.',
+        bullets: [
+          'Bullish bias: giá ở Discount HTF + có BSL phía trên unmitigated',
+          'Bearish bias: giá ở Premium HTF + có SSL phía dưới unmitigated',
+          'Neutral: balanced PD, cả 2 phía đều có liquidity → trade range',
+        ],
+      },
+    ],
+    takeaways: [
+      'Smart Money cần liquidity → săn stop loss retail là behavior thường ngày',
+      'FVG là magnet — giá có xu hướng quay lại fill imbalance',
+      'OB và Breaker Block là vùng institutional đặt lệnh limit',
+      'PD Array (Premium/Discount) là filter quan trọng nhất — đừng buy Premium, đừng sell Discount',
+      'CHoCH/MSS trên LTF xác nhận reversal → trigger entry',
+      'Killzones (London, NY AM, Silver Bullet) là khung giờ Smart Money active',
+      'Power of 3: Accumulation → Manipulation → Distribution là cấu trúc ngày phổ biến',
+    ],
+    checklist: [
+      'Đã xác định Daily Bias (bullish/bearish/neutral) chưa?',
+      'Giá đang ở Premium hay Discount của HTF range?',
+      'Có FVG hoặc OB unmitigated trên HTF gần entry?',
+      'Có liquidity sweep gần đây làm trigger?',
+      'CHoCH/MSS đã hình thành trên LTF (M5–M15)?',
+      'Đang trong killzone (London, NY AM, Silver Bullet)?',
+      'SL có đặt sau swing/OB an toàn (ít nhất 1 ATR)?',
+      'R:R tối thiểu 3:1 từ entry đến TP1?',
+    ],
+    faqs: [
+      {
+        question: 'ICT có hoạt động trên crypto không?',
+        answer:
+          'CÓ, nhưng cần điều chỉnh killzones theo UTC. BTC active nhất 13:00–21:00 UTC (NY session) và 08:00–12:00 UTC (London). FVG và OB hoạt động tốt vì crypto có nhiều institutional flow (Cumberland, Galaxy, hedge funds). Tránh trade weekend — liquidity quá mỏng.',
+      },
+      {
+        question: 'ICT có phải scam không?',
+        answer:
+          'Framework có giá trị thật (liquidity, FVG, OB là khái niệm chuẩn ngành). Nhưng cách Huddleston cherry-pick examples và mentorship đắt đỏ ($5,000+) bị chỉ trích nhiều. Học miễn phí từ YouTube series 2016–2022 là đủ — không cần mua mentorship.',
+      },
+      {
+        question: 'Tôi nên dùng ICT trên timeframe nào?',
+        answer:
+          'HTF analysis: D1 → H4 → H1. LTF execution: M15 → M5 → M1. Bias trên HTF, entry trên LTF. KHÔNG trade ICT trên M1 nếu chưa có 1,000+ giờ screen time — quá nhiều noise.',
+      },
+      {
+        question: 'OTE 0.705 vs Fibonacci truyền thống 0.618 — khác nhau?',
+        answer:
+          'ICT thích 0.705 (giữa 0.618 và 0.79) vì test backtest cho thấy đó là sweet spot giữa "vào sớm" (0.618) và "an toàn" (0.79). Bạn có thể dùng cả range 0.62–0.79 thay vì 1 mức cứng.',
+      },
+    ],
+  },
+  {
+    slug: 'options-flow-gamma-exposure',
+    category: 'Pro Trader',
+    title: 'Options Flow & GEX — Bí Mật Dealer Hedging Trên SPX/NDX',
+    excerpt:
+      'Gamma Exposure (GEX), Vanna, Charm, Dealer Positioning, Max Pain, 0DTE flow, Charm dump. Hiểu cách MM hedge để dự đoán SPX/NDX/QQQ — framework SpotGamma & SqueezeMetrics.',
+    duration: '50 phút',
+    level: 'Nâng cao',
+    cover: bullishCont,
+    intro:
+      'Sau 2020, options chiếm hơn 50% volume danh nghĩa của S&P 500 (theo Goldman Sachs research 2024). 0DTE (zero days to expiry) chiếm 50% volume options SPX hằng ngày. Điều này nghĩa là SPX/NDX không còn được "định giá" bởi spot flow — mà bởi DEALER HEDGING. Hiểu Gamma Exposure (GEX), Vanna, Charm là cách duy nhất để dự đoán intraday move của indices Mỹ trong môi trường hậu COVID.',
+    history:
+      'Khái niệm Gamma Exposure được Cem Karsan (Kai Volatility) và SpotGamma (2018+) phổ biến hóa cho retail. Trước đó chỉ có hedge fund options desk dùng. SqueezeMetrics (2017) công bố nghiên cứu "Dark Index" và GEX công khai. Sự kiện COVID 3/2020 và meme stocks 1/2021 (GME, AMC) chứng minh sức mạnh của gamma squeeze. Từ 2023, 0DTE flow trở thành driver chính của intraday SPX move (JP Morgan QDS report).',
+    sections: [
+      {
+        heading: '1. Greeks cốt lõi: Delta, Gamma, Vega, Theta, Vanna, Charm',
+        body:
+          'Để hiểu dealer hedging, bạn cần grasp 6 greeks:\n• Delta: thay đổi giá option theo $1 thay đổi underlying. Long call delta 0–1, long put -1–0.\n• Gamma: thay đổi delta theo $1 thay đổi underlying — đo "convexity"\n• Vega: thay đổi giá option theo 1% thay đổi IV\n• Theta: thay đổi giá option theo 1 ngày trôi qua\n• Vanna: thay đổi delta theo IV (cross-greek vol-spot)\n• Charm: thay đổi delta theo thời gian (delta decay)',
+        bullets: [
+          'Pro trader đọc dealer book qua aggregate gamma/vanna/charm exposure',
+          'Gamma quan trọng nhất cho intraday',
+          'Vanna và Charm quan trọng cho overnight/multi-day move',
+        ],
+      },
+      {
+        heading: '2. Dealer Positioning — Ai short, ai long gamma?',
+        body:
+          'Market makers (dealers) là COUNTERPARTY của retail. Khi retail mua call → dealer SHORT call → dealer phải hedge bằng cách MUA underlying. Khi retail bán put (premium income strategies) → dealer LONG put → dealer cũng MUA underlying để hedge.\n\nNet position của dealer thường: SHORT GAMMA (bán options ròng cho retail) vào market top, LONG GAMMA vào market bottom hoặc khi retail mua puts panic.',
+        bullets: [
+          'Long Gamma dealer → SELL high, BUY low → giảm volatility (volatility suppression)',
+          'Short Gamma dealer → BUY high, SELL low → tăng volatility (volatility expansion)',
+          'GEX = aggregate dealer gamma exposure (positive = long gamma, negative = short)',
+        ],
+        example:
+          'SPX GEX +$5B (long gamma): SPX dao động trong range 30 điểm cả ngày. Dealer mua dip bán rip → mean reversion. Đây là "pinned market".\n\nSPX GEX −$3B (short gamma): SPX move 80 điểm mỗi phiên với 2 directional swings. Dealer chase market → momentum amplification.',
+      },
+      {
+        heading: '3. Gamma Flip Level (Zero Gamma) — "Đường ranh giới"',
+        body:
+          'Mức giá mà dealer chuyển từ long gamma sang short gamma = Zero Gamma Level (hay Gamma Flip). Trên mức đó: long gamma → mean reverting. Dưới: short gamma → momentum. Mức này thay đổi mỗi ngày nhưng SpotGamma/Tier1Alpha công bố hằng ngày.',
+        bullets: [
+          'SPX > Zero Gamma: vol suppressed, range-bound',
+          'SPX < Zero Gamma: vol expanded, trending',
+          'Cross qua Zero Gamma = setup change of regime, breakout',
+          'Distance đến Zero Gamma = magnet (giá thường về test)',
+        ],
+        example:
+          'Tháng 8/2024: SPX zero gamma 5,300. Khi SPX giảm dưới 5,300 ngày 5/8, vol bùng nổ — VIX nhảy từ 16 lên 65 (yen carry trade unwind). Dealers bị forced sell theo. Cross zero gamma = signal sớm regime change.',
+      },
+      {
+        heading: '4. Max Pain & Open Interest Walls',
+        body:
+          'Max Pain = strike option mà aggregate option holders LỖ NHẤT khi expiry — đồng thời là mức dealer LÃI nhất. Có lý thuyết (gây tranh cãi) rằng giá có xu hướng "trôi" về max pain vào ngày OPEX (option expiration).\n\nReal value: Open Interest (OI) walls — strikes có OI cực lớn → trở thành magnet/barrier vì dealer hedging tập trung tại đó.',
+        bullets: [
+          'OPEX dates: 3rd Friday mỗi tháng, mạnh nhất Q-end (Mar/Jun/Sep/Dec)',
+          'Call wall lớn = resistance, Put wall lớn = support',
+          'Distance từ spot đến wall < 1% → giá có xu hướng pin',
+          'OPEX week thường low vol, post-OPEX (Mon-Tue) có "vol expansion"',
+        ],
+      },
+      {
+        heading: '5. Vanna & Charm Flow — Điều khiển trend dài hạn',
+        body:
+          'Vanna: delta tăng/giảm theo IV. Khi VIX giảm (fear giảm) → calls trở nên ITM-er → dealer mua thêm để hedge → giá lên thêm. Đây là FEEDBACK LOOP "Vanna Rally" classic vào quý 4 (window dressing + IV crush).\n\nCharm: delta decay theo thời gian. OTM calls/puts mất delta khi gần expiry → dealer unhedge → bán underlying (nếu net long calls) → "charm dump" vào chiều thứ Sáu OPEX.',
+        bullets: [
+          'Vanna flow positive: VIX giảm → dealer buy SPX (Q4 rally classic)',
+          'Charm flow negative: thứ 4–thứ 6 OPEX week, dealer sell SPX nhẹ',
+          'Vanna unwind: khi VIX spike → dealer sell SPX panic (positioning unwind)',
+        ],
+        example:
+          'Q4 2023: VIX giảm từ 22 xuống 12 (Oct→Dec). SPX tăng từ 4,100 lên 4,800 — phần lớn là vanna flow. Khi IV ở mức thấp như vậy, mọi sự tăng IV nhẹ đều gây mean reversion (Q1 2024 đầu năm pullback nhẹ).',
+      },
+      {
+        heading: '6. 0DTE Flow — Game changer hậu 2022',
+        body:
+          '0DTE (zero days to expiry) options expire trong vòng 24h. Hiện chiếm 50% volume SPX options. Tác động cực lớn lên intraday vì:\n• Gamma cực cao gần ATM (ngày T)\n• Dealer phải hedge cực nhanh → magnify intraday move\n• Charm decay cực nhanh trong ngày → afternoon flow predictable',
+        bullets: [
+          '0DTE call buying retail → dealer buy SPX → tăng intraday momentum',
+          '0DTE put selling (covered) → dealer hedge calmer → suppress vol',
+          '0DTE volume spike sau 14:00 NY = "afternoon gamma squeeze"',
+          'Max gamma strike intraday = magnet đến close',
+        ],
+        example:
+          '8/3/2024: SPX mở 5,150, 0DTE call wall lớn 5,180. Suốt ngày SPX climb đều đến 5,178 lúc 15:55 NY (5 phút trước close). Dealer hedge buy đẩy lên — pin near wall.',
+      },
+      {
+        heading: '7. Dark Pool Index (DIX) & Hidden Orders',
+        body:
+          'DIX (Dark Pool Index) đo % volume giao dịch ở dark pools (institutional venues, không hiển thị public). DIX cao → institutional accumulating quietly → bullish forward 1–2 tuần. DIX thấp → distributing → bearish.\n\nSqueezeMetrics công bố DIX hằng ngày miễn phí. Đây là 1 trong vài leading indicator đáng tin.',
+        bullets: [
+          'DIX > 45% trong 3 ngày liên tiếp → bullish setup 5–10 ngày',
+          'DIX < 38% liên tục → distribution signal',
+          'GEX + DIX combination: GEX âm + DIX cao = bullish reversal sớm',
+        ],
+      },
+      {
+        heading: '8. Setup Pro: GEX Regime Trading',
+        body:
+          'Strategy framework dựa trên gamma regime:\n\n• Positive GEX > $3B: SHORT IRON CONDOR / sell strangles (vol suppressed)\n• Positive GEX nhỏ ($0–3B): TREND day theo VWAP\n• Negative GEX: LONG STRADDLE / buy options (vol expanding)\n• Cross zero gamma: directional bet theo direction phá\n\nMỗi regime đòi hỏi position sizing khác nhau. Negative GEX → giảm size 50% vì swing rộng.',
+      },
+      {
+        heading: '9. Công cụ và data sources',
+        body:
+          'Chuyên nghiệp: SpotGamma ($99/tháng — best UI), Tier1Alpha ($149 — institutional grade), Menthor Q ($99 — VN cũng dùng), Unusual Whales ($60/tháng — flow alert).\n\nFree: SqueezeMetrics DIX (miễn phí), CBOE GEX (delayed), TradingView gamma indicator (community).\n\nData feed cần: OPRA (options) — qua Polygon ($199/tháng) hoặc Tradier free tier.',
+      },
+    ],
+    takeaways: [
+      'Hậu 2020, dealer hedging là driver chính của SPX/NDX intraday',
+      'GEX dương → vol suppressed; GEX âm → vol expanded',
+      'Zero Gamma Level là "regime boundary" — cross qua = breakout signal',
+      'Vanna flow điều khiển trend Q4 (year-end rally classic)',
+      'Charm dump xảy ra chiều thứ 6 OPEX khi delta decay',
+      '0DTE chiếm 50% volume SPX options → magnify intraday move',
+      'DIX là leading indicator institutional accumulation đáng tin',
+      'Max gamma strike intraday = magnet đến close',
+    ],
+    checklist: [
+      'GEX hiện tại dương hay âm, magnitude bao nhiêu?',
+      'Zero Gamma Level hôm nay ở đâu?',
+      'Distance từ spot đến nearest call/put wall lớn?',
+      'Có OPEX trong tuần không? (Friday 3rd)',
+      'VIX trend (vanna direction)?',
+      'DIX 5-day average — accumulating hay distributing?',
+      '0DTE volume hôm nay so với trung bình?',
+      'Position sizing đã điều chỉnh theo gamma regime chưa?',
+    ],
+    faqs: [
+      {
+        question: 'Tôi không trade options, hiểu GEX để làm gì?',
+        answer:
+          'GEX/Vanna ảnh hưởng trực tiếp đến SPX/NDX/QQQ futures và spot. Equity trader, futures trader, ETF trader đều cần hiểu để tránh "fight the tape" trong gamma regime sai. Ví dụ: short SPX trong long gamma regime = sai — vì dealer sẽ buy mọi dip.',
+      },
+      {
+        question: 'GEX có dùng được cho stocks lẻ không?',
+        answer:
+          'CÓ với mega-caps có options market lớn: AAPL, NVDA, TSLA, AMD, META. Single-stock GEX driver mạnh hơn index. NVDA/TSLA squeeze classic là combination của GEX + retail flow. Stocks small-cap không có đủ liquidity options để GEX có ý nghĩa.',
+      },
+      {
+        question: 'GEX có hoạt động trên crypto/forex không?',
+        answer:
+          'Crypto: BTC/ETH options trên Deribit có GEX nhưng chỉ ~5% spot volume → ảnh hưởng nhỏ hơn nhiều so với SPX. Vẫn hữu ích quanh major expiry (last Friday). Forex: gần như không (FX options OTC, không centralized).',
+      },
+      {
+        question: 'Tôi cần bao nhiêu vốn để trade GEX framework?',
+        answer:
+          'Equity/Futures: $25,000 (PDT rule) + $5k buffer cho ES micro. Options: $5,000 đủ start, nhưng học 6 tháng paper trade trước. Đừng trade options thật khi chưa hiểu Greeks — losses 100% capital là chuyện thường.',
+      },
+    ],
+  },
+  {
+    slug: 'risk-management-pro',
+    category: 'Pro Trader',
+    title: 'Risk Management Cấp Pro — Kelly, R-Multiple, Portfolio Heat & Tail Risk',
+    excerpt:
+      'Kelly Criterion, fractional Kelly, R-multiple system, portfolio heat, correlation matrix, drawdown management, tail risk hedging. Framework từ Van Tharp, Ed Seykota, Paul Tudor Jones.',
+    duration: '40 phút',
+    level: 'Nâng cao',
+    cover: bullishCont,
+    intro:
+      'Hơn 90% pro trader thất bại không phải vì hệ thống tệ, mà vì position sizing sai. Một edge 60% win rate có thể blow account nếu sizing 25% capital/trade. Bài này hệ thống hóa risk management cấp institutional: từ Kelly Criterion (do John Kelly 1956 phát minh cho Bell Labs), R-multiple của Van Tharp, đến portfolio heat của Ed Seykota và tail risk hedging kiểu Universa Investments.',
+    history:
+      'John L. Kelly Jr. (Bell Labs, 1956) công bố "A New Interpretation of Information Rate" — công thức Kelly tối ưu hóa long-term geometric growth. Ed Thorp ("Beat the Dealer", 1962) áp dụng cho blackjack và Wall Street. Van Tharp ("Trade Your Way to Financial Freedom", 1998) phổ biến R-multiple cho retail. Paul Tudor Jones nổi tiếng với câu "5:1 R:R minimum" và Mark Spitznagel (Universa) chứng minh tail hedge tăng CAGR dài hạn dù lỗ nhỏ thường xuyên.',
+    sections: [
+      {
+        heading: '1. R-Multiple System — Đơn vị đo chuẩn',
+        body:
+          'R = Risk per trade (số tiền mất nếu chạm SL). Mọi trade đo bằng R-multiple, không bằng %.\n• Win 2R = lãi gấp 2 lần risk\n• Lose 1R = chạm SL chuẩn\n• Lose 2R = mistake (slippage hoặc gồng lệnh)\n\nVí dụ: Account $10,000, risk 1% = $100 = 1R. Trade kiếm $300 = +3R. Trade mất $150 (slippage) = -1.5R.',
+        bullets: [
+          'Mọi journal phải log R-multiple cho mỗi trade',
+          'Expectancy = (Win% × Avg Win R) − (Loss% × Avg Loss R)',
+          'Expectancy > 0.5R = good system',
+          'Expectancy > 1R = excellent (rare)',
+          'System với 40% win rate + 3R avg win = expectancy 0.6R (rất tốt)',
+        ],
+        example:
+          'Pro trader 100 trades: 45 win avg +2.5R, 55 loss avg -1R.\nExpectancy = (0.45 × 2.5) − (0.55 × 1) = 1.125 − 0.55 = +0.575R/trade.\nVới 100 trades/năm risk 1% → return = 57.5%/năm trước drawdown.',
+      },
+      {
+        heading: '2. Kelly Criterion — Tối ưu hóa geometric growth',
+        body:
+          'Kelly Formula cho biết % capital tối ưu để bet:\nf* = (bp − q) / b\nTrong đó:\n• b = odds (avg win / avg loss)\n• p = xác suất thắng\n• q = 1 − p (xác suất thua)\n\nVí dụ: System 60% win, avg win = 1.5× avg loss → b = 1.5, p = 0.6, q = 0.4\nf* = (1.5 × 0.6 − 0.4) / 1.5 = (0.9 − 0.4) / 1.5 = 0.333 = 33.3% capital/trade!\n\nNHƯNG: Full Kelly RẤT VOLATILE. 50% drawdown thường xuyên. Pro dùng FRACTIONAL KELLY (1/4 hoặc 1/2 Kelly).',
+        bullets: [
+          'Full Kelly: max long-term growth nhưng drawdown khủng',
+          '1/4 Kelly: 75% growth của Full Kelly với 25% volatility',
+          '1/2 Kelly: 87.5% growth với 50% volatility',
+          'Hầu hết hedge fund dùng 1/4 Kelly hoặc nhỏ hơn',
+        ],
+        example:
+          'Edge 60% win, 1.5b → Full Kelly 33%. Áp dụng 1/4 Kelly = 8.3% per trade. Vẫn aggressive — retail nên dùng 1/8 Kelly = 4% hoặc fixed 1–2%/trade.',
+        pitfall:
+          'Edge ƯỚC TÍNH (sample <100 trades) thường overestimate. Discount Kelly thêm 50% để safety margin.',
+      },
+      {
+        heading: '3. Position Sizing Models',
+        body:
+          'Có 4 model chính, từ đơn giản đến phức tạp:\n\n1. Fixed Dollar: $X per trade. Sai vì không scale theo account.\n2. Fixed Fractional (% Risk): X% account per trade — phổ biến nhất, recommended cho retail. Chuẩn 1–2%.\n3. Volatility-based (ATR Sizing): position size = (% Risk × Equity) / (ATR × Multiplier). Trade nhiều shares hơn khi vol thấp, ít hơn khi vol cao.\n4. Kelly Fractional: theo công thức Kelly đã tính.',
+        bullets: [
+          'Retail dưới $50k → fixed 1% per trade',
+          'Account $50k–$500k → 1.5% với volatility scaling',
+          'Trên $500k → Kelly fractional + portfolio heat',
+        ],
+        example:
+          'Account $20,000, risk 1% = $200. ATR(14) của BTC = $1,500. SL 2× ATR = $3,000 từ entry. Position size = $200 / $3,000 = 0.066 BTC. Tự động scale: BTC vol cao hơn → size nhỏ hơn.',
+      },
+      {
+        heading: '4. Portfolio Heat — Tổng risk lúc nào',
+        body:
+          'Portfolio Heat = tổng % risk của TẤT CẢ positions đang mở. Ed Seykota khuyến nghị max 6%. Trader-Coach Linda Raschke dùng 4%.\n\nNếu mở 4 trades 1.5% mỗi cái → heat = 6%. Nếu thêm 2 trade nữa cùng correlation cao → real heat có thể 10%+ vì correlated drawdown.',
+        bullets: [
+          'Hard cap: 6% portfolio heat tổng',
+          'Correlation-adjusted heat: nhân heat × avg correlation',
+          'Crypto trader: BTC, ETH, SOL có correlation 0.85 → effective heat = nominal × 0.9',
+          'Forex: EUR/USD và GBP/USD correlation 0.7 → reduce 1 trong 2 size',
+        ],
+      },
+      {
+        heading: '5. Correlation Matrix & Diversification',
+        body:
+          'Diversification THẬT đòi hỏi correlation < 0.3 giữa positions. Tính correlation 90 ngày qua returns:\n• ρ = 1: hoàn toàn tương quan (BTC-ETH thường 0.85)\n• ρ = 0: không tương quan\n• ρ = -1: tương quan ngược (Gold-DXY thường -0.6)\n\nRule pro: max 2 positions correlation > 0.7. 3+ correlated positions = 1 mega-trade trá hình.',
+        bullets: [
+          'Gold + Silver + Platinum = 1 trade (precious metals)',
+          'BTC + ETH + SOL = 1 trade (crypto majors)',
+          'AAPL + MSFT + GOOG = 1 trade (mega-cap tech)',
+          'Kiểm tra correlation matrix tuần 1 lần',
+        ],
+      },
+      {
+        heading: '6. Drawdown Management — Khi mọi thứ sai',
+        body:
+          'Mọi system sẽ trải qua drawdown. Quan trọng là KIỂM SOÁT, không tránh. Quy tắc pro:\n\n• Drawdown 10%: review trades, không thay đổi system\n• Drawdown 15%: giảm size 50%\n• Drawdown 20%: pause 2 tuần, review hoàn toàn\n• Drawdown 25%: STOP TRADING, review tâm lý + system\n• Drawdown 33%: cần kiếm 50% để hồi vốn — danger zone\n\nMath cứng: lỗ 50% cần lãi 100% để hồi. Lỗ 67% cần lãi 200%. Bảo vệ vốn là số 1.',
+        bullets: [
+          'Set max daily loss: 3% account',
+          'Set max weekly loss: 6%',
+          'Set max monthly drawdown: 10%',
+          'Vi phạm = forced break minimum 1 tuần',
+        ],
+      },
+      {
+        heading: '7. Tail Risk Hedging — Kiểu Universa/Spitznagel',
+        body:
+          'Mark Spitznagel (Universa Investments) chứng minh: dùng 0.5%/tháng mua deep OTM puts làm hedge → CAGR cao hơn long-only S&P 500 trong dài hạn 30 năm. Mặc dù 90%+ thời gian các puts hết hạn vô giá trị.\n\nLý do: trong tail event (March 2020, GFC 2008), puts payoff 50–500× → bù lại nhiều năm "phí bảo hiểm".\n\nRetail apply: dành 1% portfolio mua VIX calls hoặc SPY puts xa OTM (delta 0.05–0.10) hằng quý.',
+        bullets: [
+          'Buy SPY puts strike 20% OTM, expiry 6 tháng',
+          'Buy VIX calls strike 30, expiry 3 tháng',
+          'Roll mỗi quý',
+          'Hedge cost ~2–3%/năm — chấp nhận như insurance',
+        ],
+        example:
+          'March 2020: Universa kiếm +4,144% trên hedge book trong khi SPX -32%. Net portfolio của họ +17% Q1/2020 trong khi market bleed.',
+      },
+      {
+        heading: '8. Risk of Ruin — Xác suất phá sản',
+        body:
+          'Risk of Ruin (RoR) = xác suất account về 0 hoặc dưới ngưỡng "no-recovery" (thường 50% drawdown).\n\nCông thức đơn giản: RoR = ((1 - edge) / (1 + edge))^units\nVới edge = win% − loss%, units = số lần risk capital có thể chịu.\n\nVí dụ: edge 20% (60% win), risk 2% account/trade, units = 50:\nRoR = (0.8/1.2)^50 = 0.0007% → cực thấp.\n\nNếu risk 10%/trade, units = 10: RoR = (0.8/1.2)^10 = 1.7% → vẫn thấp nhưng nguy hiểm.\nNếu risk 25%/trade, units = 4: RoR = (0.8/1.2)^4 = 19.7% → 1/5 phá sản!',
+        bullets: [
+          'Risk per trade ≤ 2% → RoR < 1% trong hầu hết edge tốt',
+          'Risk per trade 5% → đỉnh của zone an toàn',
+          'Risk per trade > 10% → gambler territory',
+          'Edge thấp (50–55% win) cần size NHỎ hơn nhiều',
+        ],
+      },
+    ],
+    takeaways: [
+      'R-multiple là đơn vị đo chuẩn — mọi trade đo bằng R, không bằng %',
+      'Expectancy > 0.5R/trade là threshold của system tốt',
+      'Kelly cho biết bet size tối ưu — luôn dùng Fractional Kelly (1/4 hoặc nhỏ hơn)',
+      'Position sizing dựa trên ATR scale tự động theo volatility',
+      'Portfolio heat tổng max 6%, điều chỉnh theo correlation',
+      'Max 2 positions có correlation > 0.7 — diversification thật',
+      'Drawdown levels có quy tắc cứng (10/15/20/25%) cho action',
+      'Tail risk hedging tăng CAGR dài hạn dù lỗ phí bảo hiểm thường xuyên',
+    ],
+    checklist: [
+      'Risk per trade ≤ 1–2% account chưa?',
+      'SL đặt theo cấu trúc + buffer ATR, không cảm tính?',
+      'Position size đã tính theo volatility (ATR) chưa?',
+      'Portfolio heat hiện tại ≤ 6%?',
+      'Có position nào correlation > 0.7 với position cũ không?',
+      'Daily/weekly/monthly loss limit đã set chưa?',
+      'Có hedge tail risk cho portfolio dài hạn không?',
+      'R-multiple journal đã ghi cho mỗi trade?',
+    ],
+    faqs: [
+      {
+        question: 'Tôi có $1,000 thôi, áp dụng risk management thế nào?',
+        answer:
+          'Account nhỏ < $5k thực sự rất khó vì: (1) commission/slippage chiếm % lớn, (2) 1% = $10 không đủ trade futures/forex chuẩn. Đề xuất: paper trade với $50k giả lập 6 tháng để build edge và kỷ luật, song song save thêm vốn. KHÔNG over-leverage để "fast track" — đó là con đường blow account chắc chắn.',
+      },
+      {
+        question: 'Kelly Criterion có dùng được cho swing/position trading không?',
+        answer:
+          'CÓ, nhưng cần ước tính edge từ sample LỚN (>100 trades). Swing trader thường ít data hơn day trader → edge estimate noisy → dùng 1/8 Kelly hoặc nhỏ hơn để safe. Position trader (1–2 trade/tháng) gần như không dùng được Kelly — chỉ fixed 2–3%.',
+      },
+      {
+        question: 'Portfolio heat 6% có quá conservative không?',
+        answer:
+          'Cho retail KHÔNG. Pro hedge fund với multi-strategy có thể 8–10% nhưng họ có hedge layer phức tạp. Bạn không phải Citadel — giữ 6% là sweet spot giữa growth và safety. Khi prove được edge consistent 12 tháng → có thể nâng lên 8%.',
+      },
+      {
+        question: 'Tail risk hedging có cần thiết cho retail không?',
+        answer:
+          'Cho account < $50k: KHÔNG ưu tiên — phí bảo hiểm cao tương đối. Cho account > $100k và horizon > 5 năm: NÊN. Đặc biệt nếu portfolio long-only equity. Black swan (COVID, GFC) có thể wipe 40%+ trong vài tuần — hedge là insurance, không phải optional.',
+      },
+    ],
+  },
 ];
 
 export const CATEGORIES = Array.from(new Set(LESSONS.map(l => l.category)));
