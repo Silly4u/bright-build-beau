@@ -6,6 +6,14 @@ export interface LessonSection {
   heading: string;
   body: string;
   bullets?: string[];
+  example?: string;
+  pitfall?: string;
+  image?: string;
+}
+
+export interface LessonFAQ {
+  question: string;
+  answer: string;
 }
 
 export interface Lesson {
@@ -17,8 +25,11 @@ export interface Lesson {
   level: 'Cơ bản' | 'Trung cấp' | 'Nâng cao';
   cover: string;
   intro: string;
+  history?: string;
   sections: LessonSection[];
   takeaways: string[];
+  checklist?: string[];
+  faqs?: LessonFAQ[];
 }
 
 export const ACADEMY_HERO = academyHero;
