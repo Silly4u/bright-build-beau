@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Clock, BookOpen, Search, Sparkles, CheckCircle2, GraduationCap } from 'lucide-react';
+import { ArrowLeft, Clock, BookOpen, Search, Sparkles, CheckCircle2, GraduationCap, AlertTriangle, Lightbulb, HelpCircle, ListChecks, History } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { LESSONS, CATEGORIES, ACADEMY_HERO, type Lesson } from '@/data/academyLessons';
 
 const levelColor = (lv: Lesson['level']) =>
