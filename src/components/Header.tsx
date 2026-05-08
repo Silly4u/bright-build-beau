@@ -14,6 +14,7 @@ const navLinks = [
   { href: '/indicators', label: 'Indicators' },
   { href: '/lich-kinh-te', label: 'Lịch Kinh Tế' },
   { href: '/services', label: 'Dịch Vụ' },
+  { href: '/hoc-vien', label: 'Học Viện' },
   { href: '/contact', label: 'Liên Hệ' },
 ];
 
