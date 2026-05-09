@@ -236,38 +236,105 @@ export const LESSONS: Lesson[] = [
     category: 'Smart Money Concepts',
     title: 'Smart Money Concepts (SMC) Từ A-Z',
     excerpt:
-      'Order Block, Fair Value Gap, Liquidity, BOS, CHOCH — hiểu cách "cá mập" thực sự giao dịch.',
-    duration: '35 phút',
+      'Order Block, Fair Value Gap, Liquidity, BOS, CHOCH, Mitigation, Premium/Discount — hiểu cách "cá mập" thực sự giao dịch.',
+    duration: '45 phút',
     level: 'Nâng cao',
     cover: coverSmc,
     intro:
-      'Smart Money Concepts (SMC) là phương pháp giao dịch theo dấu chân của tổ chức lớn — những người tạo ra xu hướng. Thay vì đoán theo đám đông, SMC dạy bạn nhận ra nơi smart money đang gom hàng và xả hàng.',
+      'Smart Money Concepts (SMC) là phương pháp giao dịch theo dấu chân của tổ chức lớn — những người tạo ra xu hướng. Thay vì đoán theo đám đông, SMC dạy bạn nhận ra nơi smart money đang gom hàng và xả hàng. Phương pháp được phát triển từ nền tảng Wyckoff và ICT (Inner Circle Trader) của Michael J. Huddleston, hiện là khung phân tích phổ biến nhất trong cộng đồng trader chuyên nghiệp 2020–2025.',
+    history:
+      'SMC bắt nguồn từ Wyckoff (1900s) → phát triển thành ICT bởi Michael Huddleston (2010s) → được rút gọn và phổ biến thành "SMC" trên YouTube/Twitter từ 2019. Hiện chiếm khoảng 60% nội dung phân tích kỹ thuật trong cộng đồng trader trẻ toàn cầu.',
     sections: [
       {
-        heading: 'Order Block (OB)',
-        body: 'Là vùng giá cuối cùng mà tổ chức đặt lệnh trước khi tạo ra một move mạnh. Khi giá quay lại OB, nó thường phản ứng mạnh — đây là vùng vào lệnh có winrate cao.',
+        heading: '1. Market Structure — Cấu trúc thị trường',
+        body: 'Nền tảng của SMC. Một xu hướng tăng (bullish) tạo Higher High (HH) và Higher Low (HL) liên tục. Xu hướng giảm tạo Lower High (LH) và Lower Low (LL). Mọi khái niệm khác trong SMC đều xoay quanh việc đọc đúng cấu trúc này trên nhiều khung.',
+        bullets: [
+          'Xác định cấu trúc trên 3 khung: HTF (D1/H4) → MTF (H1) → LTF (M15)',
+          'Chỉ trade theo hướng cấu trúc HTF',
+          'LTF dùng để tìm entry chính xác',
+        ],
+        image: 'https://images.unsplash.com/photo-1642790551116-18e150f248e3?w=800&q=80',
       },
       {
-        heading: 'Fair Value Gap (FVG)',
-        body: 'Khoảng trống không cân bằng giữa 3 nến — thị trường có xu hướng quay lại "lấp đầy" FVG. Là vùng take-profit hoặc entry pullback rất hiệu quả.',
+        heading: '2. BOS (Break of Structure)',
+        body: 'Phá vỡ cấu trúc CÙNG CHIỀU xu hướng — xác nhận xu hướng còn tiếp diễn. Trong uptrend, BOS xảy ra khi giá phá đỉnh HH gần nhất. Đây là tín hiệu tiếp tục, không phải tín hiệu đảo chiều.',
+        example: 'BTCUSDT H4 sau khi tạo HL tại $58,000 đã BOS qua $65,000 ngày 26/02/2024, mở đường cho rally lên $73,000.',
       },
       {
-        heading: 'Liquidity (Thanh khoản)',
-        body: 'Là vùng tập trung stop-loss của retail trader (trên đỉnh, dưới đáy). Smart money thường đẩy giá quét những vùng này trước khi đi theo hướng thật.',
+        heading: '3. CHOCH (Change of Character)',
+        body: 'Phá vỡ cấu trúc NGƯỢC CHIỀU xu hướng — tín hiệu đầu tiên của đảo chiều. Trong uptrend, CHOCH xảy ra khi giá phá đáy HL gần nhất. Sau CHOCH thường có pullback về OB rồi mới chạy thật sự.',
+        pitfall: 'Nhiều trader nhầm CHOCH với BOS — luôn xác định rõ swing high/low gần nhất TRƯỚC khi gọi tên tín hiệu.',
       },
       {
-        heading: 'BOS (Break of Structure)',
-        body: 'Phá vỡ cấu trúc cùng chiều xu hướng → xác nhận xu hướng còn tiếp diễn.',
+        heading: '4. Order Block (OB)',
+        body: 'Là nến giảm cuối cùng trước một move tăng mạnh (Bullish OB), hoặc nến tăng cuối cùng trước move giảm mạnh (Bearish OB). OB chứa lệnh chưa khớp hết của tổ chức — khi giá quay lại, họ tiếp tục đẩy theo hướng cũ. Đây là vùng entry có winrate cao nhất trong SMC.',
+        bullets: [
+          'OB hợp lệ phải kèm move impulsive (≥ 3 nến cùng chiều bứt phá)',
+          'OB chưa được mitigated (chưa bị quay lại lấp) tin cậy hơn',
+          'Refined OB = chỉ lấy phần thân nến + FVG kế tiếp để vào lệnh chính xác',
+        ],
+        image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80',
       },
       {
-        heading: 'CHOCH (Change of Character)',
-        body: 'Phá vỡ cấu trúc ngược chiều xu hướng → tín hiệu đầu tiên của đảo chiều.',
+        heading: '5. Fair Value Gap (FVG) / Imbalance',
+        body: 'Khoảng trống giá giữa 3 nến: bóng nến 1 và bóng nến 3 không chạm nhau, để lại "khe hở" trong phạm vi nến 2. Thị trường có xu hướng quay lại lấp đầy FVG để cân bằng cung-cầu. FVG vừa là vùng entry pullback vừa là target take-profit hiệu quả.',
+        bullets: [
+          'FVG cùng chiều BOS = vùng entry có R:R cao',
+          'FVG ngược chiều = target TP khi giá đang chạy xa khỏi điểm vào',
+          'FVG trên HTF (H4, D1) tin cậy hơn nhiều so với LTF',
+        ],
+      },
+      {
+        heading: '6. Liquidity (Thanh khoản) & Liquidity Sweep',
+        body: 'Liquidity là vùng tập trung stop-loss của retail trader (trên đỉnh equal highs, dưới đáy equal lows, dưới trendline rõ ràng). Smart money cần thanh khoản để khớp lệnh lớn, nên thường đẩy giá QUÉT (sweep) các vùng này trước khi đi theo hướng thật. Liquidity sweep + CHOCH ngay sau là combo entry kinh điển.',
+        example: 'XAUUSD ngày 13/05/2024 quét đáy đôi tại $2,332 (sweep liquidity bear), tạo CHOCH H1 và bật lên $2,385 trong 18 giờ.',
+        pitfall: 'Đừng vào lệnh ngay khi thấy sweep — chờ CHOCH xác nhận hoặc nến đảo chiều mạnh tại vùng OB/FVG.',
+      },
+      {
+        heading: '7. Premium & Discount Zones',
+        body: 'Chia range giữa swing high và swing low gần nhất theo Fibonacci. Vùng trên 0.5 = Premium (đắt, ưu tiên SELL); vùng dưới 0.5 = Discount (rẻ, ưu tiên BUY); vùng 0.5–0.618 = Equilibrium (cân bằng). SMC chỉ BUY ở Discount và SELL ở Premium — không đu đỉnh, không bắt đáy giữa range.',
+      },
+      {
+        heading: '8. Mitigation Block & Breaker Block',
+        body: 'Mitigation Block là OB ngược chiều bị giá phá qua rồi quay lại test → trở thành kháng cự/hỗ trợ mới. Breaker Block là OB cũ bị BOS phá qua, sau đó được tái sử dụng làm vùng entry theo hướng ngược lại. Hai khái niệm này giúp tận dụng lại các zone đã "vô hiệu" theo cách thông minh.',
+      },
+      {
+        heading: '9. Quy trình Top-Down Analysis chuẩn SMC',
+        body: 'Bước 1: D1 xác định bias (bullish/bearish) qua cấu trúc. Bước 2: H4 tìm POI (Point of Interest = OB/FVG chưa mitigated) trong vùng Discount/Premium. Bước 3: H1 chờ giá tới POI và tạo liquidity sweep. Bước 4: M15 chờ CHOCH + entry tại OB/FVG nhỏ bên trong. Bước 5: SL sau OB, TP1 = liquidity gần nhất, TP2 = OB ngược chiều HTF.',
+        bullets: [
+          'Luôn đi từ HTF xuống LTF, không bao giờ ngược lại',
+          'Mỗi POI chỉ trade tối đa 1–2 lần, không "trả thù"',
+          'Ghi nhật ký: POI nào hoạt động, POI nào fail để tinh chỉnh',
+        ],
       },
     ],
     takeaways: [
       'SMC hiệu quả nhất trên timeframe H1, H4, D1',
       'Luôn phân tích từ HTF (D1) xuống LTF (M15) để đồng pha',
-      'OB + FVG + Liquidity Sweep = combo entry mạnh nhất',
+      'OB + FVG + Liquidity Sweep + CHOCH = combo entry mạnh nhất',
+      'Chỉ BUY ở Discount, SELL ở Premium — tuyệt đối không đu giữa range',
+      'POI chưa mitigated luôn ưu tiên hơn POI đã test nhiều lần',
+    ],
+    checklist: [
+      'Đã xác định bias HTF (D1/H4) chưa?',
+      'POI nằm trong vùng Discount (BUY) hoặc Premium (SELL) chưa?',
+      'Đã có liquidity sweep tại POI chưa?',
+      'CHOCH trên LTF (M15/M5) đã xác nhận chưa?',
+      'SL sau OB và R:R ≥ 1:3 chưa?',
+    ],
+    faqs: [
+      {
+        question: 'SMC có khác gì so với ICT?',
+        answer: 'ICT là bộ khung gốc rất chi tiết (gồm Killzones, Power of 3, OTE…) của Michael Huddleston. SMC là phiên bản rút gọn, dễ tiếp cận hơn, tập trung vào BOS/CHOCH/OB/FVG/Liquidity. Bài "Liquidity & ICT Concepts" trong khoá Pro đào sâu hơn.',
+      },
+      {
+        question: 'SMC có dùng được cho stocks và crypto không?',
+        answer: 'Có. SMC hoạt động tốt trên mọi thị trường có thanh khoản cao: forex, crypto (BTC/ETH/large caps), futures (ES/NQ), gold. Hiệu quả kém trên cổ phiếu small-cap thanh khoản thấp.',
+      },
+      {
+        question: 'Bao lâu mới thành thạo SMC?',
+        answer: 'Hiểu lý thuyết: 2–4 tuần. Áp dụng có lời ổn định: 6–12 tháng backtest + forward test ít nhất 200 lệnh. Đừng vội nạp tiền thật trước khi qua giai đoạn demo.',
+      },
     ],
   },
   {
