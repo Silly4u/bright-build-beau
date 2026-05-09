@@ -797,7 +797,7 @@ export const LESSONS: Lesson[] = [
         example:
           'BTC W1 từ đáy 15.500 → đếm sóng cấp Primary. Trên D1: sóng 2 hoàn tất tại Fib 0.618 (19.500), RSI oversold + Bullish Engulfing → entry BUY, TP 1.618 × sóng 1 = ~35.000.',
       },
-
+    ],
     takeaways: [
       'Elliott là framework, KHÔNG phải tín hiệu — luôn cần xác nhận',
       'Entry an toàn nhất: cuối sóng 2, vào theo sóng 3',
