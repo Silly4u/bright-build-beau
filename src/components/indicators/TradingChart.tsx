@@ -32,6 +32,10 @@ import {
 export interface AITrendline {
   start: { time: number; price: number };
   end: { time: number; price: number };
+  broken?: boolean;
+  brokenAt?: number;
+  slopePerBar?: number;
+  touches?: number;
 }
 
 const TIMEFRAMES = ['M5', 'M15', 'M30', 'H1', 'H4', 'D1', 'W1'];
@@ -410,12 +414,16 @@ const TradingChart: React.FC<TradingChartProps> = ({
     });
     }
 
-    // ── AI Trendlines (always render when data available) ──
+    // ── AI Trendlines (broken → dashed xám + nhãn BROKEN) ──
     if (trendline) {
+      const isBroken = trendline.broken === true;
       const trendSeries = chart.addSeries(LineSeries, {
-        color: '#26a69a', lineWidth: 2, lineStyle: 2,
-        priceLineVisible: false, lastValueVisible: false,
-        title: 'Trend ▲',
+        color: isBroken ? 'rgba(148,163,184,0.55)' : '#26a69a',
+        lineWidth: isBroken ? 1 : 2,
+        lineStyle: isBroken ? 1 : 2, // 1 = dotted khi broken
+        priceLineVisible: false,
+        lastValueVisible: false,
+        title: isBroken ? 'Trend ▲ BROKEN' : `Trend ▲${trendline.touches ? ' ×' + trendline.touches : ''}`,
       });
       trendSeries.setData([
         { time: (trendline.start.time / 1000) as any, value: trendline.start.price },
@@ -423,10 +431,14 @@ const TradingChart: React.FC<TradingChartProps> = ({
       ]);
     }
     if (trendlineResistance) {
+      const isBroken = trendlineResistance.broken === true;
       const resSeries = chart.addSeries(LineSeries, {
-        color: '#ef5350', lineWidth: 2, lineStyle: 2,
-        priceLineVisible: false, lastValueVisible: false,
-        title: 'Trend ▼',
+        color: isBroken ? 'rgba(148,163,184,0.55)' : '#ef5350',
+        lineWidth: isBroken ? 1 : 2,
+        lineStyle: isBroken ? 1 : 2,
+        priceLineVisible: false,
+        lastValueVisible: false,
+        title: isBroken ? 'Trend ▼ BROKEN' : `Trend ▼${trendlineResistance.touches ? ' ×' + trendlineResistance.touches : ''}`,
       });
       resSeries.setData([
         { time: (trendlineResistance.start.time / 1000) as any, value: trendlineResistance.start.price },
@@ -1626,24 +1638,33 @@ const TradingChart: React.FC<TradingChartProps> = ({
           ? prevWeek.lowTime < prevWeek.highTime
           : prevWeek.lastClose >= prevWeek.firstOpen;
 
-        const fibLevels: { ratio: number; color: string; width: 1 | 2; style: 0 | 1 | 2 }[] = [
+        const fibLevels: { ratio: number; color: string; width: 1 | 2; style: 0 | 1 | 2; key?: boolean }[] = [
           { ratio: 0,     color: 'rgba(255,213,79,0.85)', width: 2, style: 0 },
-          { ratio: 0.236, color: 'rgba(255,213,79,0.45)', width: 1, style: 2 },
+          { ratio: 0.236, color: 'rgba(255,213,79,0.40)', width: 1, style: 2 },
           { ratio: 0.382, color: 'rgba(255,213,79,0.55)', width: 1, style: 2 },
-          { ratio: 0.5,   color: 'rgba(255,213,79,0.70)', width: 1, style: 0 },
-          { ratio: 0.618, color: 'rgba(255,213,79,0.75)', width: 1, style: 0 },
-          { ratio: 0.786, color: 'rgba(255,213,79,0.55)', width: 1, style: 2 },
+          { ratio: 0.5,   color: 'rgba(255,213,79,0.70)', width: 1, style: 0, key: true },
+          { ratio: 0.618, color: 'rgba(255,193,7,0.95)',  width: 2, style: 0, key: true },
+          { ratio: 0.65,  color: 'rgba(255,193,7,0.95)',  width: 1, style: 1 }, // Golden Pocket cap
+          { ratio: 0.786, color: 'rgba(255,213,79,0.55)', width: 1, style: 2, key: true },
           { ratio: 1,     color: 'rgba(255,213,79,0.85)', width: 2, style: 0 },
+          // Extensions cho TP breakout
+          { ratio: 1.272, color: 'rgba(186,104,200,0.65)', width: 1, style: 2 },
+          { ratio: 1.414, color: 'rgba(186,104,200,0.45)', width: 1, style: 2 },
+          { ratio: 1.618, color: 'rgba(186,104,200,0.85)', width: 2, style: 0 },
         ];
 
         const startSec = (prevWeek.start / 1000) as any;
         const endSec = (Math.max(currentWeekStart + WEEK_MS, lastCandleTime) / 1000) as any;
 
-        fibLevels.forEach(({ ratio, color, width, style }) => {
-          // Up trend: 0 ở Low, 1 ở High. Down trend: ngược lại.
-          const price = isUpTrend
-            ? prevWeek.low + range * ratio
-            : prevWeek.high - range * ratio;
+        const fibPriceAt = (ratio: number) =>
+          isUpTrend ? prevWeek.low + range * ratio : prevWeek.high - range * ratio;
+
+        // Lưu price các fib level để check confluence với trendline
+        const keyFibPrices: { ratio: number; price: number }[] = [];
+
+        fibLevels.forEach(({ ratio, color, width, style, key }) => {
+          const price = fibPriceAt(ratio);
+          if (key) keyFibPrices.push({ ratio, price });
 
           const ls = chart.addSeries(LineSeries, {
             color,
@@ -1658,6 +1679,83 @@ const TradingChart: React.FC<TradingChartProps> = ({
             { time: endSec, value: price },
           ]);
         });
+
+        // ── GOLDEN POCKET (0.618 → 0.65) — vẽ 2 line dày + nhãn ──
+        // (Lightweight Charts không có shaded band giữa 2 line; dùng line đậm để gợi vùng)
+        const gpTopPrice = fibPriceAt(0.65);
+        const gpMidPrice = (fibPriceAt(0.618) + fibPriceAt(0.65)) / 2;
+        const gpLabel = chart.addSeries(LineSeries, {
+          color: 'rgba(255,193,7,0.0)',
+          lineWidth: 1,
+          priceLineVisible: false,
+          lastValueVisible: true,
+          title: '🟡 Golden Pocket',
+        });
+        gpLabel.setData([
+          { time: startSec, value: gpMidPrice },
+          { time: endSec, value: gpMidPrice },
+        ]);
+        void gpTopPrice;
+
+        // ── CONFLUENCE TRENDLINE × FIB ──
+        // Nếu trendline (chưa broken) ở thời điểm hiện tại nằm trong 0.5*ATR
+        // so với 1 trong 3 fib quan trọng (0.5/0.618/0.786) → vẽ price line cảnh báo.
+        const lastIdx = candles.length - 1;
+        const lastT = candles[lastIdx].time;
+        const lastPrice = candles[lastIdx].close;
+        // ATR đơn giản: trung bình range 14 nến cuối
+        const atrWin = candles.slice(-14);
+        const atrEst = atrWin.length
+          ? atrWin.reduce((s, c) => s + (c.high - c.low), 0) / atrWin.length
+          : 0;
+
+        const trendlineYAt = (tl: AITrendline, t: number) => {
+          const dt = tl.end.time - tl.start.time;
+          if (dt === 0) return tl.start.price;
+          const ratio = (t - tl.start.time) / dt;
+          return tl.start.price + (tl.end.price - tl.start.price) * ratio;
+        };
+
+        const checkConfluence = (tl: AITrendline | null | undefined, role: 'support' | 'resistance') => {
+          if (!tl || tl.broken) return;
+          const yNow = trendlineYAt(tl, lastT);
+          for (const f of keyFibPrices) {
+            const dist = Math.abs(yNow - f.price);
+            if (atrEst > 0 && dist <= atrEst * 0.5) {
+              const conflPrice = (yNow + f.price) / 2;
+              // Vẽ price line confluence trên candle series
+              candleSeries.createPriceLine({
+                price: conflPrice,
+                color: role === 'support' ? '#10b981' : '#f43f5e',
+                lineWidth: 2,
+                lineStyle: 0,
+                axisLabelVisible: true,
+                title: `🎯 CONFLUENCE Fib${f.ratio} × ${role === 'support' ? 'TL▲' : 'TL▼'}`,
+              });
+              // Auto setup gợi ý — push log nhẹ qua window event để page có thể bắt
+              try {
+                const direction = role === 'support' ? 'LONG' : 'SHORT';
+                const sl = role === 'support' ? conflPrice - atrEst : conflPrice + atrEst;
+                const tp1 = role === 'support' ? conflPrice + atrEst * 1.5 : conflPrice - atrEst * 1.5;
+                const tp2 = fibPriceAt(role === 'support' ? 1.272 : 1.272);
+                window.dispatchEvent(new CustomEvent('chart:confluence', {
+                  detail: {
+                    direction,
+                    fib: f.ratio,
+                    entry: conflPrice,
+                    sl,
+                    tp1,
+                    tp2,
+                    distancePct: lastPrice ? ((conflPrice - lastPrice) / lastPrice) * 100 : 0,
+                  },
+                }));
+              } catch { /* noop */ }
+              break; // chỉ 1 confluence mạnh nhất gần nhất
+            }
+          }
+        };
+        checkConfluence(trendline, 'support');
+        checkConfluence(trendlineResistance, 'resistance');
       }
     }
 
