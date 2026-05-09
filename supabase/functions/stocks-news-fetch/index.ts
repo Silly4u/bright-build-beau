@@ -44,9 +44,10 @@ async function fetchCompanyNews(ticker: string, apiKey: string, fromDays = 3): P
   }
 }
 
-async function aiTranslate(items: { ticker: string; title: string; summary: string }[]): Promise<{ title: string; summary: string }[]> {
+async function aiTranslate(items: { ticker: string; title: string; summary: string }[]): Promise<{ title: string; summary: string; ok: boolean }[]> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  if (!LOVABLE_API_KEY || items.length === 0) return items.map(i => ({ title: i.title, summary: i.summary }));
+  if (!LOVABLE_API_KEY || items.length === 0) return items.map(i => ({ title: i.title, summary: i.summary, ok: false }));
+
 
   const prompt = `Bạn là biên tập viên tài chính. Dịch và viết lại các tin tức cổ phiếu Mỹ sang TIẾNG VIỆT chuyên nghiệp, ngắn gọn, hấp dẫn nhà đầu tư Việt. Giữ nguyên tên công ty, ticker, số liệu.
 
