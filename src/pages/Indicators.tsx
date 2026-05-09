@@ -548,6 +548,9 @@ const Indicators: React.FC = () => {
                 <AlphaEventConfigPanel config={alphaEventConfig} onChange={setAlphaEventConfig} />
               </div>
             )}
+
+            {/* Economic Events — fills bottom-left empty space */}
+            <EconomicEventsWidget />
           </div>
           )}
 
