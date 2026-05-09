@@ -345,7 +345,7 @@ const AnalysisDetail: React.FC<AnalysisDetailProps> = ({ symbolOverride, embedde
         </div>
       </div>
 
-      <Footer />
+      {!embedded && <Footer />}
     </main>
   );
 };
