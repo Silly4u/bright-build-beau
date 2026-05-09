@@ -244,7 +244,7 @@ export function useSignals() {
 
     // Subscribe to realtime
     const channel = supabase
-      .channel('signals-realtime')
+      .channel(`signals-realtime-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'signals' }, (payload) => {
         setSignals(prev => [payload.new as unknown as Signal, ...prev].slice(0, 50));
       })
