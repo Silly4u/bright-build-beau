@@ -44,11 +44,17 @@ async function fetchCompanyNews(ticker: string, apiKey: string, fromDays = 3): P
   }
 }
 
-async function aiTranslate(items: { ticker: string; title: string; summary: string }[]): Promise<{ title: string; summary: string }[]> {
+async function aiTranslate(items: { ticker: string; title: string; summary: string }[]): Promise<{ title: string; summary: string; ok: boolean }[]> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  if (!LOVABLE_API_KEY || items.length === 0) return items.map(i => ({ title: i.title, summary: i.summary }));
+  if (!LOVABLE_API_KEY || items.length === 0) return items.map(i => ({ title: i.title, summary: i.summary, ok: false }));
 
-  const prompt = `Bạn là biên tập viên tài chính. Dịch và viết lại các tin tức cổ phiếu Mỹ sang TIẾNG VIỆT chuyên nghiệp, ngắn gọn, hấp dẫn nhà đầu tư Việt. Giữ nguyên tên công ty, ticker, số liệu. Trả về JSON ARRAY chính xác cùng số phần tử input, mỗi phần tử có { "title": string (tiếng Việt, <100 ký tự), "summary": string (tiếng Việt, 2-3 câu) }.
+
+  const prompt = `Bạn là biên tập viên tài chính. Dịch và viết lại các tin tức cổ phiếu Mỹ sang TIẾNG VIỆT chuyên nghiệp, ngắn gọn, hấp dẫn nhà đầu tư Việt. Giữ nguyên tên công ty, ticker, số liệu.
+
+TRẢ VỀ JSON HỢP LỆ DUY NHẤT theo dạng:
+{ "items": [ { "title": "tiêu đề tiếng Việt <100 ký tự", "summary": "tóm tắt tiếng Việt 2-3 câu" }, ... ] }
+
+Mảng "items" phải có ĐÚNG ${items.length} phần tử, theo đúng thứ tự input.
 
 Input:
 ${JSON.stringify(items, null, 2)}`;
@@ -68,19 +74,27 @@ ${JSON.stringify(items, null, 2)}`;
     });
     if (!res.ok) {
       console.error("AI translate failed:", res.status, await res.text());
-      return items.map(i => ({ title: i.title, summary: i.summary }));
+      return items.map(i => ({ title: i.title, summary: i.summary, ok: false }));
     }
     const json = await res.json();
-    const content = json.choices?.[0]?.message?.content || "[]";
+    const content = json.choices?.[0]?.message?.content || "{}";
     const parsed = JSON.parse(content);
-    const arr = Array.isArray(parsed) ? parsed : (parsed.items || parsed.results || parsed.data || []);
-    return items.map((orig, i) => ({
-      title: arr[i]?.title || orig.title,
-      summary: arr[i]?.summary || orig.summary,
-    }));
+    const arr = Array.isArray(parsed)
+      ? parsed
+      : (parsed.items || parsed.results || parsed.data || parsed.translations || []);
+    if (!Array.isArray(arr) || arr.length === 0) {
+      console.error("AI translate: empty/invalid array", JSON.stringify(parsed).slice(0, 300));
+      return items.map(i => ({ title: i.title, summary: i.summary, ok: false }));
+    }
+    return items.map((orig, i) => {
+      const t = arr[i]?.title;
+      const s = arr[i]?.summary;
+      const ok = !!t && t !== orig.title;
+      return { title: t || orig.title, summary: s || orig.summary, ok };
+    });
   } catch (e) {
     console.error("AI translate error:", e);
-    return items.map(i => ({ title: i.title, summary: i.summary }));
+    return items.map(i => ({ title: i.title, summary: i.summary, ok: false }));
   }
 }
 
@@ -164,12 +178,12 @@ serve(async (req) => {
       });
     }
 
-    // 4) Pick top 10 most recent for AI translation, rest stay English
+    // 4) Pick top 20 most recent for AI translation, rest stay English
     fresh.sort((a, b) => b.n.datetime - a.n.datetime);
-    const top10 = fresh.slice(0, 10);
-    const rest = fresh.slice(10);
+    const top = fresh.slice(0, 20);
+    const rest = fresh.slice(20);
 
-    const translated = await aiTranslate(top10.map(x => ({
+    const translated = await aiTranslate(top.map(x => ({
       ticker: x.ticker,
       title: x.n.headline,
       summary: x.n.summary,
@@ -177,7 +191,7 @@ serve(async (req) => {
 
     // 5) Build rows — strip placeholder images so frontend can use ticker-based fallback
     const rows = [
-      ...top10.map((x, i) => ({
+      ...top.map((x, i) => ({
         symbol: x.ticker,
         title: translated[i].title,
         original_title: x.n.headline,
@@ -187,7 +201,7 @@ serve(async (req) => {
         url: x.n.url,
         image_url: isPlaceholderImage(x.n.image) ? null : x.n.image,
         published_at: new Date(x.n.datetime * 1000).toISOString(),
-        ai_translated: true,
+        ai_translated: translated[i].ok === true,
         external_id: String(x.n.id),
       })),
       ...rest.map(x => ({
@@ -208,10 +222,11 @@ serve(async (req) => {
     const { error } = await sb.from("stock_news").insert(rows);
     if (error) throw error;
 
+    const okCount = translated.filter(t => t.ok).length;
     return new Response(JSON.stringify({
       inserted: rows.length,
-      ai_translated: top10.length,
-      english_only: rest.length,
+      ai_translated: okCount,
+      english_only: rows.length - okCount,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
