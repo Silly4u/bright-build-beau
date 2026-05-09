@@ -362,7 +362,7 @@ const Indicators: React.FC = () => {
 
           {/* ── LEFT: Indicator Checklist + Presets + Pin ── */}
           {sidebarOpen && (
-          <div className="bg-[#161a1e] p-3 relative space-y-3 overflow-y-auto max-h-[calc(100vh-180px)]">
+          <div className="bg-[#161a1e] p-3 relative space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-[10px] font-bold text-[#848e9c] tracking-widest uppercase font-mono">CHỈ BÁO</h3>
               <div className="flex items-center gap-2">
@@ -600,7 +600,7 @@ const Indicators: React.FC = () => {
           </div>
 
           {/* ── RIGHT: Strength + AI + Top Movers + Triggers + Signals ── */}
-          <div className="bg-[#161a1e] p-3 flex flex-col min-h-0 space-y-3 overflow-y-auto max-h-[calc(100vh-180px)]">
+          <div className="bg-[#161a1e] p-3 flex flex-col min-h-0 space-y-3">
             <IndicatorStrengthMeter votes={votes} />
             <AIConfluenceCard
               pair={activePair}
