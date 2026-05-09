@@ -414,12 +414,16 @@ const TradingChart: React.FC<TradingChartProps> = ({
     });
     }
 
-    // ── AI Trendlines (always render when data available) ──
+    // ── AI Trendlines (broken → dashed xám + nhãn BROKEN) ──
     if (trendline) {
+      const isBroken = trendline.broken === true;
       const trendSeries = chart.addSeries(LineSeries, {
-        color: '#26a69a', lineWidth: 2, lineStyle: 2,
-        priceLineVisible: false, lastValueVisible: false,
-        title: 'Trend ▲',
+        color: isBroken ? 'rgba(148,163,184,0.55)' : '#26a69a',
+        lineWidth: isBroken ? 1 : 2,
+        lineStyle: isBroken ? 1 : 2, // 1 = dotted khi broken
+        priceLineVisible: false,
+        lastValueVisible: false,
+        title: isBroken ? 'Trend ▲ BROKEN' : `Trend ▲${trendline.touches ? ' ×' + trendline.touches : ''}`,
       });
       trendSeries.setData([
         { time: (trendline.start.time / 1000) as any, value: trendline.start.price },
@@ -427,10 +431,14 @@ const TradingChart: React.FC<TradingChartProps> = ({
       ]);
     }
     if (trendlineResistance) {
+      const isBroken = trendlineResistance.broken === true;
       const resSeries = chart.addSeries(LineSeries, {
-        color: '#ef5350', lineWidth: 2, lineStyle: 2,
-        priceLineVisible: false, lastValueVisible: false,
-        title: 'Trend ▼',
+        color: isBroken ? 'rgba(148,163,184,0.55)' : '#ef5350',
+        lineWidth: isBroken ? 1 : 2,
+        lineStyle: isBroken ? 1 : 2,
+        priceLineVisible: false,
+        lastValueVisible: false,
+        title: isBroken ? 'Trend ▼ BROKEN' : `Trend ▼${trendlineResistance.touches ? ' ×' + trendlineResistance.touches : ''}`,
       });
       resSeries.setData([
         { time: (trendlineResistance.start.time / 1000) as any, value: trendlineResistance.start.price },
