@@ -76,8 +76,13 @@ const SignalCard: React.FC<Props> = ({ signal, style, currentPrice, now, onClick
         <span className="ml-auto text-[9px] text-muted-foreground/60 font-mono">{signal.symbol}</span>
       </div>
 
-      <p className="text-[10px] text-muted-foreground/80 leading-relaxed pl-3.5 mb-1.5">
+      <p className="text-[10px] text-muted-foreground/80 leading-relaxed pl-3.5 mb-1">
         {signal.message}
+      </p>
+      <p className="text-[9px] text-muted-foreground/50 leading-tight pl-3.5 mb-1.5 font-mono">
+        <span className="text-muted-foreground/40">Lý do:</span>{' '}
+        <span className={`font-bold ${style.text}`}>{signal.badge}</span>
+        <span className="text-muted-foreground/40"> · {signal.type.toUpperCase()}</span>
       </p>
 
       <div className="flex items-center justify-between gap-2 pl-3.5">
