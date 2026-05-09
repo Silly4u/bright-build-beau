@@ -81,12 +81,13 @@ const StockNewsDetail: React.FC = () => {
       setArticle(data as StockNews);
       setLoading(false);
 
-      // If not translated, trigger on-demand translation
-      if (!data.ai_translated) {
+      // If not translated OR content too short → expand via AI
+      const wc = (data.full_content || '').trim().split(/\s+/).filter(Boolean).length;
+      if (!data.ai_translated || wc < 1200) {
         setTranslating(true);
         try {
           const { data: res } = await supabase.functions.invoke('stock-news-translate', {
-            body: { id: data.id },
+            body: { id: data.id, force: wc < 1200 },
           });
           if (!cancelled && res?.article) setArticle(res.article as StockNews);
         } catch (e) {
