@@ -98,12 +98,21 @@ const Analysis: React.FC = () => {
   // Filter state for signal feed
   const [signalSymbolFilter, setSignalSymbolFilter] = useState<'ALL' | 'BTC' | 'GOLD'>('ALL');
   const [signalTypeFilter, setSignalTypeFilter] = useState<'ALL' | 'breakout' | 'support_touch' | 'volume_anomaly' | 'buy' | 'alert'>('ALL');
+  const [signalPage, setSignalPage] = useState(1);
+  const SIGNALS_PER_PAGE = 5;
 
   const allSignals = mergedSignals.filter(s => {
     if (signalSymbolFilter !== 'ALL' && s.symbol !== signalSymbolFilter) return false;
     if (signalTypeFilter !== 'ALL' && s.type !== signalTypeFilter) return false;
     return true;
   });
+
+  const totalPages = Math.max(1, Math.ceil(allSignals.length / SIGNALS_PER_PAGE));
+  const currentPage = Math.min(signalPage, totalPages);
+  const pagedSignals = allSignals.slice((currentPage - 1) * SIGNALS_PER_PAGE, currentPage * SIGNALS_PER_PAGE);
+
+  // Reset về trang 1 khi đổi bộ lọc
+  useEffect(() => { setSignalPage(1); }, [signalSymbolFilter, signalTypeFilter]);
 
   // Tick "now" mỗi 30s để relative time tự cập nhật
   const [nowTs, setNowTs] = useState(() => Date.now());
@@ -651,40 +660,64 @@ const Analysis: React.FC = () => {
                 </div>
               </div>
 
-              <div className="max-h-[520px] overflow-y-auto">
+              <div>
                 {allSignals.length === 0 ? (
                   <div className="p-4 text-center text-[10px] text-muted-foreground/40">
                     Không có tín hiệu khớp bộ lọc
                   </div>
                 ) : (
-                  <div className="divide-y divide-foreground/5">
-                    {allSignals.map(sig => {
-                      const style = SIGNAL_COLORS[sig.type] || SIGNAL_COLORS.info;
-                      const currentPrice =
-                        sig.symbol === 'BTC' ? btcPrice :
-                        sig.symbol === 'GOLD' || sig.symbol === 'XAU' ? goldPrice :
-                        undefined;
-                      const handleClick = () => {
-                        if (sig.symbol === 'BTC') {
-                          setActiveAsset('BTC');
-                          requestAnimationFrame(() => btcChartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
-                        } else if (sig.symbol === 'GOLD' || sig.symbol === 'XAU') {
-                          setActiveAsset('XAU');
-                          requestAnimationFrame(() => goldChartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
-                        }
-                      };
-                      return (
-                        <SignalCard
-                          key={sig.id}
-                          signal={sig}
-                          style={style}
-                          currentPrice={currentPrice}
-                          now={nowTs}
-                          onClick={handleClick}
-                        />
-                      );
-                    })}
-                  </div>
+                  <>
+                    <div className="divide-y divide-foreground/5">
+                      {pagedSignals.map(sig => {
+                        const style = SIGNAL_COLORS[sig.type] || SIGNAL_COLORS.info;
+                        const currentPrice =
+                          sig.symbol === 'BTC' ? btcPrice :
+                          sig.symbol === 'GOLD' || sig.symbol === 'XAU' ? goldPrice :
+                          undefined;
+                        const handleClick = () => {
+                          if (sig.symbol === 'BTC') {
+                            setActiveAsset('BTC');
+                            requestAnimationFrame(() => btcChartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+                          } else if (sig.symbol === 'GOLD' || sig.symbol === 'XAU') {
+                            setActiveAsset('XAU');
+                            requestAnimationFrame(() => goldChartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+                          }
+                        };
+                        return (
+                          <SignalCard
+                            key={sig.id}
+                            signal={sig}
+                            style={style}
+                            currentPrice={currentPrice}
+                            now={nowTs}
+                            onClick={handleClick}
+                          />
+                        );
+                      })}
+                    </div>
+                    {/* Pagination */}
+                    <div className="flex items-center justify-between px-3 py-2 border-t border-foreground/5">
+                      <button
+                        type="button"
+                        onClick={() => setSignalPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage <= 1}
+                        className="text-[9px] font-mono font-bold px-2 py-1 rounded-md border border-foreground/10 bg-foreground/[0.02] text-muted-foreground/70 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        ← Trước
+                      </button>
+                      <span className="text-[9px] font-mono text-muted-foreground/60">
+                        Trang {currentPage} / {totalPages}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setSignalPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage >= totalPages}
+                        className="text-[9px] font-mono font-bold px-2 py-1 rounded-md border border-foreground/10 bg-foreground/[0.02] text-muted-foreground/70 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Sau →
+                      </button>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
