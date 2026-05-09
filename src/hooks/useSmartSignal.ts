@@ -10,7 +10,7 @@ export interface SmartSignal {
   symbol: string;
   badge: string;
   price: number;          // giá lúc tín hiệu xuất hiện
-  sparkline: number[];    // 20 close gần nhất
+  sparkline: number[];    // 20 close gần nhất tính tới candle đó
   isNew?: boolean;
 }
 
@@ -27,22 +27,27 @@ const SIGNAL_MESSAGES: Record<string, { badge: string; type: SmartSignal['type']
   support_bounce: { badge: 'BOUNCE', type: 'buy' },
 };
 
-function generateSignal(
+interface PickedCondition {
+  key: string;
+  msg: string;
+}
+
+function detectAt(
   candles: Candle[],
   indicators: Indicators | null,
   zones: Zone[],
-  symbol: string,
-): SmartSignal | null {
-  if (!candles.length || !indicators) return null;
-
-  const n = candles.length - 1;
+  sym: string,
+  n: number,
+): PickedCondition[] {
+  if (!indicators) return [];
   const curr = candles[n];
   const prev = candles[n - 1];
-  if (!curr || !prev) return null;
+  if (!curr || !prev) return [];
 
-  const closes = candles.map(c => c.close);
   const volumes = candles.map(c => c.volume);
-  const volAvg10 = volumes.slice(Math.max(0, n - 9), n + 1).reduce((a, b) => a + b, 0) / Math.min(10, n + 1);
+  const start = Math.max(0, n - 9);
+  const slice = volumes.slice(start, n + 1);
+  const volAvg10 = slice.reduce((a, b) => a + b, 0) / Math.max(1, slice.length);
   const volRatio = volAvg10 > 0 ? curr.volume / volAvg10 : 1;
   const rsiVal = indicators.rsi[n];
   const bbUpper = indicators.bb.upper[n];
@@ -52,113 +57,84 @@ function generateSignal(
   const supportZones = zones.filter(z => z.type === 'support');
   const resistanceZones = zones.filter(z => z.type === 'resistance');
 
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-  const sym = symbol.replace('/USDT', '').replace('/', '');
+  const conditions: PickedCondition[] = [];
 
-  const conditions: { key: string; msg: string }[] = [];
-
-  // 1. Volume Anomaly
   if (volRatio > 2) {
     conditions.push({ key: 'volume_anomaly', msg: `Volume ${sym} tăng ${(volRatio * 100).toFixed(0)}% so với trung bình — dấu hiệu bất thường` });
   }
-
-  // 2. Breakout
   if (resistanceZones.some(z => prev.close < z.top && curr.close > z.top)) {
     conditions.push({ key: 'breakout', msg: `${sym} breakout khỏi vùng kháng cự — momentum tăng mạnh` });
   }
-
-  // 3. Support Touch
   if (supportZones.some(z => Math.abs(curr.close - (z.top + z.bottom) / 2) / curr.close < 0.005)) {
     conditions.push({ key: 'support_touch', msg: `${sym} chạm vùng hỗ trợ AI — theo dõi phản ứng giá` });
   }
-
-  // 4. BB Squeeze
   if (bbWidth && prevBbWidth && bbWidth < prevBbWidth * 0.92) {
     conditions.push({ key: 'bb_squeeze', msg: `BB Squeeze trên ${sym} — BB width giảm ${((1 - bbWidth / prevBbWidth) * 100).toFixed(1)}%` });
   }
-
-  // 5. BB Breakout
   if (bbUpper && curr.close > bbUpper) {
     conditions.push({ key: 'bb_breakout', msg: `${sym} phá vỡ BB Upper — tín hiệu breakout mạnh` });
   }
-
-  // 6. BB Oversold + Support
   if (bbLower && curr.close <= bbLower && supportZones.some(z => curr.close >= z.bottom && curr.close <= z.top)) {
     conditions.push({ key: 'bb_oversold', msg: `🔥 VIP: ${sym} chạm BB Lower + vùng hỗ trợ AI — cơ hội mua cực tốt` });
   }
-
-  // 7. Momentum
   const twoBack = candles[n - 2];
   if (twoBack) {
     const pct = ((curr.close - twoBack.close) / twoBack.close) * 100;
-    const threshold = sym === 'XAU' ? 0.8 : 1.5;
+    const threshold = sym === 'XAU' || sym === 'GOLD' ? 0.8 : 1.5;
     if (Math.abs(pct) > threshold) {
       conditions.push({ key: 'momentum', msg: `${sym} ${pct > 0 ? 'tăng' : 'giảm'} ${Math.abs(pct).toFixed(2)}% trong 2 nến — momentum ${pct > 0 ? 'mạnh' : 'yếu'}` });
     }
   }
-
-  // 8. Volume Spike + direction
   if (volRatio > 1.5 && Math.abs(curr.close - curr.open) / curr.open > 0.002) {
     const dir = curr.close > curr.open ? 'tăng' : 'giảm';
     conditions.push({ key: 'volume_spike', msg: `Volume spike ${sym} (${(volRatio * 100).toFixed(0)}%) + nến ${dir} — xác nhận xu hướng` });
   }
-
-  // 9. RSI Divergence
   if (rsiVal && rsiVal > 60 && curr.close > prev.close && rsiVal < (indicators.rsi[n - 1] || 50)) {
     conditions.push({ key: 'rsi_divergence', msg: `RSI divergence bearish trên ${sym} — giá tăng nhưng RSI giảm` });
   }
   if (rsiVal && rsiVal < 40 && curr.close < prev.close && rsiVal > (indicators.rsi[n - 1] || 50)) {
     conditions.push({ key: 'rsi_divergence', msg: `RSI divergence bullish trên ${sym} — giá giảm nhưng RSI tăng` });
   }
-
-  // 10. Support Bounce
   if (supportZones.some(z => prev.low >= z.bottom * 0.998 && prev.low <= z.top * 1.002) &&
       curr.close > prev.close && curr.close > curr.open) {
     conditions.push({ key: 'support_bounce', msg: `${sym} bounce từ hỗ trợ AI — nến đảo chiều tăng` });
   }
+  return conditions;
+}
 
+function buildSignal(
+  candles: Candle[],
+  indicators: Indicators | null,
+  zones: Zone[],
+  symbol: string,
+  n: number,
+  pickStrategy: 'random' | 'first' = 'random',
+  isNew = false,
+): SmartSignal | null {
+  const conditions = detectAt(candles, indicators, zones, symbol.replace('/USDT', '').replace('/', ''), n);
   if (conditions.length === 0) return null;
-
-  // Pick random condition from pool
-  const picked = conditions[Math.floor(Math.random() * conditions.length)];
+  const sym = symbol.replace('/USDT', '').replace('/', '');
+  const picked = pickStrategy === 'first'
+    ? conditions[0]
+    : conditions[Math.floor(Math.random() * conditions.length)];
   const meta = SIGNAL_MESSAGES[picked.key] || { badge: 'ALERT', type: 'alert' as const };
-
+  const curr = candles[n];
+  const closes = candles.slice(Math.max(0, n - 19), n + 1).map(c => c.close);
+  const ts = curr.time; // ms
+  const d = new Date(ts);
   return {
-    id: `smart-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-    time: timeStr,
-    createdAt: now.getTime(),
+    id: `smart-${sym}-${ts}-${picked.key}`,
+    time: d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+    createdAt: ts,
     message: picked.msg,
     type: meta.type,
     symbol: sym,
     badge: meta.badge,
     price: curr.close,
-    sparkline: closes.slice(-20),
-    isNew: true,
+    sparkline: closes,
+    isNew,
   };
 }
-
-// Helper for seed signals: stagger times in the past few hours
-function seed(offsetMin: number, base: Omit<SmartSignal, 'createdAt' | 'time' | 'price' | 'sparkline'> & { price: number; sparkline?: number[] }): SmartSignal {
-  const t = new Date(Date.now() - offsetMin * 60 * 1000);
-  const spark = base.sparkline ?? Array.from({ length: 20 }, (_, i) => base.price * (1 + Math.sin(i / 3 + offsetMin) * 0.004 + (i - 10) * 0.0008));
-  return {
-    ...base,
-    createdAt: t.getTime(),
-    time: t.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-    sparkline: spark,
-  };
-}
-
-const INITIAL_SIGNALS: SmartSignal[] = [
-  seed(8,   { id: 'init-1', message: 'BTC breakout khỏi vùng kháng cự 68,000 — momentum tăng mạnh', type: 'breakout',        symbol: 'BTC',  badge: 'BREAKOUT', price: 68120 }),
-  seed(35,  { id: 'init-2', message: 'XAU/USD chạm vùng hỗ trợ 2,290 — theo dõi phản ứng giá',     type: 'support_touch',   symbol: 'GOLD', badge: 'HỖ TRỢ',   price: 2291.4 }),
-  seed(52,  { id: 'init-3', message: 'Volume BTC tăng 340% so với trung bình — dấu hiệu bất thường', type: 'volume_anomaly', symbol: 'BTC',  badge: 'VOLUME',   price: 67890 }),
-  seed(80,  { id: 'init-4', message: 'BTC phá vỡ vùng tích lũy 67.5k–68k với volume lớn',           type: 'breakout',        symbol: 'BTC',  badge: 'BREAKOUT', price: 67750 }),
-  seed(125, { id: 'init-5', message: 'ETH tăng 5.2% — breakout trên EMA 200',                       type: 'buy',             symbol: 'ETH',  badge: 'MUA',      price: 3142 }),
-  seed(168, { id: 'init-6', message: 'Vàng rebound từ hỗ trợ 2,290 — nến đảo chiều tăng H4',         type: 'support_touch',   symbol: 'GOLD', badge: 'HỖ TRỢ',   price: 2295.2 }),
-  seed(205, { id: 'init-7', message: 'Volume XAU/USD tăng đột biến 280% — theo dõi breakout',        type: 'volume_anomaly',  symbol: 'GOLD', badge: 'VOLUME',   price: 2287.8 }),
-];
 
 export function useSmartSignals(
   candles: Candle[],
@@ -167,22 +143,46 @@ export function useSmartSignals(
   symbol: string,
   loading: boolean,
 ) {
-  const [signals, setSignals] = useState<SmartSignal[]>(INITIAL_SIGNALS);
+  const [signals, setSignals] = useState<SmartSignal[]>([]);
+  const seededRef = useRef(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Seed once: scan back over recent candles to surface real, recent signals
+  useEffect(() => {
+    if (seededRef.current) return;
+    if (loading || !candles.length || !indicators) return;
+    const scanFrom = Math.max(2, candles.length - 60);
+    const collected: SmartSignal[] = [];
+    let lastKey = '';
+    for (let n = scanFrom; n < candles.length; n++) {
+      const sig = buildSignal(candles, indicators, zones, symbol, n, 'first', false);
+      if (!sig) continue;
+      // Avoid back-to-back identical types
+      if (sig.type === lastKey) continue;
+      lastKey = sig.type;
+      collected.push(sig);
+    }
+    // Keep last 8 (most recent)
+    const seeded = collected.slice(-8).reverse();
+    if (seeded.length > 0) {
+      setSignals(seeded);
+    }
+    seededRef.current = true;
+  }, [loading, candles, indicators, zones, symbol]);
 
   const generate = useCallback(() => {
     if (loading || !candles.length) return;
-    const signal = generateSignal(candles, indicators, zones, symbol);
-    if (signal) {
-      setSignals(prev => {
-        const updated = [signal, ...prev.map(s => ({ ...s, isNew: false }))].slice(0, 20);
-        return updated;
-      });
-      // Remove "new" highlight after 2.5s
-      setTimeout(() => {
-        setSignals(prev => prev.map(s => s.id === signal.id ? { ...s, isNew: false } : s));
-      }, 2500);
-    }
+    const n = candles.length - 1;
+    const signal = buildSignal(candles, indicators, zones, symbol, n, 'random', true);
+    if (!signal) return;
+    setSignals(prev => {
+      // Skip if same id already present
+      if (prev.some(s => s.id === signal.id)) return prev;
+      return [signal, ...prev.map(s => ({ ...s, isNew: false }))].slice(0, 20);
+    });
+    setTimeout(() => {
+      setSignals(prev => prev.map(s => s.id === signal.id ? { ...s, isNew: false } : s));
+    }, 2500);
   }, [candles, indicators, zones, symbol, loading]);
 
   useEffect(() => {
