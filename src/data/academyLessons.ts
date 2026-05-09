@@ -114,38 +114,121 @@ export const LESSONS: Lesson[] = [
     category: 'Price Action',
     title: 'Mẫu Nến Đảo Chiều Quan Trọng Nhất',
     excerpt:
-      'Hammer, Shooting Star, Engulfing, Morning/Evening Star — những mẫu nến giúp bạn bắt đỉnh đáy chính xác.',
-    duration: '20 phút',
+      'Hammer, Shooting Star, Engulfing, Morning/Evening Star, Tweezer, Three Inside/Outside — những mẫu nến giúp bạn bắt đỉnh đáy chính xác.',
+    duration: '28 phút',
     level: 'Cơ bản',
     cover: coverReversal,
     intro:
-      'Mẫu nến đảo chiều xuất hiện ở cuối xu hướng và báo hiệu khả năng đảo chiều. Đây là công cụ cốt lõi của Price Action mà mọi trader cần thuộc lòng.',
+      'Mẫu nến đảo chiều (reversal pattern) xuất hiện ở cuối xu hướng và báo hiệu khả năng đảo ngược dòng tiền. Khái niệm này được Steve Nison phổ biến ra phương Tây năm 1991 qua cuốn "Japanese Candlestick Charting Techniques", dù người Nhật đã dùng từ thế kỷ 18 để giao dịch gạo. Bài học bóc tách 10 mẫu mạnh nhất, kèm bối cảnh, ví dụ thực chiến và bẫy thường gặp — tất cả công cụ cốt lõi của Price Action mà mọi trader cần thuộc lòng.',
+    history:
+      'Munehisa Homma (1724–1803), thương gia gạo Nhật Bản, được xem là cha đẻ của biểu đồ nến. Ông dùng nó để dự báo giá gạo tại sàn Dojima. Phương pháp lan sang phương Tây năm 1991 nhờ Steve Nison và đến nay vẫn là ngôn ngữ giao dịch chuẩn mực.',
     sections: [
       {
-        heading: 'Hammer & Hanging Man',
-        body: 'Nến có thân nhỏ, bóng dưới dài gấp 2-3 lần thân. Hammer ở đáy = đảo chiều tăng. Hanging Man ở đỉnh = đảo chiều giảm.',
+        heading: '1. Hammer & Hanging Man',
+        body: 'Nến có thân nhỏ ở phía trên, bóng dưới dài gấp ít nhất 2 lần thân, gần như không có bóng trên. Cùng hình dạng nhưng ý nghĩa phụ thuộc bối cảnh: Hammer ở đáy downtrend = đảo chiều tăng; Hanging Man ở đỉnh uptrend = cảnh báo đảo chiều giảm.',
+        bullets: [
+          'Bóng dưới ≥ 2× thân nến',
+          'Bóng trên không quá 10% tổng độ dài nến',
+          'Phải xuất hiện ở vùng hỗ trợ/kháng cự rõ ràng',
+        ],
+        example: 'BTCUSDT 4H ngày 11/03/2024 hình thành Hammer chuẩn tại $61,200 sau 5 nến giảm liên tiếp; nến xác nhận tăng 3.2% và mở ra nhịp tăng lên $73,000.',
+        pitfall: 'Hammer giữa sideway gần như vô nghĩa — chỉ giao dịch khi có xu hướng rõ trước đó.',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Candlestick_chart_scheme_03-en.svg/640px-Candlestick_chart_scheme_03-en.svg.png',
       },
       {
-        heading: 'Shooting Star & Inverted Hammer',
-        body: 'Bóng trên dài, thân nhỏ. Shooting Star ở đỉnh báo hiệu lực bán mạnh. Inverted Hammer ở đáy báo hiệu áp lực mua đang quay lại.',
+        heading: '2. Shooting Star & Inverted Hammer',
+        body: 'Hình ảnh đối xứng của Hammer: thân nhỏ ở dưới, bóng trên dài. Shooting Star ở đỉnh báo lực bán đè mạnh sau khi phe mua thử phá kháng cự bất thành. Inverted Hammer ở đáy thể hiện phe mua bắt đầu phản công.',
+        bullets: [
+          'Bóng trên ≥ 2× thân, bóng dưới rất ngắn',
+          'Shooting Star tin cậy hơn nếu kèm volume cao',
+          'Inverted Hammer cần nến xác nhận tăng kế tiếp',
+        ],
+        pitfall: 'Đừng nhầm Shooting Star với Inverted Hammer — vị trí trong xu hướng quyết định ý nghĩa.',
       },
       {
-        heading: 'Bullish & Bearish Engulfing',
-        body: 'Nến thứ 2 nhấn chìm hoàn toàn nến thứ 1 và ngược chiều. Mẫu đảo chiều mạnh nhất, đặc biệt khi xuất hiện ở vùng hỗ trợ/kháng cự quan trọng.',
+        heading: '3. Bullish & Bearish Engulfing',
+        body: 'Mẫu 2 nến: nến thứ 2 ngược chiều và thân nhấn chìm hoàn toàn thân nến thứ 1. Engulfing là một trong những mẫu đảo chiều có winrate cao nhất theo nghiên cứu của Thomas Bulkowski ("Encyclopedia of Candlestick Charts"), đặc biệt khi xuất hiện tại vùng S/R kết hợp Fibonacci 0.618.',
+        bullets: [
+          'Thân nến 2 phải lớn hơn thân nến 1 (không cần bao bóng)',
+          'Volume nến 2 nên gấp 1.5–2× volume trung bình',
+          'Vào lệnh ngay khi nến 2 đóng cửa, SL sau bóng dài hơn của 2 nến',
+        ],
+        example: 'EURUSD H4 ngày 02/10/2023 cho Bullish Engulfing tại 1.0450 (vùng demand H1 + Fib 0.618), giá tăng 280 pip trong 4 ngày kế tiếp.',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Candlestick_chart_scheme_02-en.svg/640px-Candlestick_chart_scheme_02-en.svg.png',
       },
       {
-        heading: 'Morning Star & Evening Star',
-        body: '3 nến: nến lớn cùng xu hướng → nến doji nhỏ → nến lớn ngược chiều. Báo hiệu chuyển giao quyền lực giữa bên mua và bên bán.',
+        heading: '4. Morning Star & Evening Star',
+        body: 'Mẫu 3 nến cổ điển: nến 1 lớn cùng xu hướng cũ → nến 2 thân nhỏ (doji/spinning top) thể hiện do dự → nến 3 lớn ngược chiều, đóng cửa ít nhất giữa thân nến 1. Báo hiệu chuyển giao quyền lực rõ ràng giữa bên mua và bên bán.',
+        bullets: [
+          'Nến 2 lý tưởng có gap so với nến 1 và nến 3',
+          'Nến 3 đóng cửa càng sâu vào thân nến 1 càng mạnh',
+          'TP1 = đỉnh/đáy gần nhất, TP2 = mở rộng Fib 1.618',
+        ],
+        pitfall: 'Trên crypto 24/7, gap giữa các nến hiếm — tiêu chí "gap" có thể bỏ qua, nhưng tỉ lệ thân nến vẫn phải đúng.',
       },
       {
-        heading: 'Doji & Spinning Top',
-        body: 'Thân rất nhỏ, thể hiện sự lưỡng lự. Khi xuất hiện ở vùng quá mua/quá bán → cảnh báo sớm cho đảo chiều.',
+        heading: '5. Three Inside Up/Down & Three Outside Up/Down',
+        body: 'Three Inside Up = Bullish Harami + nến xác nhận tăng phá đỉnh nến mẹ. Three Outside Up = Bullish Engulfing + nến xác nhận. Theo Bulkowski, Three Outside có tỉ lệ đảo chiều thành công ~78%, cao nhất trong nhóm 3 nến.',
+      },
+      {
+        heading: '6. Tweezer Top & Tweezer Bottom',
+        body: 'Hai (hoặc nhiều) nến liên tiếp có cùng đỉnh (Tweezer Top) hoặc cùng đáy (Tweezer Bottom). Thị trường thử phá vùng giá 2 lần đều thất bại → vùng đó trở thành kháng cự/hỗ trợ vững chắc.',
+        bullets: [
+          'Càng có nhiều nến chạm cùng đỉnh/đáy càng mạnh',
+          'Hiệu quả nhất ở vùng round number (1.1000, 70,000…)',
+        ],
+      },
+      {
+        heading: '7. Piercing Pattern & Dark Cloud Cover',
+        body: 'Phiên bản "nhẹ" hơn của Engulfing: nến 2 ngược chiều và đóng cửa vượt qua trung điểm thân nến 1 nhưng không nhấn chìm hoàn toàn. Tin cậy ~65–70% khi đi kèm volume tăng và vùng S/R.',
+      },
+      {
+        heading: '8. Doji & Spinning Top — Tín hiệu lưỡng lự',
+        body: 'Thân rất nhỏ (Doji gần như không thân), thể hiện cân bằng cung-cầu. Phân loại: Standard Doji, Long-legged Doji, Dragonfly (đáy), Gravestone (đỉnh). Khi xuất hiện sau xu hướng dài + tại vùng S/R + RSI quá mua/quá bán → cảnh báo đảo chiều sớm.',
+        pitfall: 'Doji giữa range thấp biến động chỉ là noise, đừng giao dịch theo.',
+      },
+      {
+        heading: '9. Three White Soldiers & Three Black Crows',
+        body: 'Ba nến cùng chiều liên tiếp, thân lớn, mỗi nến đóng cửa gần đỉnh/đáy nến đó. Xuất hiện ở cuối downtrend (Three White Soldiers) hoặc uptrend (Three Black Crows) → đảo chiều rất mạnh, thường mở ra một xu hướng mới.',
+      },
+      {
+        heading: '10. Cách lọc tín hiệu đảo chiều — Quy tắc 4 lớp',
+        body: 'Một mẫu nến đẹp chưa đủ. Áp dụng quy tắc 4 lớp xác nhận: (1) Vị trí — phải tại S/R đa khung; (2) Bối cảnh — sau xu hướng dài, không trong sideway; (3) Volume — nến tín hiệu kèm volume bứt phá; (4) Đa chỉ báo — RSI phân kỳ, MACD cắt, hoặc OB/FVG đồng pha.',
+        bullets: [
+          'Lớp 1: Khung HTF có vùng S/R rõ ràng',
+          'Lớp 2: Khung trade có mẫu nến đảo chiều',
+          'Lớp 3: Volume + indicator xác nhận',
+          'Lớp 4: Risk-Reward ≥ 1:2 trước khi vào lệnh',
+        ],
       },
     ],
     takeaways: [
       'Mẫu đảo chiều CHỈ có ý nghĩa khi xuất hiện ở vùng S/R quan trọng',
       'Luôn chờ nến xác nhận sau mẫu đảo chiều rồi mới vào lệnh',
       'Volume tăng đột biến = độ tin cậy cao hơn nhiều lần',
+      'Engulfing và Three Outside có winrate cao nhất theo Bulkowski',
+      'Kết hợp đa khung (HTF context + LTF entry) để giảm tín hiệu giả',
+    ],
+    checklist: [
+      'Xu hướng trước đó có rõ ràng không (≥ 5 nến cùng chiều)?',
+      'Mẫu nến đang ở vùng S/R, Fibonacci hoặc OB/FVG?',
+      'Volume nến tín hiệu có ≥ 1.5× volume trung bình 20 nến?',
+      'Có chỉ báo phụ xác nhận (RSI phân kỳ, MACD cross)?',
+      'R:R ≥ 1:2 với SL hợp lý sau bóng nến tín hiệu?',
+    ],
+    faqs: [
+      {
+        question: 'Mẫu nến đảo chiều có hiệu quả trên khung thời gian thấp như M5/M15 không?',
+        answer: 'Có, nhưng nhiễu cao hơn nhiều. Khuyến nghị dùng từ H1 trở lên cho swing, M15 trở lên cho intraday và luôn xác nhận với khung HTF.',
+      },
+      {
+        question: 'Nên đặt SL ở đâu cho an toàn?',
+        answer: 'Đặt sau bóng dài nhất của mẫu nến tín hiệu, cộng thêm 0.2–0.5× ATR(14) để tránh bị quét bởi spread/biến động bất thường.',
+      },
+      {
+        question: 'Crypto không có gap, Morning Star có còn hiệu lực?',
+        answer: 'Có. Trên crypto 24/7, bỏ qua tiêu chí gap và tập trung vào tỉ lệ thân nến cùng vị trí trong xu hướng. Mẫu vẫn cho tín hiệu tốt.',
+      },
     ],
   },
   {
