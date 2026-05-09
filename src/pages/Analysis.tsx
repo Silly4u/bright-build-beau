@@ -98,12 +98,21 @@ const Analysis: React.FC = () => {
   // Filter state for signal feed
   const [signalSymbolFilter, setSignalSymbolFilter] = useState<'ALL' | 'BTC' | 'GOLD'>('ALL');
   const [signalTypeFilter, setSignalTypeFilter] = useState<'ALL' | 'breakout' | 'support_touch' | 'volume_anomaly' | 'buy' | 'alert'>('ALL');
+  const [signalPage, setSignalPage] = useState(1);
+  const SIGNALS_PER_PAGE = 5;
 
   const allSignals = mergedSignals.filter(s => {
     if (signalSymbolFilter !== 'ALL' && s.symbol !== signalSymbolFilter) return false;
     if (signalTypeFilter !== 'ALL' && s.type !== signalTypeFilter) return false;
     return true;
   });
+
+  const totalPages = Math.max(1, Math.ceil(allSignals.length / SIGNALS_PER_PAGE));
+  const currentPage = Math.min(signalPage, totalPages);
+  const pagedSignals = allSignals.slice((currentPage - 1) * SIGNALS_PER_PAGE, currentPage * SIGNALS_PER_PAGE);
+
+  // Reset về trang 1 khi đổi bộ lọc
+  useEffect(() => { setSignalPage(1); }, [signalSymbolFilter, signalTypeFilter]);
 
   // Tick "now" mỗi 30s để relative time tự cập nhật
   const [nowTs, setNowTs] = useState(() => Date.now());
