@@ -35,6 +35,8 @@ import MultiChartGrid from '@/components/indicators/MultiChartGrid';
 import MarketOverviewBar from '@/components/indicators/MarketOverviewBar';
 import TopMoversPanel from '@/components/indicators/TopMoversPanel';
 import TradeSetupCards from '@/components/indicators/TradeSetupCards';
+import EconomicEventsWidget from '@/components/indicators/EconomicEventsWidget';
+import LiquidationHeatmap from '@/components/indicators/LiquidationHeatmap';
 import { computeIndicatorVotes, aggregateStrength } from '@/lib/indicatorVotes';
 import { useIndicatorTriggers, type TriggerType } from '@/hooks/useIndicatorTriggers';
 
@@ -546,6 +548,9 @@ const Indicators: React.FC = () => {
                 <AlphaEventConfigPanel config={alphaEventConfig} onChange={setAlphaEventConfig} />
               </div>
             )}
+
+            {/* Economic Events — fills bottom-left empty space */}
+            <EconomicEventsWidget />
           </div>
           )}
 
@@ -618,6 +623,9 @@ const Indicators: React.FC = () => {
                 <SignalFeed signals={signals} loading={signalsLoading} maxItems={5} />
               </div>
             </div>
+
+            {/* Liquidation Heatmap — fills bottom-right empty space */}
+            <LiquidationHeatmap />
           </div>
         </div>
       </div>
