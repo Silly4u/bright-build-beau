@@ -68,7 +68,7 @@ const Header: React.FC = () => {
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center justify-center gap-0.5 min-w-0 overflow-hidden">
-            {navLinks.map((link) => {
+            {NAV_ITEMS.map((link) => {
               const isActive = location.pathname === link.href;
               return (
                 <Link
@@ -80,7 +80,7 @@ const Header: React.FC = () => {
                       : 'text-white/65 hover:text-foreground hover:bg-white/5'
                   }`}
                 >
-                  {link.label}
+                  {t(`nav.${link.key}`)}
                 </Link>
               );
             })}
@@ -94,7 +94,7 @@ const Header: React.FC = () => {
                 className="hidden xl:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold text-amber-300 bg-amber-400/10 border border-amber-400/30 hover:bg-amber-400/20 transition-all"
               >
                 <Shield className="w-3 h-3" />
-                Admin
+                {t('nav.admin')}
               </Link>
             )}
             <LanguageSwitcher />
@@ -104,7 +104,7 @@ const Header: React.FC = () => {
                 className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-semibold text-white/80 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all whitespace-nowrap"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">Đăng Xuất</span>
+                <span className="hidden xl:inline">{t('nav.logout')}</span>
               </button>
             ) : (
               <Link
@@ -112,7 +112,7 @@ const Header: React.FC = () => {
                 className="hidden md:inline-flex btn-primary items-center gap-1.5 px-2.5 xl:px-3 py-1.5 rounded-full text-[11px] xl:text-[11.5px] whitespace-nowrap"
               >
                 <LogIn className="w-3.5 h-3.5" />
-                Đăng Nhập
+                {t('nav.login')}
                 <ArrowUpRight className="w-3.5 h-3.5 hidden xl:inline" />
               </Link>
             )}
