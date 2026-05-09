@@ -13,8 +13,8 @@ const Footer: React.FC = () => {
       title: t('footer.colProduct'),
       links: [
         { label: t('footer.productLinks.news'), href: '/tin-tuc' },
-        { label: t('footer.productLinks.analysis'), href: '/phan-tich' },
-        { label: t('footer.productLinks.indicators'), href: '/indicators' },
+        { label: t('footer.productLinks.analysis'), href: '/workspace?tab=overview' },
+        { label: t('footer.productLinks.indicators'), href: '/workspace?tab=chart' },
         { label: t('footer.productLinks.calendar'), href: '/lich-kinh-te' },
       ],
     },
