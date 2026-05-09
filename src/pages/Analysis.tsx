@@ -73,17 +73,28 @@ const Analysis: React.FC = () => {
   const goldSignals = useSmartSignals(goldData.candles, goldData.indicators, goldData.zones, 'XAU/USDT', goldData.loading);
   const dxy = useDXY();
 
-  // Merge signals for sidebar
+  // Merge signals for sidebar — dedup theo id và theo (symbol+message) trong cửa sổ 5 phút
   const mergedSignals = (() => {
-    const seen = new Set<string>();
-    return [...btcSignals, ...goldSignals]
-      .filter(s => {
-        if (seen.has(s.id)) return false;
-        seen.add(s.id);
-        return true;
-      })
-      .sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0) || (b.createdAt ?? 0) - (a.createdAt ?? 0))
-      .slice(0, 30);
+    const sorted = [...btcSignals, ...goldSignals].sort(
+      (a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0) || (b.createdAt ?? 0) - (a.createdAt ?? 0),
+    );
+    const result: typeof sorted = [];
+    const seenIds = new Set<string>();
+    const FIVE_MIN = 5 * 60 * 1000;
+    for (const s of sorted) {
+      if (seenIds.has(s.id)) continue;
+      // Trùng nội dung gần nhau?
+      const dup = result.find(
+        r => r.symbol === s.symbol && r.message === s.message && Math.abs((r.createdAt ?? 0) - (s.createdAt ?? 0)) < FIVE_MIN,
+      );
+      if (dup) continue;
+      // Chỉ giữ symbol có data live (BTC/GOLD/XAU)
+      if (!['BTC', 'GOLD', 'XAU'].includes(s.symbol)) continue;
+      seenIds.add(s.id);
+      result.push(s);
+      if (result.length >= 30) break;
+    }
+    return result;
   })();
 
   // Filter state for signal feed
