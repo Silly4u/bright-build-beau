@@ -127,22 +127,37 @@ function generateSignal(
   return {
     id: `smart-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     time: timeStr,
+    createdAt: now.getTime(),
     message: picked.msg,
     type: meta.type,
     symbol: sym,
     badge: meta.badge,
+    price: curr.close,
+    sparkline: closes.slice(-20),
     isNew: true,
   };
 }
 
+// Helper for seed signals: stagger times in the past few hours
+function seed(offsetMin: number, base: Omit<SmartSignal, 'createdAt' | 'time' | 'price' | 'sparkline'> & { price: number; sparkline?: number[] }): SmartSignal {
+  const t = new Date(Date.now() - offsetMin * 60 * 1000);
+  const spark = base.sparkline ?? Array.from({ length: 20 }, (_, i) => base.price * (1 + Math.sin(i / 3 + offsetMin) * 0.004 + (i - 10) * 0.0008));
+  return {
+    ...base,
+    createdAt: t.getTime(),
+    time: t.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+    sparkline: spark,
+  };
+}
+
 const INITIAL_SIGNALS: SmartSignal[] = [
-  { id: 'init-1', time: '06:42', message: 'BTC breakout khỏi vùng kháng cự 68,000 — momentum tăng mạnh', type: 'breakout', symbol: 'BTC', badge: 'BREAKOUT' },
-  { id: 'init-2', time: '06:15', message: 'XAU/USD chạm vùng hỗ trợ 2,290 — theo dõi phản ứng giá', type: 'support_touch', symbol: 'GOLD', badge: 'HỖ TRỢ' },
-  { id: 'init-3', time: '05:58', message: 'Volume BTC tăng 340% so với trung bình — dấu hiệu bất thường', type: 'volume_anomaly', symbol: 'BTC', badge: 'VOLUME' },
-  { id: 'init-4', time: '05:30', message: 'BTC phá vỡ vùng tích lũy 67.5k–68k với volume lớn', type: 'breakout', symbol: 'BTC', badge: 'BREAKOUT' },
-  { id: 'init-5', time: '04:45', message: 'ETH tăng 5.2% — breakout trên EMA 200', type: 'buy', symbol: 'ETH', badge: 'MUA' },
-  { id: 'init-6', time: '04:12', message: 'Vàng rebound từ hỗ trợ 2,290 — nến đảo chiều tăng H4', type: 'support_touch', symbol: 'GOLD', badge: 'HỖ TRỢ' },
-  { id: 'init-7', time: '03:55', message: 'Volume XAU/USD tăng đột biến 280% — theo dõi breakout', type: 'volume_anomaly', symbol: 'GOLD', badge: 'VOLUME' },
+  seed(8,   { id: 'init-1', message: 'BTC breakout khỏi vùng kháng cự 68,000 — momentum tăng mạnh', type: 'breakout',        symbol: 'BTC',  badge: 'BREAKOUT', price: 68120 }),
+  seed(35,  { id: 'init-2', message: 'XAU/USD chạm vùng hỗ trợ 2,290 — theo dõi phản ứng giá',     type: 'support_touch',   symbol: 'GOLD', badge: 'HỖ TRỢ',   price: 2291.4 }),
+  seed(52,  { id: 'init-3', message: 'Volume BTC tăng 340% so với trung bình — dấu hiệu bất thường', type: 'volume_anomaly', symbol: 'BTC',  badge: 'VOLUME',   price: 67890 }),
+  seed(80,  { id: 'init-4', message: 'BTC phá vỡ vùng tích lũy 67.5k–68k với volume lớn',           type: 'breakout',        symbol: 'BTC',  badge: 'BREAKOUT', price: 67750 }),
+  seed(125, { id: 'init-5', message: 'ETH tăng 5.2% — breakout trên EMA 200',                       type: 'buy',             symbol: 'ETH',  badge: 'MUA',      price: 3142 }),
+  seed(168, { id: 'init-6', message: 'Vàng rebound từ hỗ trợ 2,290 — nến đảo chiều tăng H4',         type: 'support_touch',   symbol: 'GOLD', badge: 'HỖ TRỢ',   price: 2295.2 }),
+  seed(205, { id: 'init-7', message: 'Volume XAU/USD tăng đột biến 280% — theo dõi breakout',        type: 'volume_anomaly',  symbol: 'GOLD', badge: 'VOLUME',   price: 2287.8 }),
 ];
 
 export function useSmartSignals(
