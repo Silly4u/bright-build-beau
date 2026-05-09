@@ -15,7 +15,7 @@ import { Sparkles, RefreshCw, History } from 'lucide-react';
 import MorningBriefBanner from '@/components/analysis/MorningBriefBanner';
 import StreakBadge from '@/components/analysis/StreakBadge';
 import EventReminders from '@/components/analysis/EventReminders';
-import Watchlist from '@/components/analysis/Watchlist';
+
 import PositionCalculator from '@/components/analysis/PositionCalculator';
 import TradeJournal from '@/components/analysis/TradeJournal';
 import PriceAlerts from '@/components/analysis/PriceAlerts';
