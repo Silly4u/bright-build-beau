@@ -274,54 +274,6 @@ const News: React.FC = () => {
         </div>
       </section>
 
-      {/* Search + Filter Bar */}
-      <section className="pb-4 px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row gap-2">
-            <div className="flex-1 relative">
-              <svg viewBox="0 0 24 24" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60 fill-none stroke-current stroke-2">
-                <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" strokeLinecap="round" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Tìm kiếm tin tức, coin, nguồn..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full bg-[#0d1526] border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-cyan-400/40 outline-none"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-foreground text-sm"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-            <select
-              value={timeFilter}
-              onChange={e => setTimeFilter(e.target.value as typeof timeFilter)}
-              className="bg-[#0d1526] border border-white/5 rounded-xl px-3 py-2.5 text-xs text-foreground focus:border-cyan-400/40 outline-none cursor-pointer"
-            >
-              <option value="all">⏱ Tất cả</option>
-              <option value="1h">1 giờ qua</option>
-              <option value="24h">24 giờ qua</option>
-              <option value="7d">7 ngày qua</option>
-            </select>
-            <select
-              value={sourceFilter}
-              onChange={e => setSourceFilter(e.target.value)}
-              className="bg-[#0d1526] border border-white/5 rounded-xl px-3 py-2.5 text-xs text-foreground focus:border-cyan-400/40 outline-none cursor-pointer"
-            >
-              <option value="all">📡 Tất cả nguồn</option>
-              {availableSources.map(src => (
-                <option key={src} value={src}>{src}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </section>
-
       {/* Trending Coins */}
       {market.trending.length > 0 && activeStream === 'hot' && (
         <section className="pb-6 px-6 lg:px-8">
