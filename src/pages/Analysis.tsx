@@ -87,7 +87,7 @@ const Analysis: React.FC = () => {
   })();
 
   // Filter state for signal feed
-  const [signalSymbolFilter, setSignalSymbolFilter] = useState<'ALL' | 'BTC' | 'GOLD' | 'ETH'>('ALL');
+  const [signalSymbolFilter, setSignalSymbolFilter] = useState<'ALL' | 'BTC' | 'GOLD'>('ALL');
   const [signalTypeFilter, setSignalTypeFilter] = useState<'ALL' | 'breakout' | 'support_touch' | 'volume_anomaly' | 'buy' | 'alert'>('ALL');
 
   const allSignals = mergedSignals.filter(s => {
