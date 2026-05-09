@@ -866,7 +866,49 @@ export const LESSONS: Lesson[] = [
         ],
       },
       {
-        heading: '4. Hệ thống RSI + MACD',
+        heading: '4. MACD Histogram — Tín hiệu sớm hơn cross',
+        body: 'Histogram là khoảng cách giữa MACD và Signal. Nó chuyển dấu TRƯỚC khi cross xảy ra → cho tín hiệu sớm 1–3 nến.',
+        bullets: [
+          'Histogram thu hẹp 3 nến liên tiếp ở vùng dương → cảnh báo top sắp đến',
+          'Histogram mở rộng từ âm sang dương → động lượng tăng đang quay lại',
+          '"Squeeze" — histogram nhỏ dần về 0 = trước biến động lớn (kết hợp BB)',
+        ],
+      },
+      {
+        heading: '5. Hidden Divergence — "Vũ khí bí mật" tiếp diễn',
+        body: 'Khác với regular divergence (đảo chiều), hidden divergence là tín hiệu tiếp diễn xu hướng — entry lý tưởng để vào theo trend sau pullback.',
+        bullets: [
+          'Hidden Bullish: Giá tạo đáy CAO HƠN, RSI tạo đáy THẤP HƠN → tiếp tục TĂNG',
+          'Hidden Bearish: Giá tạo đỉnh THẤP HƠN, RSI tạo đỉnh CAO HƠN → tiếp tục GIẢM',
+          'Win-rate cao hơn regular divergence vì trade thuận xu hướng',
+        ],
+        example:
+          'BTC H4 02/2024 trong uptrend: pullback tạo đáy 51.500 (cao hơn đáy trước 50.800), RSI lại xuống 38 (thấp hơn 42 trước đó) → Hidden Bullish, entry BUY hoàn hảo, giá lên 56.000 sau 3 ngày.',
+      },
+      {
+        heading: '6. Divergence Cheat Sheet — Bảng tra nhanh',
+        body: 'Phân loại 4 dạng divergence theo chiều giá và RSI:',
+        bullets: [
+          'Class A (mạnh nhất): Giá đỉnh cao hơn nhiều, RSI đỉnh THẤP HƠN nhiều → reversal mạnh',
+          'Class B: Giá tạo double top/bottom, RSI tạo đỉnh/đáy lệch nhau → reversal trung bình',
+          'Class C (yếu nhất): Giá đỉnh cao hơn, RSI đỉnh ngang → cảnh báo nhẹ, không entry độc lập',
+          'Hidden: Tín hiệu tiếp diễn — chỉ trade khi xu hướng chính rõ ràng',
+        ],
+        pitfall:
+          'Divergence cần CONFIRMATION. Đừng vào lệnh ngay khi thấy divergence — chờ giá break trendline ngắn hạn hoặc xuất hiện mẫu nến đảo chiều.',
+      },
+      {
+        heading: '7. Settings tối ưu theo timeframe',
+        body: 'RSI mặc định 14 phù hợp đa số. MACD mặc định 12-26-9 chuẩn cho swing. Tuy nhiên có thể tinh chỉnh:',
+        bullets: [
+          'Scalping (M1–M5): RSI 7–9, MACD 5-13-5 (nhạy, nhanh)',
+          'Day trading (M15–H1): RSI 14, MACD 12-26-9 (chuẩn)',
+          'Swing trading (H4–D1): RSI 14–21, MACD 19-39-9 (mượt hơn, ít noise)',
+          'Position trading (D1–W1): RSI 21, MACD 50-100-9 (lọc cực mạnh)',
+        ],
+      },
+      {
+        heading: '8. Hệ thống RSI + MACD thực chiến',
         body: 'Chỉ vào lệnh khi 2 chỉ báo cùng tín hiệu. VD entry BUY: RSI thoát vùng oversold + MACD cross bullish trên đường 0. Winrate hệ thống này thường 60–70% trên H4.',
         example:
           'ETH H4 ngày 10/01/2024: RSI từ 28 lên 35 (thoát oversold) + MACD histogram chuyển dương + cross trên signal → BUY tại 2.250, TP 2.500 (R:R 1:2.5).',
