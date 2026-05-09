@@ -757,12 +757,47 @@ export const LESSONS: Lesson[] = [
         ],
       },
       {
-        heading: '5. Áp dụng thực chiến',
+        heading: '5. Wave Personality — "Tính cách" của từng sóng',
+        body: 'Mỗi sóng có đặc điểm tâm lý và volume riêng. Nắm được "personality" giúp bạn xác định mình đang ở sóng nào dù chưa kết thúc.',
+        bullets: [
+          'Sóng 1: Volume thấp, tin tức tiêu cực, đa số nghĩ là pullback',
+          'Sóng 2: Sợ hãi tột độ, retail capitulate; volume giảm dần — KHÔNG được vượt đáy sóng 1',
+          'Sóng 3: Volume cao nhất, breakout S/R lớn, tin tức bắt đầu xoay chiều, FOMO',
+          'Sóng 4: Tích luỹ choppy, trader bị stop-loss liên tục — TRÁNH trade',
+          'Sóng 5: Volume thấp hơn sóng 3, divergence RSI/MACD, retail "all in" — chuẩn bị thoát',
+          'Sóng A: Tin xấu nhẹ, đa số nghĩ chỉ là correction',
+          'Sóng B: Bounce yếu, "bull trap" hoàn hảo — không trade',
+          'Sóng C: Capitulation, volume tăng vọt, panic — đáy thật chuẩn bị hình thành',
+        ],
+      },
+      {
+        heading: '6. Mẫu sóng đặc biệt cần thuộc',
+        body: 'Khoảng 30% chu kỳ Elliott không "chuẩn 5-3" mà rơi vào các biến thể sau:',
+        bullets: [
+          'Extension: 1 trong 3 sóng đẩy (thường sóng 3) kéo dài thành 5 sub-wave nhỏ',
+          'Truncated 5th: Sóng 5 không vượt đỉnh sóng 3 — dấu hiệu yếu, đảo chiều mạnh',
+          'Leading Diagonal (sóng 1 hoặc A): 5 sub-wave kiểu chồng lấp trong kênh hội tụ',
+          'Ending Diagonal (sóng 5 hoặc C): wedge cuối xu hướng — báo đảo chiều mạnh',
+          'Double/Triple Three: 2–3 mẫu A-B-C nối nhau bằng sóng X — điều chỉnh phức tạp',
+        ],
+      },
+      {
+        heading: '7. Quy tắc chia khung (Degree) Elliott',
+        body: 'Elliott phân chia sóng theo cấp (degree) từ Grand Supercycle (200+ năm) xuống Subminuette (vài giờ). Quy tắc vàng: phân tích từ HTF xuống LTF, không bao giờ ngược lại.',
+        bullets: [
+          'D1/W1 → đếm sóng cấp Primary/Intermediate cho swing trade',
+          'H4 → cấp Minor cho position 3–10 ngày',
+          'H1/M15 → cấp Minute/Subminuette cho intraday',
+          'Sóng cấp dưới luôn nằm bên trong sóng cấp trên — fractal',
+        ],
+      },
+      {
+        heading: '8. Áp dụng thực chiến',
         body: 'Entry tốt nhất là cuối sóng 2 (vào theo sóng 3 — sóng dài nhất). Tránh trade sóng 4 (choppy). Sóng 5 thường có divergence với RSI/MACD — cảnh báo sắp đảo chiều.',
         example:
-          'Đếm sóng trên D1, xác nhận trên H4. Khi sóng 2 hoàn tất tại Fib 0.618 + RSI oversold → entry BUY, TP tại 1.618 × sóng 1.',
+          'BTC W1 từ đáy 15.500 → đếm sóng cấp Primary. Trên D1: sóng 2 hoàn tất tại Fib 0.618 (19.500), RSI oversold + Bullish Engulfing → entry BUY, TP 1.618 × sóng 1 = ~35.000.',
       },
-    ],
+
     takeaways: [
       'Elliott là framework, KHÔNG phải tín hiệu — luôn cần xác nhận',
       'Entry an toàn nhất: cuối sóng 2, vào theo sóng 3',
