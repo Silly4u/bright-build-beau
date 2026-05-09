@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import Header from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIndicatorPermissions } from '@/hooks/useIndicatorPermissions';
@@ -39,6 +39,12 @@ import EconomicEventsWidget from '@/components/indicators/EconomicEventsWidget';
 import LiquidationHeatmap from '@/components/indicators/LiquidationHeatmap';
 import { computeIndicatorVotes, aggregateStrength } from '@/lib/indicatorVotes';
 import { useIndicatorTriggers, type TriggerType } from '@/hooks/useIndicatorTriggers';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import {
+  ChartCandlestick, Layers, Zap, Bell, Activity, Flame, TrendingUp,
+  PanelLeft, PanelRight, ChevronDown, Sparkles, Pin, BookMarked,
+} from 'lucide-react';
 
 const PAIRS = [
   { symbol: 'BTC/USDT', label: 'BTC', color: '#F7931A' },
@@ -51,7 +57,6 @@ const PAIRS = [
   { symbol: 'WLD/USDT', label: 'WLD', color: '#1DB4D5' },
   { symbol: 'HYPE/USDT', label: 'HYPE', color: '#A855F7' },
   { symbol: 'PEPE/USDT', label: 'PEPE', color: '#4CAF50' },
-  // Top futures volume tháng (Binance/Bybit/Hyperliquid ~30D)
   { symbol: 'SUI/USDT', label: 'SUI', color: '#4DA2FF' },
   { symbol: 'ENA/USDT', label: 'ENA', color: '#FF5C00' },
   { symbol: 'FARTCOIN/USDT', label: 'FART', color: '#FFB347' },
@@ -74,29 +79,40 @@ const DEFAULT_INDICATORS: IndicatorConfig[] = [
   { id: 'prev_week_fib', label: 'Fib Tuần Cũ', enabled: false, color: '#FFD54F', category: 'Fibonacci', note: 'Tự vẽ Fibonacci theo High/Low của tuần trước, cập nhật mỗi tuần.' },
 ];
 
+// ── Reusable section card ──
+const SectionCard: React.FC<{ title: string; icon?: React.ReactNode; right?: React.ReactNode; children: React.ReactNode; className?: string }> = ({ title, icon, right, children, className = '' }) => (
+  <div className={`bg-[#0f1318] border border-[#2b3139]/80 rounded-lg overflow-hidden shadow-[0_1px_0_rgba(255,255,255,0.02)_inset] ${className}`}>
+    <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gradient-to-r from-[#1a1f26] to-[#13171c] border-b border-[#2b3139]/60">
+      {icon && <span className="text-[#fcd535]">{icon}</span>}
+      <span className="text-[10px] font-mono font-bold tracking-[0.16em] text-[#eaecef]/90 uppercase">{title}</span>
+      {right && <div className="ml-auto">{right}</div>}
+    </div>
+    <div>{children}</div>
+  </div>
+);
+
 const Indicators: React.FC = () => {
   const { user } = useAuth();
   const { hasAccess, loading: permLoading } = useIndicatorPermissions();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // ── Initialise state from URL share-link if present ──
   const initialPair = searchParams.get('pair') && PAIRS.find(p => p.symbol === searchParams.get('pair'))
-    ? (searchParams.get('pair') as string)
-    : 'BTC/USDT';
+    ? (searchParams.get('pair') as string) : 'BTC/USDT';
   const initialTf = searchParams.get('tf') && TIMEFRAMES.includes(searchParams.get('tf') as string)
-    ? (searchParams.get('tf') as string)
-    : 'H4';
+    ? (searchParams.get('tf') as string) : 'H4';
   const initialIndIds = (searchParams.get('ind') || '').split(',').filter(Boolean);
 
   const [activeView, setActiveView] = useState<'single' | 'multi'>('single');
   const [activePair, setActivePair] = useState(initialPair);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTimeframe, setActiveTimeframe] = useState(initialTf);
   const [indicators, setIndicators] = useState<IndicatorConfig[]>(
     DEFAULT_INDICATORS.map(i => ({ ...i, enabled: initialIndIds.includes(i.id) || i.enabled })),
   );
   const [logs, setLogs] = useState<string[]>([]);
   const [watchedTriggers, setWatchedTriggers] = useState<TriggerType[]>([]);
+  const [leftOpen, setLeftOpen] = useState(false); // Sheet on all sizes
+  const [rightOpen, setRightOpen] = useState(false); // Mobile sheet
+  const [bottomOpen, setBottomOpen] = useState(true);
 
   const marketData = useMarketData(activePair, activeTimeframe);
   const { fetchOlderCandles } = marketData;
@@ -138,50 +154,30 @@ const Indicators: React.FC = () => {
   const livePrice = lastCandle ? lastCandle.close : 0;
   const prevCandle = marketData.candles[marketData.candles.length - 2];
   const priceChange = prevCandle ? ((livePrice - prevCandle.close) / prevCandle.close * 100) : 0;
+  const isUp = priceChange >= 0;
 
-  // ── Strength Meter votes ──
   const votes = useMemo(
     () => computeIndicatorVotes({
-      enabledIds,
-      proEmaData,
-      srData,
-      wyckoffData,
-      alphaLHData,
-      alphaEventData,
-      matrixData,
-      engineData,
-      tpSlData,
-      smcAnalysis: smcResult.analysis,
-      livePrice,
+      enabledIds, proEmaData, srData, wyckoffData, alphaLHData, alphaEventData,
+      matrixData, engineData, tpSlData, smcAnalysis: smcResult.analysis, livePrice,
     }),
     [enabledIds, proEmaData, srData, wyckoffData, alphaLHData, alphaEventData, matrixData, engineData, tpSlData, smcResult.analysis, livePrice],
   );
   const strengthScore = useMemo(() => aggregateStrength(votes), [votes]);
 
-  // ── Trigger Alerts ──
   useIndicatorTriggers({
     enabled: watchedTriggers.length > 0 && !marketData.loading,
-    pair: activePair,
-    timeframe: activeTimeframe,
-    candles: marketData.candles,
-    proEmaData,
-    wyckoffData,
-    alphaLHData,
-    alphaEventData,
-    watchedTriggers,
+    pair: activePair, timeframe: activeTimeframe, candles: marketData.candles,
+    proEmaData, wyckoffData, alphaLHData, alphaEventData, watchedTriggers,
   });
 
   useEffect(() => {
     if (!marketData.loading && marketData.candles.length > 0) {
       const now = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-      setLogs(prev => [
-        `[${now}] Đang quét nến ${activeTimeframe} cho ${activePair}...`,
-        ...prev.slice(0, 10),
-      ]);
+      setLogs(prev => [`[${now}] Đang quét nến ${activeTimeframe} cho ${activePair}...`, ...prev.slice(0, 10)]);
     }
   }, [marketData.loading, activePair, activeTimeframe]);
 
-  // Sync URL params (debounced via deps) so refresh keeps state
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
     params.set('pair', activePair);
@@ -198,374 +194,268 @@ const Indicators: React.FC = () => {
     setIndicators(prev => prev.map(i => ({ ...i, enabled: preset.enabled_indicators.includes(i.id) })));
   };
 
+  // ── LEFT PANEL CONTENT (used in Sheet) ──
+  const LeftPanelContent = (
+    <div className="space-y-3 pb-6">
+      <SectionCard title="Chỉ báo" icon={<Layers className="w-3 h-3" />} right={<span className="text-[9px] font-mono text-[#5e6673]">{enabledIds.length}/{indicators.length}</span>}>
+        <div className="p-2">
+          <IndicatorPanel indicators={indicators} onToggle={toggleIndicator} />
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Layout Presets" icon={<BookMarked className="w-3 h-3" />}>
+        <div className="p-2">
+          <LayoutPresets currentPair={activePair} currentTimeframe={activeTimeframe} enabledIndicators={enabledIds} onLoad={handleLoadPreset} />
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Pinned Charts" icon={<Pin className="w-3 h-3" />}>
+        <div className="p-2">
+          <PinnedMiniCharts activePair={activePair} onSelect={setActivePair} availablePairs={PAIRS.map(p => p.symbol)} />
+        </div>
+      </SectionCard>
+
+      {tpSlEnabled && tpSlData && (
+        <SectionCard title="Backtest TP/SL">
+          <div className="p-2 space-y-1.5 text-[10px] font-mono">
+            <div className="flex justify-between"><span className="text-[#5e6673]">Total Entries</span><span className="text-[#eaecef] font-bold">{tpSlData.stats.totalEntries}</span></div>
+            <div className="flex justify-between"><span className="text-[#5e6673]">TP / SL</span><span><span className="text-emerald-400">{tpSlData.stats.tpCount}</span> / <span className="text-red-400">{tpSlData.stats.slCount}</span></span></div>
+            <div className="flex justify-between"><span className="text-[#5e6673]">Winrate</span><span className={tpSlData.stats.winrate >= 50 ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>{tpSlData.stats.winrate.toFixed(1)}%</span></div>
+          </div>
+        </SectionCard>
+      )}
+
+      {proEmaEnabled && proEmaData && (
+        <SectionCard title="Pro EMA">
+          <div className="p-2 space-y-1 text-[10px] font-mono">
+            <div className="flex justify-between"><span className="text-orange-400/70">EMA 20</span><span className="text-orange-400 font-bold">{proEmaData.lastEma20.toFixed(2)}</span></div>
+            <div className="flex justify-between"><span className="text-yellow-400/70">EMA 50</span><span className="text-yellow-400 font-bold">{proEmaData.lastEma50.toFixed(2)}</span></div>
+            <div className="flex justify-between"><span className="text-teal-400/70">EMA 100</span><span className="text-teal-400 font-bold">{proEmaData.lastEma100.toFixed(2)}</span></div>
+            <div className="flex justify-between"><span className="text-purple-400/70">EMA 200</span><span className="text-purple-400 font-bold">{proEmaData.lastEma200.toFixed(2)}</span></div>
+            <div className="flex justify-between pt-1 border-t border-[#2b3139]/60"><span className="text-[#5e6673]">Ribbon</span><span className={proEmaData.ribbon === 'bullish' ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}>{proEmaData.ribbon === 'bullish' ? '🟢 BULLISH' : '🔴 BEARISH'}</span></div>
+          </div>
+        </SectionCard>
+      )}
+
+      {srEnabled && srData && (
+        <SectionCard title="Pro S/R">
+          <div className="p-2 space-y-1 text-[10px] font-mono">
+            <div className="flex justify-between"><span className="text-[#5e6673]">Stoch K</span><span className={`font-bold ${srData.lastK < 30 ? 'text-emerald-400' : srData.lastK > 70 ? 'text-red-400' : 'text-yellow-400'}`}>{srData.lastK.toFixed(1)}</span></div>
+            <div className="flex justify-between"><span className="text-[#5e6673]">Stoch D</span><span className={`font-bold ${srData.lastD < 30 ? 'text-emerald-400' : srData.lastD > 70 ? 'text-red-400' : 'text-yellow-400'}`}>{srData.lastD.toFixed(1)}</span></div>
+            <div className="flex justify-between"><span className="text-[#5e6673]">Zones</span><span className="text-[#eaecef] font-bold">{srData.channels.length}</span></div>
+          </div>
+        </SectionCard>
+      )}
+
+      {wyckoffEnabled && wyckoffData && (
+        <SectionCard title="Wyckoff">
+          <div className="p-2 space-y-1 text-[10px] font-mono">
+            <div className="flex justify-between"><span className="text-[#5e6673]">Phase</span><span className="font-bold text-[#fcd535]">{wyckoffData.currentPhase.toUpperCase()}</span></div>
+            <div className="flex justify-between"><span className="text-[#5e6673]">Events</span><span className="text-[#eaecef] font-bold">{wyckoffData.events.length}</span></div>
+          </div>
+        </SectionCard>
+      )}
+
+      {alphaLHEnabled && (
+        <SectionCard title="Alpha LH Config">
+          <div className="p-2"><AlphaLHConfigPanel config={alphaLHConfig} onChange={setAlphaLHConfig} /></div>
+        </SectionCard>
+      )}
+      {alphaEventEnabled && (
+        <SectionCard title="Alpha Event Config">
+          <div className="p-2"><AlphaEventConfigPanel config={alphaEventConfig} onChange={setAlphaEventConfig} /></div>
+        </SectionCard>
+      )}
+
+      <EconomicEventsWidget />
+    </div>
+  );
+
+  // ── RIGHT PANEL CONTENT (Tabs) ──
+  const RightPanelContent = (
+    <Tabs defaultValue="ai" className="w-full">
+      <TabsList className="w-full h-9 bg-[#0f1318] border border-[#2b3139] rounded-lg p-0.5 grid grid-cols-5 gap-0.5">
+        <TabsTrigger value="ai" className="data-[state=active]:bg-[#fcd535] data-[state=active]:text-[#0b0e11] text-[10px] font-mono font-bold rounded-md gap-1"><Sparkles className="w-3 h-3" />AI</TabsTrigger>
+        <TabsTrigger value="movers" className="data-[state=active]:bg-[#fcd535] data-[state=active]:text-[#0b0e11] text-[10px] font-mono font-bold rounded-md gap-1"><TrendingUp className="w-3 h-3" />Movers</TabsTrigger>
+        <TabsTrigger value="alerts" className="data-[state=active]:bg-[#fcd535] data-[state=active]:text-[#0b0e11] text-[10px] font-mono font-bold rounded-md gap-1"><Bell className="w-3 h-3" />Alerts</TabsTrigger>
+        <TabsTrigger value="signals" className="data-[state=active]:bg-[#fcd535] data-[state=active]:text-[#0b0e11] text-[10px] font-mono font-bold rounded-md gap-1"><Activity className="w-3 h-3" />Signals</TabsTrigger>
+        <TabsTrigger value="liq" className="data-[state=active]:bg-[#fcd535] data-[state=active]:text-[#0b0e11] text-[10px] font-mono font-bold rounded-md gap-1"><Flame className="w-3 h-3" />Liq</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="ai" className="mt-3 space-y-3">
+        <IndicatorStrengthMeter votes={votes} />
+        <AIConfluenceCard pair={activePair} timeframe={activeTimeframe} livePrice={livePrice} votes={votes} strengthScore={strengthScore} />
+      </TabsContent>
+      <TabsContent value="movers" className="mt-3">
+        <TopMoversPanel onSelect={(p) => { if (PAIRS.find(x => x.symbol === p)) setActivePair(p); }} />
+      </TabsContent>
+      <TabsContent value="alerts" className="mt-3">
+        <TriggerAlertsPanel watched={watchedTriggers} onChange={setWatchedTriggers} />
+      </TabsContent>
+      <TabsContent value="signals" className="mt-3">
+        <SectionCard title="Tín hiệu gần đây" icon={<Zap className="w-3 h-3" />} right={<span className="text-[10px] font-mono text-[#5e6673]">{signals.length}</span>}>
+          <div className="p-2"><SignalFeed signals={signals} loading={signalsLoading} maxItems={6} /></div>
+        </SectionCard>
+      </TabsContent>
+      <TabsContent value="liq" className="mt-3">
+        <LiquidationHeatmap />
+      </TabsContent>
+    </Tabs>
+  );
+
   return (
-    <main className="min-h-screen bg-[#0b0e11]">
+    <main className="min-h-screen bg-[#0a0d11]">
       <Header />
 
-      {/* ═══ BLOOMBERG-STYLE MARKET OVERVIEW BAR ═══ */}
-      <div className="pt-24 px-1.5 lg:px-3">
+      {/* Market overview ticker */}
+      <div className="pt-20 px-2 lg:px-3">
         <MarketOverviewBar />
+      </div>
 
-        {/* Row 1: Big price + bid/ask */}
-        <div className="bg-[#0b0e11] border-x border-t border-[#2b3139] rounded-t-md px-4 py-2.5 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: `${activePairInfo.color}25` }}>
-              <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: activePairInfo.color }} />
+      {/* ═══ HERO PRICE CARD + STICKY TOOLBAR ═══ */}
+      <div className="px-2 lg:px-3 mt-2">
+        <div className="rounded-xl overflow-hidden border border-[#2b3139] bg-gradient-to-br from-[#13171c] via-[#0f1318] to-[#0a0d11] shadow-[0_8px_24px_-12px_rgba(0,0,0,0.6)]">
+          {/* Price hero */}
+          <div className="px-4 py-3 flex items-center justify-between gap-4 flex-wrap border-b border-[#2b3139]/60">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="relative shrink-0">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${activePairInfo.color}20`, boxShadow: `0 0 24px ${activePairInfo.color}40` }}>
+                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: activePairInfo.color }} />
+                </div>
+                <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#0f1318] ${isUp ? 'bg-[#0ecb81]' : 'bg-[#f6465d]'} animate-pulse`} />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-[14px] font-mono font-bold text-[#eaecef] tracking-wide">{activePair}</span>
+                  <span className="text-[9px] font-mono text-[#5e6673] uppercase tracking-wider">{activeTimeframe}</span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className={`text-[28px] sm:text-[32px] font-bold font-mono leading-none tabular-nums ${isUp ? 'text-[#0ecb81]' : 'text-[#f6465d]'}`}>
+                    {marketData.loading ? '...' : `$${livePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  </span>
+                  {!marketData.loading && (
+                    <span className={`flex items-center gap-1 text-[12px] font-mono font-semibold ${isUp ? 'text-[#0ecb81]' : 'text-[#f6465d]'}`}>
+                      <span>{isUp ? '↗' : '↘'}</span>
+                      {isUp ? '+' : ''}{(prevCandle ? livePrice - prevCandle.close : 0).toFixed(2)}
+                      <span className="text-[#848e9c]">({isUp ? '+' : ''}{priceChange.toFixed(2)}%)</span>
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-            <span className={`text-[26px] font-bold font-mono leading-none tabular-nums ${priceChange >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'}`}>
-              {marketData.loading ? '...' : `$${livePrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-            </span>
-            {!marketData.loading && (
-              <span className={`flex items-center gap-1 text-[13px] font-mono font-semibold ${priceChange >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]'}`}>
-                <span className="text-base leading-none">{priceChange >= 0 ? '↗' : '↘'}</span>
-                {priceChange >= 0 ? '+' : ''}{(prevCandle ? livePrice - prevCandle.close : 0).toFixed(2)}
-                <span className="text-[#848e9c]">({priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%)</span>
-              </span>
-            )}
-          </div>
-          {/* Bid/Ask/Last */}
-          <div className="hidden sm:flex items-baseline gap-4 text-[13px] font-mono tabular-nums shrink-0">
-            <span className="text-[#eaecef] font-semibold">${lastCandle ? lastCandle.low.toFixed(2) : '—'}</span>
-            <span className="text-[#0ecb81] font-semibold">${lastCandle ? lastCandle.high.toFixed(2) : '—'}</span>
-            <span className="text-[#f6465d] font-semibold">${lastCandle ? lastCandle.open.toFixed(2) : '—'}</span>
-          </div>
-        </div>
 
-        {/* Row 2: Chart toolbar */}
-        <div className="bg-[#161a1e] border border-[#2b3139] rounded-b-md px-2 py-1.5 flex items-center gap-1.5 text-xs flex-wrap">
-          {/* Symbol search (PairSelector trigger) */}
-          <div className="flex items-center">
-            <PairSelector
-              pairs={PAIRS}
-              activePair={activePair}
-              onSelect={setActivePair}
-            />
-          </div>
-
-          {/* "+" add compare */}
-          <button
-            onClick={() => setActiveView(activeView === 'multi' ? 'single' : 'multi')}
-            className="w-7 h-7 flex items-center justify-center rounded text-[#848e9c] hover:text-[#eaecef] hover:bg-[#2b3139] transition-colors shrink-0"
-            title="So sánh nhiều chart"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-          </button>
-
-          <div className="w-px h-5 bg-[#2b3139] mx-0.5" />
-
-          {/* Quick timeframes */}
-          <div className="flex items-center gap-0.5 shrink-0">
-            {TIMEFRAMES.map(tf => (
-              <button key={tf} onClick={() => setActiveTimeframe(tf)}
-                className={`px-2 py-1 rounded font-mono font-semibold text-[12px] transition-all ${
-                  activeTimeframe === tf
-                    ? 'bg-[#2b3139] text-[#eaecef]'
-                    : 'text-[#848e9c] hover:text-[#eaecef] hover:bg-[#2b3139]/60'
-                }`}>
-                {tf === 'M15' ? '15m' : tf === 'H1' ? '1h' : tf === 'H4' ? '4h' : tf === 'D1' ? 'D' : tf}
-              </button>
-            ))}
-            <TimeframeSelector activeTf={activeTimeframe} onSelect={setActiveTimeframe} />
-          </div>
-
-          <div className="w-px h-5 bg-[#2b3139] mx-0.5" />
-
-          {/* Chart type icons (visual only — placeholders) */}
-          <button className="w-7 h-7 flex items-center justify-center rounded text-[#848e9c] hover:text-[#eaecef] hover:bg-[#2b3139] transition-colors shrink-0" title="Loại chart">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" />
-            </svg>
-          </button>
-          <button className="w-7 h-7 flex items-center justify-center rounded text-[#fcd535] bg-[#2b3139] shrink-0" title="Nến Nhật">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <rect x="5" y="6" width="3" height="12" rx="0.5" />
-              <line x1="6.5" y1="3" x2="6.5" y2="6" stroke="currentColor" strokeWidth="1.5" />
-              <line x1="6.5" y1="18" x2="6.5" y2="21" stroke="currentColor" strokeWidth="1.5" />
-              <rect x="14" y="9" width="3" height="8" rx="0.5" />
-              <line x1="15.5" y1="5" x2="15.5" y2="9" stroke="currentColor" strokeWidth="1.5" />
-              <line x1="15.5" y1="17" x2="15.5" y2="20" stroke="currentColor" strokeWidth="1.5" />
-            </svg>
-          </button>
-          <button className="hidden md:flex w-7 h-7 items-center justify-center rounded text-[#848e9c] hover:text-[#eaecef] hover:bg-[#2b3139] transition-colors shrink-0" title="Line">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l6-6 4 4 8-8" />
-            </svg>
-          </button>
-
-          <div className="w-px h-5 bg-[#2b3139] mx-0.5" />
-
-          {/* Indicators button */}
-          <button
-            onClick={() => setSidebarOpen(o => !o)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[12px] font-mono font-semibold text-[#eaecef] hover:bg-[#2b3139] transition-colors shrink-0"
-            title="Chỉ báo"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18M7 14l4-4 4 4 5-5" />
-            </svg>
-            <span>Các chỉ báo</span>
-            {enabledIds.length > 0 && (
-              <span className="text-[10px] bg-[#fcd535]/15 text-[#fcd535] px-1.5 rounded">{enabledIds.length}</span>
-            )}
-          </button>
-
-          {/* View tabs + Share */}
-          <div className="flex items-center gap-1.5 ml-auto shrink-0">
-            <div className="flex items-center gap-0.5 bg-[#0b0e11] border border-[#2b3139] rounded p-0.5">
-              <button
-                onClick={() => setActiveView('single')}
-                className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all ${
-                  activeView === 'single' ? 'bg-[#fcd535] text-[#0b0e11]' : 'text-[#848e9c] hover:text-[#eaecef]'
-                }`}
-              >
-                Single
-              </button>
-              <button
-                onClick={() => setActiveView('multi')}
-                className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-all ${
-                  activeView === 'multi' ? 'bg-[#fcd535] text-[#0b0e11]' : 'text-[#848e9c] hover:text-[#eaecef]'
-                }`}
-              >
-                Multi
-              </button>
+            {/* OHLC mini grid */}
+            <div className="hidden md:grid grid-cols-4 gap-3 text-[11px] font-mono tabular-nums">
+              {[
+                { label: 'Open', val: lastCandle?.open, color: 'text-[#eaecef]' },
+                { label: 'High', val: lastCandle?.high, color: 'text-[#0ecb81]' },
+                { label: 'Low', val: lastCandle?.low, color: 'text-[#f6465d]' },
+                { label: 'Close', val: lastCandle?.close, color: 'text-[#fcd535]' },
+              ].map(c => (
+                <div key={c.label} className="flex flex-col items-end">
+                  <span className="text-[9px] text-[#5e6673] uppercase tracking-wider">{c.label}</span>
+                  <span className={`${c.color} font-semibold`}>${c.val ? c.val.toFixed(2) : '—'}</span>
+                </div>
+              ))}
             </div>
-            <ShareSnapshot pair={activePair} timeframe={activeTimeframe} enabledIndicators={enabledIds} />
+          </div>
+
+          {/* Toolbar */}
+          <div className="px-2 py-2 flex items-center gap-1.5 flex-wrap bg-[#0c1015]">
+            <PairSelector pairs={PAIRS} activePair={activePair} onSelect={setActivePair} />
+
+            <div className="w-px h-5 bg-[#2b3139] mx-0.5" />
+
+            <div className="flex items-center gap-0.5 bg-[#0a0d11] rounded-md p-0.5 border border-[#2b3139]/60">
+              {TIMEFRAMES.map(tf => (
+                <button key={tf} onClick={() => setActiveTimeframe(tf)}
+                  className={`px-2.5 py-1 rounded font-mono font-semibold text-[11px] transition-all ${
+                    activeTimeframe === tf ? 'bg-[#fcd535] text-[#0b0e11] shadow-sm' : 'text-[#848e9c] hover:text-[#eaecef] hover:bg-[#2b3139]/60'
+                  }`}>
+                  {tf === 'M15' ? '15m' : tf === 'H1' ? '1h' : tf === 'H4' ? '4h' : 'D'}
+                </button>
+              ))}
+              <TimeframeSelector activeTf={activeTimeframe} onSelect={setActiveTimeframe} />
+            </div>
+
+            <div className="w-px h-5 bg-[#2b3139] mx-0.5" />
+
+            {/* Indicators button → opens left sheet */}
+            <Sheet open={leftOpen} onOpenChange={setLeftOpen}>
+              <SheetTrigger asChild>
+                <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-mono font-semibold text-[#eaecef] hover:bg-[#2b3139] transition-colors border border-[#2b3139]/60">
+                  <PanelLeft className="w-3.5 h-3.5" />
+                  <span>Chỉ báo</span>
+                  {enabledIds.length > 0 && (
+                    <span className="text-[9px] bg-[#fcd535]/20 text-[#fcd535] px-1.5 py-0.5 rounded font-bold">{enabledIds.length}</span>
+                  )}
+                </button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[320px] sm:w-[360px] bg-[#0a0d11] border-r border-[#2b3139] p-3 overflow-y-auto">
+                <SheetHeader className="mb-3">
+                  <SheetTitle className="text-[#eaecef] font-mono text-sm tracking-widest">⚡ INDICATORS & TOOLS</SheetTitle>
+                </SheetHeader>
+                {LeftPanelContent}
+              </SheetContent>
+            </Sheet>
+
+            {/* Mobile-only right panel trigger */}
+            <Sheet open={rightOpen} onOpenChange={setRightOpen}>
+              <SheetTrigger asChild>
+                <button className="lg:hidden flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-mono font-semibold text-[#eaecef] hover:bg-[#2b3139] transition-colors border border-[#2b3139]/60">
+                  <PanelRight className="w-3.5 h-3.5" />
+                  <span>Phân tích</span>
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[340px] sm:w-[380px] bg-[#0a0d11] border-l border-[#2b3139] p-3 overflow-y-auto">
+                <SheetHeader className="mb-3">
+                  <SheetTitle className="text-[#eaecef] font-mono text-sm tracking-widest">📊 ANALYTICS</SheetTitle>
+                </SheetHeader>
+                {RightPanelContent}
+              </SheetContent>
+            </Sheet>
+
+            {/* View tabs + Share — pushed right */}
+            <div className="flex items-center gap-1.5 ml-auto">
+              <div className="flex items-center gap-0.5 bg-[#0a0d11] border border-[#2b3139] rounded-md p-0.5">
+                <button onClick={() => setActiveView('single')}
+                  className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold transition-all flex items-center gap-1 ${
+                    activeView === 'single' ? 'bg-[#fcd535] text-[#0b0e11]' : 'text-[#848e9c] hover:text-[#eaecef]'
+                  }`}>
+                  <ChartCandlestick className="w-3 h-3" /> Single
+                </button>
+                <button onClick={() => setActiveView('multi')}
+                  className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold transition-all ${
+                    activeView === 'multi' ? 'bg-[#fcd535] text-[#0b0e11]' : 'text-[#848e9c] hover:text-[#eaecef]'
+                  }`}>
+                  Multi
+                </button>
+              </div>
+              <ShareSnapshot pair={activePair} timeframe={activeTimeframe} enabledIndicators={enabledIds} />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ═══ MULTI-CHART VIEW ═══ */}
+      {/* ═══ MAIN BODY ═══ */}
       {activeView === 'multi' ? (
-        <div className="px-1.5 lg:px-3 py-3">
+        <div className="px-2 lg:px-3 py-3">
           <MultiChartGrid />
         </div>
       ) : (
-        <>
-      {/* ═══ 3-PANEL LAYOUT ═══ */}
-      <div className="px-1.5 lg:px-3 py-1">
-        <div className={`grid grid-cols-1 ${sidebarOpen ? 'lg:grid-cols-[210px_1fr_320px]' : 'lg:grid-cols-[1fr_320px]'} gap-px min-h-[75vh] bg-[#2b3139] rounded overflow-hidden transition-all duration-300`}>
-
-          {/* ── Collapsed sidebar handle ── */}
-          {!sidebarOpen && (
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="fixed left-1 top-1/2 -translate-y-1/2 z-30 bg-[#1e2329] border border-[#2b3139] rounded-r-lg px-1 py-4 hover:bg-[#2b3139] transition-colors group"
-              title="Mở chỉ báo"
-            >
-              <svg className="w-3.5 h-3.5 text-[#848e9c] group-hover:text-[#fcd535] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          )}
-
-          {/* ── LEFT: Indicator Checklist + Presets + Pin ── */}
-          {sidebarOpen && (
-          <div className="bg-[#161a1e] p-3 relative space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-[10px] font-bold text-[#848e9c] tracking-widest uppercase font-mono">CHỈ BÁO</h3>
-              <div className="flex items-center gap-2">
-                <span className="text-[9px] font-mono text-[#5e6673]">{enabledIds.length}/{indicators.length}</span>
-                <button
-                  onClick={() => setSidebarOpen(false)}
-                  className="p-0.5 rounded hover:bg-[#2b3139] transition-colors group"
-                  title="Thu gọn"
-                >
-                  <svg className="w-3.5 h-3.5 text-[#5e6673] group-hover:text-[#fcd535] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <p className="text-[9px] text-[#5e6673] font-mono -mt-2">Bật/Tắt + hover ⓘ để xem hướng dẫn</p>
-            <IndicatorPanel indicators={indicators} onToggle={toggleIndicator} />
-
-            {/* Layout Presets (login required) */}
-            <LayoutPresets
-              currentPair={activePair}
-              currentTimeframe={activeTimeframe}
-              enabledIndicators={enabledIds}
-              onLoad={handleLoadPreset}
-            />
-
-            {/* Pinned mini-charts */}
-            <PinnedMiniCharts
-              activePair={activePair}
-              onSelect={setActivePair}
-              availablePairs={PAIRS.map(p => p.symbol)}
-            />
-
-            {/* TP/SL Backtesting Dashboard */}
-            {tpSlEnabled && tpSlData && (
-              <div className="border border-[#2b3139] rounded-lg overflow-hidden">
-                <div className="bg-[#1e2329] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
-                  BACKTESTING
-                </div>
-                <div className="bg-[#161a1e] p-2 space-y-1.5">
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Total Entries</span>
-                    <span className="text-[#eaecef] font-bold">{tpSlData.stats.totalEntries}</span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">TP / SL Hit</span>
-                    <span className="text-[#eaecef] font-bold">
-                      <span className="text-emerald-400">{tpSlData.stats.tpCount}</span>
-                      {' / '}
-                      <span className="text-red-400">{tpSlData.stats.slCount}</span>
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Winrate</span>
-                    <span className={`font-bold ${tpSlData.stats.winrate >= 50 ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {tpSlData.stats.winrate.toFixed(2)}%
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Pro EMA Dashboard */}
-            {proEmaEnabled && proEmaData && (
-              <div className="border border-[#2b3139] rounded-lg overflow-hidden">
-                <div className="bg-[#1e2329] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
-                  PRO EMA
-                </div>
-                <div className="bg-[#161a1e] p-2 space-y-1.5">
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-orange-400/60">EMA 20</span>
-                    <span className="text-orange-400 font-bold">{proEmaData.lastEma20.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-yellow-400/60">EMA 50</span>
-                    <span className="text-yellow-400 font-bold">{proEmaData.lastEma50.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-teal-400/60">EMA 100</span>
-                    <span className="text-teal-400 font-bold">{proEmaData.lastEma100.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-purple-400/60">EMA 200</span>
-                    <span className="text-purple-400 font-bold">{proEmaData.lastEma200.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Ribbon</span>
-                    <span className={`font-bold ${proEmaData.ribbon === 'bullish' ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {proEmaData.ribbon === 'bullish' ? '🟢 BULLISH' : '🔴 BEARISH'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Crosses</span>
-                    <span className="text-[#eaecef] font-bold">{proEmaData.crosses.length}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Pro Support/Resistance Dashboard */}
-            {srEnabled && srData && (
-              <div className="border border-[#2b3139] rounded-lg overflow-hidden">
-                <div className="bg-[#1e2329] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
-                  PRO S/R
-                </div>
-                <div className="bg-[#161a1e] p-2 space-y-1.5">
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Stoch K</span>
-                    <span className={`font-bold ${srData.lastK < 30 ? 'text-emerald-400' : srData.lastK > 70 ? 'text-red-400' : 'text-yellow-400'}`}>
-                      {srData.lastK.toFixed(1)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Stoch D</span>
-                    <span className={`font-bold ${srData.lastD < 30 ? 'text-emerald-400' : srData.lastD > 70 ? 'text-red-400' : 'text-yellow-400'}`}>
-                      {srData.lastD.toFixed(1)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">S/R Zones</span>
-                    <span className="text-[#eaecef] font-bold">{srData.channels.length}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Wyckoff Dashboard */}
-            {wyckoffEnabled && wyckoffData && (
-              <div className="border border-[#2b3139] rounded-lg overflow-hidden">
-                <div className="bg-[#1e2329] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
-                  WYCKOFF
-                </div>
-                <div className="bg-[#161a1e] p-2 space-y-1.5">
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Phase</span>
-                    <span className={`font-bold ${
-                      wyckoffData.currentPhase === 'accumulation' ? 'text-emerald-400' :
-                      wyckoffData.currentPhase === 'distribution' ? 'text-red-400' :
-                      wyckoffData.currentPhase === 'bullish' ? 'text-lime-400' :
-                      wyckoffData.currentPhase === 'bearish' ? 'text-purple-400' :
-                      'text-muted-foreground'
-                    }`}>
-                      {wyckoffData.currentPhase.toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[10px] font-mono">
-                    <span className="text-[#5e6673]">Events</span>
-                    <span className="text-[#eaecef] font-bold">{wyckoffData.events.length}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Alpha LH Dashboard + Config */}
-            {alphaLHEnabled && (
-              <div>
-                <AlphaLHConfigPanel config={alphaLHConfig} onChange={setAlphaLHConfig} />
-                {alphaLHData && (
-                  <div className="mt-2 border border-[#2b3139] rounded-lg overflow-hidden">
-                    <div className="bg-[#1e2329] px-2 py-1.5 text-[10px] font-mono font-bold text-muted-foreground tracking-widest">
-                      ALPHA LH STATS
-                    </div>
-                    <div className="bg-[#161a1e] p-2 space-y-1.5">
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">Total Entries</span>
-                        <span className="text-[#eaecef] font-bold">{alphaLHData.stats.totalEntries}</span>
-                      </div>
-                      <div className="flex justify-between text-[10px] font-mono">
-                        <span className="text-[#5e6673]">Winrate</span>
-                        <span className={`font-bold ${alphaLHData.stats.winrate >= 50 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {alphaLHData.stats.winrate.toFixed(1)}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Alpha Event Dashboard + Config */}
-            {alphaEventEnabled && (
-              <div>
-                <AlphaEventConfigPanel config={alphaEventConfig} onChange={setAlphaEventConfig} />
-              </div>
-            )}
-
-            {/* Economic Events — fills bottom-left empty space */}
-            <EconomicEventsWidget />
-          </div>
-          )}
-
-          {/* ── CENTER: Main Chart ── */}
-          <div className="bg-[#0b0e11] overflow-hidden flex flex-col">
-            <div className="flex-1">
+        <div className="px-2 lg:px-3 mt-3">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-3">
+            {/* CHART */}
+            <div className="rounded-xl overflow-hidden border border-[#2b3139] bg-[#0a0d11] shadow-[0_8px_24px_-12px_rgba(0,0,0,0.6)]">
               {marketData.loading ? (
-                <div className="flex items-center justify-center h-[560px] bg-[#0b0e11]">
+                <div className="flex items-center justify-center h-[600px]">
                   <div className="flex flex-col items-center gap-3">
-                    <div className="w-8 h-8 border-2 border-[#fcd535] border-t-transparent rounded-full animate-spin" />
+                    <div className="w-10 h-10 border-2 border-[#fcd535] border-t-transparent rounded-full animate-spin" />
                     <span className="text-xs text-[#848e9c] font-mono">Loading {activePair}...</span>
                   </div>
                 </div>
               ) : marketData.error ? (
-                <div className="flex items-center justify-center h-[560px] bg-[#0b0e11]">
+                <div className="flex items-center justify-center h-[600px]">
                   <div className="text-center">
                     <span className="text-[#f6465d] text-sm font-mono">⚠️ {marketData.error}</span>
                     <p className="text-[#848e9c] text-xs mt-2 font-mono">Đang sử dụng dữ liệu demo</p>
@@ -580,7 +470,7 @@ const Indicators: React.FC = () => {
                   trendline={trendlines.support}
                   trendlineResistance={trendlines.resistance}
                   enabledIndicators={enabledIds}
-                  height={750}
+                  height={720}
                   smcAnalysis={smcResult.analysis}
                   alphaNetData={null}
                   matrixData={matrixData}
@@ -598,124 +488,86 @@ const Indicators: React.FC = () => {
               )}
             </div>
 
-            {/* ── RISK DISCLAIMER (fills empty space below chart) ── */}
-            <div className="mt-2 border border-[#f6465d]/40 bg-gradient-to-br from-[#f6465d]/8 via-[#1a0f12] to-[#0b0e11] rounded-md overflow-hidden">
-              <div className="flex items-center gap-1.5 bg-[#f6465d]/15 px-2 py-1 border-b border-[#f6465d]/30">
+            {/* RIGHT PANEL — desktop only (mobile uses Sheet) */}
+            <aside className="hidden lg:block">
+              <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1 space-y-3">
+                {RightPanelContent}
+              </div>
+            </aside>
+          </div>
+
+          {/* DISCLAIMER + SETUPS + LOG (collapsible bottom area) */}
+          <div className="mt-3 space-y-3">
+            {/* Disclaimer */}
+            <div className="border border-[#f6465d]/40 bg-gradient-to-br from-[#f6465d]/10 via-[#1a0f12] to-[#0a0d11] rounded-xl overflow-hidden">
+              <div className="flex items-center gap-1.5 bg-[#f6465d]/15 px-3 py-1.5 border-b border-[#f6465d]/30">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#f6465d] animate-pulse" />
-                <span className="text-[9px] font-mono font-bold tracking-[0.2em] text-[#f6465d]">⚠️ CẢNH BÁO RỦI RO · DISCLAIMER</span>
-                <span className="ml-auto text-[8px] font-mono text-[#848e9c] uppercase tracking-wider">Đọc kỹ trước khi giao dịch</span>
+                <span className="text-[10px] font-mono font-bold tracking-[0.18em] text-[#f6465d]">⚠️ CẢNH BÁO RỦI RO · DISCLAIMER</span>
+                <span className="ml-auto text-[9px] font-mono text-[#848e9c] uppercase tracking-wider hidden sm:inline">Đọc kỹ trước khi giao dịch</span>
               </div>
-              <div className="p-2.5 space-y-1.5">
-                <p className="text-[10px] font-mono text-[#eaecef] leading-relaxed">
-                  <span className="text-[#fcd535] font-bold">Lưu ý kỹ:</span> Tất cả chỉ báo, tín hiệu và phân tích trên trang này <span className="text-[#f6465d] font-bold">KHÔNG PHẢI lời khuyên đầu tư</span>, chỉ là quan điểm và góc nhìn cá nhân của tác giả nhằm mục đích tham khảo & học hỏi.
-                </p>
-                <p className="text-[10px] font-mono text-[#848e9c] leading-relaxed">
-                  Giao dịch <span className="text-[#fcd535]">Crypto</span>, đặc biệt là <span className="text-[#fcd535]">Futures (phái sinh)</span>, luôn đi kèm với rủi ro biến động <span className="text-[#f6465d] font-bold">cực kỳ lớn</span> và có thể dẫn đến <span className="text-[#f6465d] font-bold">mất toàn bộ số vốn</span>.
-                </p>
-                <div className="flex items-center gap-2 pt-1 border-t border-[#2b3139]/60 mt-1">
-                  <span className="text-[14px]">🛡️</span>
-                  <p className="text-[10px] font-mono text-[#0ecb81] leading-relaxed flex-1">
-                    Bạn <span className="font-bold">phải tự chịu trách nhiệm</span> và tự quản trị rủi ro cho mọi quyết định xuống tiền của chính mình. <span className="text-[#848e9c]">DYOR · NFA · Trade safe.</span>
-                  </p>
+              <div className="p-3 grid md:grid-cols-3 gap-3 text-[10px] font-mono leading-relaxed">
+                <p className="text-[#eaecef]"><span className="text-[#fcd535] font-bold">Lưu ý kỹ:</span> Tất cả chỉ báo & phân tích <span className="text-[#f6465d] font-bold">KHÔNG PHẢI lời khuyên đầu tư</span>, chỉ tham khảo & học hỏi.</p>
+                <p className="text-[#848e9c]">Giao dịch <span className="text-[#fcd535]">Crypto/Futures</span> đi kèm rủi ro <span className="text-[#f6465d] font-bold">cực kỳ lớn</span>, có thể <span className="text-[#f6465d] font-bold">mất toàn bộ vốn</span>.</p>
+                <p className="text-[#0ecb81]">🛡️ Bạn <span className="font-bold">phải tự chịu trách nhiệm</span> cho mọi quyết định. <span className="text-[#848e9c]">DYOR · NFA · Trade safe.</span></p>
+              </div>
+            </div>
+
+            {/* Auto Trade Setups */}
+            <TradeSetupCards pair={activePair} livePrice={livePrice} candles={marketData.candles} votes={votes} strengthScore={strengthScore} />
+
+            {/* Collapsible System Log + AI SMC */}
+            <div className="border border-[#2b3139] rounded-xl overflow-hidden bg-[#0f1318]">
+              <button
+                onClick={() => setBottomOpen(o => !o)}
+                className="w-full flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-[#1a1f26] to-[#13171c] hover:bg-[#2b3139]/40 transition-colors"
+              >
+                <Activity className="w-3.5 h-3.5 text-[#fcd535]" />
+                <span className="text-[10px] font-mono font-bold tracking-[0.18em] text-[#eaecef]">SYSTEM LOG & AI SMC</span>
+                <ChevronDown className={`w-4 h-4 text-[#848e9c] ml-auto transition-transform ${bottomOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {bottomOpen && (
+                <div className="p-3 space-y-3">
+                  <div className="flex items-center gap-3 overflow-x-auto text-[10px] font-mono text-[#848e9c]">
+                    {logs.length === 0 ? <span>Chờ dữ liệu...</span> : logs.slice(0, 4).map((log, i) => (
+                      <span key={i} className={i === 0 ? 'text-[#fcd535]' : ''}>{log}</span>
+                    ))}
+                  </div>
+                  {smcResult.analysis && smcResult.analysis.action_points.length > 0 && (
+                    <div className="border-t border-[#2b3139] pt-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="w-3.5 h-3.5 text-[#fcd535]" />
+                        <span className="text-[10px] font-bold text-[#eaecef] tracking-widest font-mono">AI PHÂN TÍCH SMC</span>
+                        {smcResult.analysis.trade_signal.has_signal && (
+                          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
+                            smcResult.analysis.trade_signal.type === 'Long' ? 'text-[#0ecb81] bg-[#0ecb81]/10' : 'text-[#f6465d] bg-[#f6465d]/10'
+                          }`}>
+                            {smcResult.analysis.trade_signal.type === 'Long' ? '▲ LONG' : '▼ SHORT'}
+                          </span>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {smcResult.analysis.action_points.map((point, i) => (
+                          <div key={i} className="flex items-start gap-2 text-[11px] font-mono text-[#848e9c]">
+                            <span className="text-[#fcd535] shrink-0">{i + 1}.</span><span>{point}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {smcResult.analysis.trade_signal.has_signal && smcResult.analysis.trade_signal.entry_price && (
+                        <div className="flex items-center gap-4 mt-3 pt-2 border-t border-[#2b3139] text-[10px] font-mono flex-wrap">
+                          <span className="text-[#848e9c]">Entry: <span className="text-[#eaecef]">${smcResult.analysis.trade_signal.entry_price?.toLocaleString()}</span></span>
+                          <span className="text-[#0ecb81]">TP1: ${smcResult.analysis.trade_signal.TP1?.toLocaleString()}</span>
+                          <span className="text-[#0ecb81]">TP2: ${smcResult.analysis.trade_signal.TP2?.toLocaleString()}</span>
+                          <span className="text-[#0ecb81]">TP3: ${smcResult.analysis.trade_signal.TP3?.toLocaleString()}</span>
+                          <span className="text-[#f6465d]">SL: ${smcResult.analysis.trade_signal.SL?.toLocaleString()}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── RIGHT: Strength + AI + Top Movers + Triggers + Signals ── */}
-          <div className="bg-[#161a1e] p-3 flex flex-col min-h-0 space-y-3">
-            <IndicatorStrengthMeter votes={votes} />
-            <AIConfluenceCard
-              pair={activePair}
-              timeframe={activeTimeframe}
-              livePrice={livePrice}
-              votes={votes}
-              strengthScore={strengthScore}
-            />
-            <TopMoversPanel onSelect={(p) => {
-              if (PAIRS.find(x => x.symbol === p)) setActivePair(p);
-            }} />
-            <TriggerAlertsPanel watched={watchedTriggers} onChange={setWatchedTriggers} />
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-[10px] font-bold text-[#848e9c] tracking-widest uppercase font-mono">TÍN HIỆU GẦN ĐÂY</h3>
-                <span className="text-[10px] font-mono text-[#5e6673]">{signals.length}</span>
-              </div>
-              <div className="min-h-0">
-                <SignalFeed signals={signals} loading={signalsLoading} maxItems={5} />
-              </div>
-            </div>
-
-            {/* Liquidation Heatmap — fills bottom-right empty space */}
-            <LiquidationHeatmap />
-          </div>
-        </div>
-      </div>
-
-      {/* ═══ AUTO TRADE SETUPS ═══ */}
-      <div className="px-1.5 lg:px-3 pb-1">
-        <TradeSetupCards
-          pair={activePair}
-          livePrice={livePrice}
-          candles={marketData.candles}
-          votes={votes}
-          strengthScore={strengthScore}
-        />
-      </div>
-
-      {/* ═══ SYSTEM LOG ═══ */}
-      <div className="px-1.5 lg:px-3 pb-3">
-        <div className="bg-[#161a1e] border-t border-[#2b3139] px-4 py-2 flex items-center gap-3 overflow-x-auto">
-          <span className="text-[10px] font-bold text-[#5e6673] tracking-widest shrink-0 font-mono">SYSTEM LOG</span>
-          <div className="w-px h-3 bg-[#2b3139]" />
-          <div className="flex gap-4 text-[10px] font-mono text-[#848e9c]">
-            {logs.slice(0, 4).map((log, i) => (
-              <span key={i} className={i === 0 ? 'text-[#fcd535]' : ''}>{log}</span>
-            ))}
-            {logs.length === 0 && <span>Chờ dữ liệu...</span>}
-          </div>
-        </div>
-
-        {/* AI SMC Action Points */}
-        {smcResult.analysis && smcResult.analysis.action_points.length > 0 && (
-          <div className="mt-1 bg-[#161a1e] border border-[#2b3139] rounded px-4 py-3">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-[10px] font-bold text-[#848e9c] tracking-widest font-mono">🤖 AI PHÂN TÍCH SMC</span>
-              {smcResult.analysis.trade_signal.has_signal && (
-                <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
-                  smcResult.analysis.trade_signal.type === 'Long'
-                    ? 'text-[#0ecb81] bg-[#0ecb81]/10'
-                    : 'text-[#f6465d] bg-[#f6465d]/10'
-                }`}>
-                  {smcResult.analysis.trade_signal.type === 'Long' ? '▲ LONG' : '▼ SHORT'}
-                </span>
-              )}
-              {smcResult.loading && (
-                <span className="text-[10px] text-[#fcd535] font-mono animate-pulse">Đang phân tích...</span>
               )}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {smcResult.analysis.action_points.map((point, i) => (
-                <div key={i} className="flex items-start gap-2 text-[11px] font-mono text-[#848e9c]">
-                  <span className="text-[#fcd535] shrink-0">{i + 1}.</span>
-                  <span>{point}</span>
-                </div>
-              ))}
-            </div>
-            {smcResult.analysis.trade_signal.has_signal && smcResult.analysis.trade_signal.entry_price && (
-              <div className="flex items-center gap-4 mt-2 pt-2 border-t border-[#2b3139] text-[10px] font-mono">
-                <span className="text-[#848e9c]">Entry: <span className="text-[#eaecef]">${smcResult.analysis.trade_signal.entry_price?.toLocaleString()}</span></span>
-                <span className="text-[#0ecb81]">TP1: ${smcResult.analysis.trade_signal.TP1?.toLocaleString()}</span>
-                <span className="text-[#0ecb81]">TP2: ${smcResult.analysis.trade_signal.TP2?.toLocaleString()}</span>
-                <span className="text-[#0ecb81]">TP3: ${smcResult.analysis.trade_signal.TP3?.toLocaleString()}</span>
-                <span className="text-[#f6465d]">SL: ${smcResult.analysis.trade_signal.SL?.toLocaleString()}</span>
-              </div>
-            )}
           </div>
-        )}
-      </div>
-        </>
+        </div>
       )}
 
       <Footer />
