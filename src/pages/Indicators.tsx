@@ -623,6 +623,9 @@ const Indicators: React.FC = () => {
                 <SignalFeed signals={signals} loading={signalsLoading} maxItems={5} />
               </div>
             </div>
+
+            {/* Liquidation Heatmap — fills bottom-right empty space */}
+            <LiquidationHeatmap />
           </div>
         </div>
       </div>
