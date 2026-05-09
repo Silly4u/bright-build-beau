@@ -8,17 +8,39 @@ interface Pivot {
 }
 
 /**
- * Find pivot lows and pivot highs using a strict swing detection.
- * A pivot low: candle.low is strictly lower than `windowSize` candles on both sides.
- * A pivot high: candle.high is strictly higher than `windowSize` candles on both sides.
+ * ATR(14) — simple True Range moving average. Trả về mảng đồng độ dài candles
+ * (giá trị đầu = NaN cho các bar chưa đủ dữ liệu).
+ */
+function computeATR(candles: Candle[], period = 14): number[] {
+  const tr: number[] = [];
+  for (let i = 0; i < candles.length; i++) {
+    if (i === 0) { tr.push(candles[0].high - candles[0].low); continue; }
+    const c = candles[i], p = candles[i - 1];
+    tr.push(Math.max(
+      c.high - c.low,
+      Math.abs(c.high - p.close),
+      Math.abs(c.low - p.close),
+    ));
+  }
+  const atr: number[] = new Array(candles.length).fill(NaN);
+  let sum = 0;
+  for (let i = 0; i < tr.length; i++) {
+    sum += tr[i];
+    if (i >= period) sum -= tr[i - period];
+    if (i >= period - 1) atr[i] = sum / period;
+  }
+  return atr;
+}
+
+/**
+ * Pivot detection: high/low chặt — cao/thấp hơn nghiêm ngặt windowSize bar 2 bên.
  */
 function findPivots(candles: Candle[], windowSize = 5): { lows: Pivot[]; highs: Pivot[] } {
   const lows: Pivot[] = [];
   const highs: Pivot[] = [];
 
   for (let i = windowSize; i < candles.length - windowSize; i++) {
-    let isLow = true;
-    let isHigh = true;
+    let isLow = true, isHigh = true;
     for (let j = 1; j <= windowSize; j++) {
       if (candles[i].low >= candles[i - j].low || candles[i].low >= candles[i + j].low) isLow = false;
       if (candles[i].high <= candles[i - j].high || candles[i].high <= candles[i + j].high) isHigh = false;
@@ -26,13 +48,9 @@ function findPivots(candles: Candle[], windowSize = 5): { lows: Pivot[]; highs: 
     if (isLow) lows.push({ idx: i, price: candles[i].low, time: candles[i].time });
     if (isHigh) highs.push({ idx: i, price: candles[i].high, time: candles[i].time });
   }
-
   return { lows, highs };
 }
 
-/**
- * Build a line from two pivots: y = slope * x + intercept
- */
 function lineFromTwoPivots(a: Pivot, b: Pivot) {
   const slope = (b.price - a.price) / (b.idx - a.idx);
   const intercept = a.price - slope * a.idx;
@@ -40,142 +58,153 @@ function lineFromTwoPivots(a: Pivot, b: Pivot) {
 }
 
 /**
- * Count how many pivots "touch" the line within a tolerance (% of average price).
- * For a SUPPORT (low) trendline: no candle low should violate the line by more than tolerance.
- * For a RESISTANCE (high) trendline: no candle high should violate the line by more than tolerance.
+ * Score & validate một line:
+ *  - Tolerance touch/break tính theo ATR cục bộ tại từng bar (không fix %).
+ *  - Đường bị "phá" trong khoảng [a.idx, b.idx] thì loại bỏ.
+ *  - Sau b.idx, tiếp tục quét xem có break không → trả brokenIdx (>=0 nếu có).
  */
-function scoreLine(
+function scoreAndValidate(
   pivots: Pivot[],
   candles: Candle[],
+  atr: number[],
   slope: number,
   intercept: number,
   type: 'support' | 'resistance',
   startIdx: number,
   endIdx: number,
-  avgPrice: number,
-): { touches: number; valid: boolean } {
-  const touchTolerance = avgPrice * 0.003; // 0.3% — counts as a touch
-  const breakTolerance = avgPrice * 0.005; // 0.5% — beyond this the line is broken
-
-  let touches = 0;
-  let valid = true;
-
-  // Check that no candle BREAKS the line between startIdx and endIdx
+): { touches: number; valid: boolean; brokenIdx: number } {
+  // Validate trong phạm vi anchor
   for (let i = startIdx; i <= endIdx && i < candles.length; i++) {
     const lineY = slope * i + intercept;
-    if (type === 'support') {
-      // Candle low should not go significantly below the line
-      if (candles[i].low < lineY - breakTolerance) {
-        valid = false;
-        break;
-      }
-    } else {
-      // Candle high should not go significantly above the line
-      if (candles[i].high > lineY + breakTolerance) {
-        valid = false;
-        break;
-      }
-    }
+    const a = isFinite(atr[i]) ? atr[i] : 0;
+    const breakTol = a * 1.0; // 1 * ATR
+    if (type === 'support' && candles[i].close < lineY - breakTol) return { touches: 0, valid: false, brokenIdx: -1 };
+    if (type === 'resistance' && candles[i].close > lineY + breakTol) return { touches: 0, valid: false, brokenIdx: -1 };
   }
 
-  if (!valid) return { touches: 0, valid: false };
-
-  // Count pivot touches
+  // Đếm touch
+  let touches = 0;
   for (const p of pivots) {
     if (p.idx < startIdx || p.idx > endIdx) continue;
     const lineY = slope * p.idx + intercept;
-    if (Math.abs(p.price - lineY) <= touchTolerance) touches++;
+    const tol = (isFinite(atr[p.idx]) ? atr[p.idx] : 0) * 0.5; // 0.5 * ATR = touch
+    if (Math.abs(p.price - lineY) <= tol) touches++;
   }
 
-  return { touches, valid: true };
+  // Quét broken sau b.idx (close vượt > 1 ATR)
+  let brokenIdx = -1;
+  for (let i = endIdx + 1; i < candles.length; i++) {
+    const lineY = slope * i + intercept;
+    const a = isFinite(atr[i]) ? atr[i] : 0;
+    const breakTol = a * 1.0;
+    if (type === 'support' && candles[i].close < lineY - breakTol) { brokenIdx = i; break; }
+    if (type === 'resistance' && candles[i].close > lineY + breakTol) { brokenIdx = i; break; }
+  }
+
+  return { touches, valid: true, brokenIdx };
 }
 
 /**
- * Find the BEST price-action trendline from a set of pivots.
- * Approach:
- *  1. Try every pair of pivots (last ~12 pivots) as anchor points.
- *  2. For support: require slope to be non-strongly-negative AND each subsequent pivot makes a higher low (rough check).
- *  3. Score each candidate by # of touches; require it not be broken by intervening candles.
- *  4. Pick the line with the most touches (min 2 anchors + at least 1 extra touch preferred).
+ * Tìm trendline tốt nhất.
+ * Score = touches*10 + recencyBonus + nearPriceBonus
+ *   - recencyBonus: ưu tiên đường mà b.idx (anchor cuối) gần nến hiện tại.
+ *   - nearPriceBonus: ưu tiên đường mà giá hiện tại đang gần line (≤ 2*ATR).
+ *   - Đường BROKEN bị giảm điểm 50% nhưng vẫn giữ lại nếu broken trong vòng 8 bar gần nhất (vai trò role-reversal).
  */
 function findBestTrendline(
   pivots: Pivot[],
   candles: Candle[],
+  atr: number[],
   type: 'support' | 'resistance',
 ): AITrendline | null {
-  if (pivots.length < 2) return null;
+  if (pivots.length < 2 || candles.length < 30) return null;
 
-  // Use most recent pivots only
-  const recent = pivots.slice(-12);
-  const avgPrice = candles.reduce((s, c) => s + c.close, 0) / candles.length;
+  const recent = pivots.slice(-14);
+  const lastIdx = candles.length - 1;
+  const avgBarMs = (candles[lastIdx].time - candles[0].time) / Math.max(1, lastIdx);
+  const lastPrice = candles[lastIdx].close;
+  const refAtr = isFinite(atr[lastIdx]) ? atr[lastIdx] : (candles[lastIdx].high - candles[lastIdx].low);
 
-  let best: { line: AITrendline; touches: number } | null = null;
+  let best: { line: AITrendline; score: number } | null = null;
 
   for (let i = 0; i < recent.length - 1; i++) {
     for (let j = i + 1; j < recent.length; j++) {
-      const a = recent[i];
-      const b = recent[j];
-      if (b.idx - a.idx < 5) continue; // pivots too close
+      const a = recent[i], b = recent[j];
+      if (b.idx - a.idx < 5) continue;
 
       const { slope, intercept } = lineFromTwoPivots(a, b);
-
-      // Direction sanity: support should be flat-to-rising, resistance flat-to-falling.
-      // Allow gentle counter-slope (consolidation) but reject strong wrong-way.
       const slopePerBar = slope;
-      const slopePct = (slopePerBar / avgPrice) * 100; // % per bar
-      if (type === 'support' && slopePct < -0.5) continue;
-      if (type === 'resistance' && slopePct > 0.5) continue;
+      // Slope sanity: tính theo ATR — không cho line dốc vô lý.
+      // |slope| / ATR ≤ 0.5 nghĩa là mỗi bar không nhảy quá 0.5 ATR.
+      if (refAtr > 0 && Math.abs(slopePerBar) / refAtr > 0.5) continue;
+      // Hướng cơ bản: support không quá dốc xuống, resistance không quá dốc lên.
+      if (type === 'support' && slopePerBar < -refAtr * 0.15) continue;
+      if (type === 'resistance' && slopePerBar > refAtr * 0.15) continue;
 
-      const score = scoreLine(pivots, candles, slope, intercept, type, a.idx, b.idx, avgPrice);
-      if (!score.valid) continue;
-      if (score.touches < 2) continue; // need at least the 2 anchors
+      const sv = scoreAndValidate(pivots, candles, atr, slope, intercept, type, a.idx, b.idx);
+      if (!sv.valid) continue;
+      if (sv.touches < 2) continue;
 
-      // Extend line forward up to ~10 bars beyond last candle for projection
-      const startIdx = a.idx;
-      const endIdx = Math.min(candles.length - 1, b.idx + 15);
+      const broken = sv.brokenIdx >= 0;
+      // Loại đường bị phá quá lâu (>10 bar) — không còn ý nghĩa
+      const brokenAge = broken ? lastIdx - sv.brokenIdx : 0;
+      if (broken && brokenAge > 10) continue;
+
+      // Recency: b.idx càng gần lastIdx càng tốt
+      const recency = 1 - Math.min(1, (lastIdx - b.idx) / Math.max(20, lastIdx));
+      // Nearness: giá hiện tại gần line không?
+      const lineAtNow = slope * lastIdx + intercept;
+      const dist = Math.abs(lastPrice - lineAtNow) / Math.max(refAtr, 1e-9);
+      const nearness = Math.max(0, 1 - dist / 4); // 0 nếu cách >4 ATR
+
+      let score = sv.touches * 10 + recency * 5 + nearness * 6;
+      if (broken) score *= 0.5;
+
+      // Project end forward 15 bar nếu chưa broken, hoặc dừng tại brokenIdx
+      const projectionBars = broken ? 0 : 15;
+      const endIdxLogical = broken
+        ? sv.brokenIdx
+        : Math.min(lastIdx + projectionBars, lastIdx + 30);
+      const endIdxClamped = Math.min(endIdxLogical, lastIdx + 30);
+      const startTime = candles[a.idx].time;
+      const endTime = endIdxClamped <= lastIdx
+        ? candles[endIdxClamped].time
+        : candles[lastIdx].time + (endIdxClamped - lastIdx) * avgBarMs;
 
       const candidate: AITrendline = {
-        start: { time: candles[startIdx].time, price: slope * startIdx + intercept },
-        end: { time: candles[endIdx].time, price: slope * endIdx + intercept },
+        start: { time: startTime, price: slope * a.idx + intercept },
+        end: { time: endTime, price: slope * endIdxClamped + intercept },
+        broken,
+        brokenAt: broken ? candles[sv.brokenIdx].time : undefined,
+        slopePerBar,
+        touches: sv.touches,
       };
 
-      if (!best || score.touches > best.touches) {
-        best = { line: candidate, touches: score.touches };
-      }
+      if (!best || score > best.score) best = { line: candidate, score };
     }
   }
 
   return best?.line ?? null;
 }
 
-/**
- * Compute the most significant trendline (support OR resistance, whichever is stronger).
- */
 export function computeTrendline(candles: Candle[]): AITrendline | null {
   if (candles.length < 30) return null;
-
+  const atr = computeATR(candles, 14);
   const { lows, highs } = findPivots(candles, 5);
-  const support = findBestTrendline(lows, candles, 'support');
-  const resistance = findBestTrendline(highs, candles, 'resistance');
-
-  if (support && resistance) {
-    // Prefer the one with steeper recent relevance — fall back to support
-    return support;
-  }
+  const support = findBestTrendline(lows, candles, atr, 'support');
+  const resistance = findBestTrendline(highs, candles, atr, 'resistance');
   return support || resistance;
 }
 
-/**
- * Compute both support and resistance trendlines using strict price-action rules.
- */
 export function computeDualTrendlines(candles: Candle[]): {
   support: AITrendline | null;
   resistance: AITrendline | null;
 } {
   if (candles.length < 30) return { support: null, resistance: null };
+  const atr = computeATR(candles, 14);
   const { lows, highs } = findPivots(candles, 5);
   return {
-    support: findBestTrendline(lows, candles, 'support'),
-    resistance: findBestTrendline(highs, candles, 'resistance'),
+    support: findBestTrendline(lows, candles, atr, 'support'),
+    resistance: findBestTrendline(highs, candles, atr, 'resistance'),
   };
 }
