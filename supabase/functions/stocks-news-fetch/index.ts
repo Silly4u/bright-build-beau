@@ -48,7 +48,12 @@ async function aiTranslate(items: { ticker: string; title: string; summary: stri
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY || items.length === 0) return items.map(i => ({ title: i.title, summary: i.summary }));
 
-  const prompt = `Bạn là biên tập viên tài chính. Dịch và viết lại các tin tức cổ phiếu Mỹ sang TIẾNG VIỆT chuyên nghiệp, ngắn gọn, hấp dẫn nhà đầu tư Việt. Giữ nguyên tên công ty, ticker, số liệu. Trả về JSON ARRAY chính xác cùng số phần tử input, mỗi phần tử có { "title": string (tiếng Việt, <100 ký tự), "summary": string (tiếng Việt, 2-3 câu) }.
+  const prompt = `Bạn là biên tập viên tài chính. Dịch và viết lại các tin tức cổ phiếu Mỹ sang TIẾNG VIỆT chuyên nghiệp, ngắn gọn, hấp dẫn nhà đầu tư Việt. Giữ nguyên tên công ty, ticker, số liệu.
+
+TRẢ VỀ JSON HỢP LỆ DUY NHẤT theo dạng:
+{ "items": [ { "title": "tiêu đề tiếng Việt <100 ký tự", "summary": "tóm tắt tiếng Việt 2-3 câu" }, ... ] }
+
+Mảng "items" phải có ĐÚNG ${items.length} phần tử, theo đúng thứ tự input.
 
 Input:
 ${JSON.stringify(items, null, 2)}`;
