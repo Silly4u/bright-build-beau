@@ -49,7 +49,9 @@ const Sparkline: React.FC<{ data: number[]; up: boolean }> = ({ data, up }) => {
 const SignalCard: React.FC<Props> = ({ signal, style, currentPrice, now, onClick }) => {
   const ageMs = now - signal.createdAt;
   const isFresh = ageMs < 2 * 60 * 1000; // <2 phút
-  const delta = currentPrice && signal.price ? ((currentPrice - signal.price) / signal.price) * 100 : null;
+  const rawDelta = currentPrice && signal.price ? ((currentPrice - signal.price) / signal.price) * 100 : null;
+  // Bỏ qua delta phi thực tế (>50%) — thường do tín hiệu quá cũ hoặc data sai
+  const delta = rawDelta !== null && Math.abs(rawDelta) <= 50 ? rawDelta : null;
   const sparkUp = signal.sparkline.length >= 2
     ? signal.sparkline[signal.sparkline.length - 1] >= signal.sparkline[0]
     : true;
