@@ -200,8 +200,10 @@ const Indicators: React.FC = () => {
     <main className="min-h-screen bg-[#0b0e11]">
       <Header />
 
-      {/* ═══ TRADINGVIEW-STYLE TOP BAR ═══ */}
+      {/* ═══ BLOOMBERG-STYLE MARKET OVERVIEW BAR ═══ */}
       <div className="pt-24 px-1.5 lg:px-3">
+        <MarketOverviewBar />
+
         {/* Row 1: Big price + bid/ask */}
         <div className="bg-[#0b0e11] border-x border-t border-[#2b3139] rounded-t-md px-4 py-2.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
