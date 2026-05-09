@@ -5,6 +5,7 @@ import { Menu, X, LogIn, LogOut, Shield, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIndicatorPermissions } from '@/hooks/useIndicatorPermissions';
 import sphereLogo from '@/assets/uncletrader-logo.png';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const navLinks = [
   { href: '/', label: 'Trang Chủ' },
@@ -94,6 +95,7 @@ const Header: React.FC = () => {
                 Admin
               </Link>
             )}
+            <LanguageSwitcher />
             {user ? (
               <button
                 onClick={async () => { await signOut(); navigate('/'); }}
