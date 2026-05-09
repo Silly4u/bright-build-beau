@@ -69,9 +69,15 @@ const News: React.FC = () => {
   const [timeFilter, setTimeFilter] = useState<'all' | '1h' | '24h' | '7d'>('all');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
 
-  const { articles, market, loading } = useNewsData(activeStream === SAVED_TAB ? 'all' : activeStream);
+  const { articles, market, loading } = useNewsData(activeStream === SAVED_TAB || activeStream === FORYOU_TAB ? 'all' : activeStream);
   const { bookmarks } = useBookmarks();
-  const { isRead } = useReadHistory();
+  const { history, isRead } = useReadHistory();
+  const { topics: followedTopics, isFollowed, toggle: toggleFollow } = useFollowedTopics();
+  const { hidden, isHidden, hide, unhideAll } = useHiddenArticles();
+  const { ping } = useReadingStreak();
+
+  // Track streak khi user vào đọc tin
+  useEffect(() => { ping(); }, [ping]);
 
   // Ticker auto-rotate
   const hotArticles = articles.filter(a => a.stream === 'hot').slice(0, 5);
