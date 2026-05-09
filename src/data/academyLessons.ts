@@ -53,60 +53,124 @@ export const LESSONS: Lesson[] = [
     category: 'Price Action',
     title: '34 Mẫu Nến Tiếp Diễn Bạn Phải Thuộc',
     excerpt:
-      'Bộ sưu tập đầy đủ các mẫu nến tiếp diễn xu hướng — từ Rising/Falling Three Methods, Tasuki Gap đến Three Line Strike, kèm cách giao dịch thực chiến.',
-    duration: '25 phút',
+      'Bộ sưu tập đầy đủ các mẫu nến tiếp diễn xu hướng — từ Rising/Falling Three Methods, Tasuki Gap đến Three Line Strike, kèm cách giao dịch thực chiến, win-rate thống kê và checklist xác nhận.',
+    duration: '40 phút',
     level: 'Trung cấp',
     cover: coverContinuation,
     intro:
-      'Mẫu nến tiếp diễn (continuation pattern) là tín hiệu cho biết xu hướng hiện tại có khả năng cao tiếp tục sau giai đoạn nghỉ ngắn. Khác với mẫu đảo chiều, các mẫu này xuất hiện GIỮA xu hướng và là cơ hội vào lệnh thuận xu hướng với rủi ro thấp. Bài học tổng hợp 34 mẫu nến tiếp diễn quan trọng nhất, chia theo nhóm để bạn dễ ghi nhớ và áp dụng.',
+      'Mẫu nến tiếp diễn (continuation pattern) là tín hiệu cho biết xu hướng hiện tại có khả năng cao tiếp tục sau giai đoạn nghỉ ngắn. Khác với mẫu đảo chiều, các mẫu này xuất hiện GIỮA xu hướng và là cơ hội vào lệnh thuận xu hướng với rủi ro thấp — đặc biệt phù hợp với chiến lược "buy the dip / sell the rally". Bài học tổng hợp 34 mẫu nến tiếp diễn quan trọng nhất, chia theo 6 nhóm để bạn dễ ghi nhớ và áp dụng.',
+    history:
+      'Mẫu nến Nhật Bản được Munehisa Homma — thương nhân gạo Sakata thế kỷ 18 — phát triển khi quan sát thị trường gạo Dojima. Năm 1991, Steve Nison giới thiệu kỹ thuật này tới phương Tây qua cuốn "Japanese Candlestick Charting Techniques", và Thomas Bulkowski sau đó kiểm chứng tỷ lệ thành công của 100+ mẫu nến trên 38.500 chart, công bố trong "Encyclopedia of Candlestick Charts" (2008) — nguồn dữ liệu thống kê được trích dẫn trong bài này.',
     sections: [
       {
         heading: '1. Rising Three Methods (Tăng Ba Bước)',
-        body: 'Một nến tăng dài, theo sau là 3 nến giảm nhỏ nằm gọn trong thân nến đầu tiên, kết thúc bằng một nến tăng mạnh phá đỉnh nến đầu. Đây là tín hiệu tiếp tục xu hướng tăng cực mạnh.',
+        body: 'Một nến tăng dài, theo sau là 3 nến giảm nhỏ nằm gọn trong thân nến đầu tiên, kết thúc bằng một nến tăng mạnh phá đỉnh nến đầu. Đây là tín hiệu tiếp tục xu hướng tăng cực mạnh — Bulkowski thống kê win-rate 72% trên timeframe Daily.',
         bullets: [
           'Vào lệnh BUY khi nến số 5 đóng cửa trên đỉnh nến số 1',
-          'Stop-loss đặt dưới đáy thấp nhất của 3 nến giảm',
-          'Take-profit theo độ dài nến số 1 nhân 1.5–2',
+          'Stop-loss đặt dưới đáy thấp nhất của 3 nến giảm (vùng "phòng tuyến" của bên mua)',
+          'Take-profit theo độ dài nến số 1 nhân 1.5–2 (measured move)',
+          'Volume nến số 5 phải lớn hơn TB 3 nến giảm để xác nhận lực mua quay lại',
         ],
+        example:
+          'BTC/USDT D1, 14/03/2024: nến tăng dài từ 65.500 → 71.200, sau đó 3 nến giảm về 68.800 (vẫn nằm trong thân nến đầu), nến thứ 5 đóng tại 73.500 phá đỉnh — entry cho mục tiêu 78.500 (đạt sau 4 phiên).',
+        pitfall:
+          'Nếu 1 trong 3 nến giảm có thân vượt khỏi đáy nến đầu → mẫu vô hiệu. Đừng cố ép pattern khi không đúng.',
       },
       {
         heading: '2. Falling Three Methods (Giảm Ba Bước)',
-        body: 'Phiên bản đảo ngược: nến giảm dài, 3 nến tăng nhỏ trong thân, rồi nến giảm mạnh phá đáy. Tiếp diễn xu hướng giảm.',
+        body: 'Phiên bản đảo ngược: nến giảm dài, 3 nến tăng nhỏ trong thân, rồi nến giảm mạnh phá đáy. Tiếp diễn xu hướng giảm — win-rate ~68%.',
         bullets: [
           'SELL khi nến số 5 đóng dưới đáy nến số 1',
           'Stop-loss trên đỉnh cao nhất của 3 nến tăng',
+          'Phù hợp nhất trong downtrend mạnh có EMA 50 dốc xuống',
         ],
       },
       {
         heading: '3. Upside / Downside Tasuki Gap',
         body: 'Mẫu 3 nến có khoảng trống (gap) cùng chiều xu hướng. Nến thứ 3 ngược chiều nhưng KHÔNG lấp đầy gap — báo hiệu xu hướng còn nguyên động lực.',
+        bullets: [
+          'Upside Tasuki: gap up + 1 nến tăng + 1 nến giảm chưa đóng gap → BUY tại close nến 3',
+          'Áp dụng nhiều ở cổ phiếu/forex sau gap mở phiên hơn là crypto 24/7',
+        ],
+        pitfall: 'Nếu nến số 3 lấp đầy gap → mẫu fail, ưu tiên thoát lệnh.',
       },
       {
         heading: '4. Bullish / Bearish Three Line Strike',
-        body: '3 nến cùng chiều xu hướng nối tiếp, sau đó 1 nến ngược chiều "nhấn chìm" cả 3 nến trước. Nghịch lý: đây vẫn là tín hiệu TIẾP DIỄN, vì nến ngược chiều chỉ là cú rũ bỏ trước khi đi tiếp.',
+        body: '3 nến cùng chiều xu hướng nối tiếp, sau đó 1 nến ngược chiều "nhấn chìm" cả 3 nến trước. Nghịch lý: đây vẫn là tín hiệu TIẾP DIỄN, vì nến ngược chiều chỉ là cú rũ bỏ trước khi đi tiếp. Bulkowski xếp đây là mẫu tiếp diễn có win-rate cao nhất — 84% trên Daily.',
+        example:
+          'NQ futures Q1/2024 nhiều lần xuất hiện Bullish Three Line Strike trên H4 — nến strike thường khớp với fake breakdown của EMA 20.',
       },
       {
         heading: '5. Mat Hold Pattern',
-        body: 'Tương tự Rising Three nhưng nến thứ 2 mở cửa với gap tăng — cho thấy lực mua mạnh hơn nhiều. Độ tin cậy cao hơn Rising Three Methods.',
+        body: 'Tương tự Rising Three nhưng nến thứ 2 mở cửa với gap tăng — cho thấy lực mua mạnh hơn nhiều. Độ tin cậy cao hơn Rising Three Methods (~78%).',
       },
       {
         heading: '6. Separating Lines',
         body: 'Hai nến cùng giá mở cửa nhưng ngược chiều. Nến thứ 2 cùng chiều xu hướng → tiếp diễn. Thường xuất hiện sau nhịp pullback nhẹ.',
       },
       {
-        heading: '7. Side-by-Side White Lines (trong xu hướng tăng)',
-        body: 'Hai nến tăng có cùng giá mở cửa và độ dài tương đương, xuất hiện sau gap tăng. Thị trường nghỉ chân ngang trước khi tiếp tục bứt phá.',
+        heading: '7. Side-by-Side White/Black Lines',
+        body: 'Hai nến cùng màu, cùng giá mở cửa và độ dài tương đương, xuất hiện sau gap. Thị trường nghỉ chân ngang trước khi tiếp tục bứt phá.',
+        bullets: [
+          'White Lines (xu hướng tăng): cả 2 nến tăng → xác nhận động lực còn',
+          'Black Lines (xu hướng giảm): cả 2 nến giảm → xác nhận lực bán',
+        ],
       },
       {
-        heading: '8. On-Neck / In-Neck / Thrusting Pattern (trong xu hướng giảm)',
-        body: 'Nhóm 3 mẫu nến có nến tăng nhỏ không thể lấy lại được vùng giảm trước đó → người mua yếu, xu hướng giảm tiếp diễn.',
+        heading: '8. On-Neck / In-Neck / Thrusting Pattern',
+        body: 'Nhóm 3 mẫu nến trong xu hướng giảm: nến tăng nhỏ không thể lấy lại được vùng giảm trước đó → người mua yếu, xu hướng giảm tiếp diễn.',
+        bullets: [
+          'On-Neck: nến tăng đóng cửa = đáy nến giảm trước (yếu nhất)',
+          'In-Neck: đóng cửa hơi cao hơn đáy (vẫn yếu)',
+          'Thrusting: đóng cửa giữa thân nến giảm trước (mạnh hơn nhưng vẫn tiếp diễn giảm nếu nằm dưới EMA 200)',
+        ],
+      },
+      {
+        heading: '9. Bullish/Bearish Flag & Pennant (mẫu nến tổng hợp)',
+        body: 'Sau một "cột cờ" tăng/giảm mạnh, giá tích luỹ trong kênh dốc ngược (flag) hoặc tam giác hội tụ (pennant). Khi giá phá vỡ theo hướng cờ → tiếp diễn với mục tiêu = chiều dài cột cờ.',
+        bullets: [
+          'Cột cờ phải có volume bùng nổ, nhịp tích luỹ volume cạn dần',
+          'Breakout phải kèm volume gấp đôi 20-bar SMA',
+          'Phù hợp đa khung từ M5 đến D1',
+        ],
+        example: 'ETH/USDT H1 27/02/2024: cột cờ +6%, tam giác pennant 8 giờ, breakout +5.8% (gần đúng measured move).',
+      },
+      {
+        heading: '10. Ascending / Descending Triangle (tổng hợp)',
+        body: 'Tam giác tăng (đỉnh ngang + đáy cao dần) thường tiếp diễn xu hướng tăng; tam giác giảm ngược lại. Win-rate 68–73% khi breakout đúng hướng xu hướng chính.',
       },
     ],
     takeaways: [
       'Mẫu tiếp diễn = cơ hội vào lệnh THUẬN xu hướng — luôn an toàn hơn bắt đảo chiều',
-      'Luôn xác nhận với volume: nến phá vỡ phải có volume tăng',
-      'Kết hợp với EMA 50/200 để lọc tín hiệu giả',
-      'Đặt SL kỷ luật, không bao giờ "hy vọng" — mẫu nến cũng có thể fail',
+      'Luôn xác nhận với volume: nến phá vỡ phải có volume tăng ít nhất 1.5x TB 20',
+      'Kết hợp với EMA 50/200 để lọc tín hiệu giả: chỉ trade pattern cùng chiều EMA 200',
+      'Đặt SL kỷ luật, không bao giờ "hy vọng" — Bulkowski chứng minh ngay cả mẫu mạnh nhất cũng fail 16–28%',
+      'Multi-timeframe: pattern trên H4 mạnh hơn 3x pattern trên M15',
+    ],
+    checklist: [
+      '☐ Xu hướng chính (EMA 200 D1) cùng chiều pattern?',
+      '☐ Volume xác nhận trên nến phá vỡ?',
+      '☐ Vùng SL có nằm xa quá 2x ATR không (rủi ro chấp nhận được)?',
+      '☐ R:R mục tiêu ≥ 1:2?',
+      '☐ Không có resistance/support lớn trong vòng 1x ATR phía trước?',
+      '☐ Kiểm tra news lịch kinh tế trong 4h tới?',
+    ],
+    faqs: [
+      {
+        question: 'Mẫu tiếp diễn có hoạt động tốt trên crypto không?',
+        answer:
+          'Có, đặc biệt Flag/Pennant và Three Methods cho kết quả rất tốt trên BTC/ETH H1–H4. Tuy nhiên Tasuki Gap ít xuất hiện do crypto giao dịch 24/7 hiếm có gap đáng kể.',
+      },
+      {
+        question: 'Khung thời gian nào tốt nhất?',
+        answer:
+          'D1 và H4 cho tín hiệu chất lượng nhất. M5–M15 nhiễu nhiều, chỉ phù hợp scalper có kinh nghiệm và đã có context từ khung lớn.',
+      },
+      {
+        question: 'Win-rate thấp dù pattern đẹp, tôi sai gì?',
+        answer:
+          'Kiểm tra 3 lỗi phổ biến: (1) trade ngược xu hướng EMA 200, (2) bỏ qua xác nhận volume, (3) entry quá xa vùng pattern khiến SL rộng → R:R tệ.',
+      },
     ],
   },
   {
@@ -576,6 +640,38 @@ export const LESSONS: Lesson[] = [
         example:
           'ETH 2024-Q1: Fib 0.618 trùng với EMA 200 H4 và Order Block bullish. Khi giá chạm vùng này xuất hiện Bullish Engulfing → entry hoàn hảo, R:R 1:4.',
       },
+      {
+        heading: '4. Fibonacci Cluster — "Vùng vàng đa khung"',
+        body: 'Vẽ Fib trên 2–3 swing khác nhau (HTF + LTF) trên cùng một chart. Khi nhiều mức Fib từ các swing khác nhau hội tụ trong một vùng giá hẹp (cluster) → đây là vùng phản ứng mạnh nhất, "smart money zone".',
+        bullets: [
+          'Cách vẽ: Fib 1 từ đáy lớn nhất → đỉnh lớn nhất; Fib 2 từ đáy gần nhất → đỉnh gần nhất',
+          'Cluster lý tưởng: 0.618 của Fib lớn trùng 0.786 của Fib nhỏ trong khoảng giá < 0.5% biên độ',
+          'Phù hợp đặc biệt cho swing trader giữ lệnh 3–10 ngày',
+        ],
+        example:
+          'BTC 11/2023: Fib từ đáy 15.500 (FTX) → đỉnh 31.800 cho 0.382 = 25.580. Fib từ đáy 24.700 → đỉnh 31.800 cho 0.618 = 27.450. Cluster 25.500–27.500 → giá chạm và bật mạnh 4 lần liên tiếp.',
+      },
+      {
+        heading: '5. Fibonacci Time Zones',
+        body: 'Vẽ các đường dọc theo dãy Fibonacci (1, 2, 3, 5, 8, 13, 21 nến) từ đỉnh/đáy quan trọng. Các đường này hay trùng với thời điểm đảo chiều ngắn hạn — không chính xác như mức giá nhưng hữu ích để cảnh báo "sắp có biến động".',
+        pitfall:
+          'Time Zones thường gây ảo tưởng "tự thực hiện". Chỉ dùng làm bộ lọc phụ, không bao giờ làm tín hiệu chính.',
+      },
+      {
+        heading: '6. Fibonacci Fans & Arcs (nâng cao)',
+        body: 'Fan: 3 đường chéo từ swing low qua các mức 0.382/0.5/0.618 — hoạt động như trendline động. Arc: vòng cung dựa trên các mức Fib — đo cả thời gian lẫn giá. Phổ biến hơn trong cổ phiếu Mỹ và Forex.',
+      },
+      {
+        heading: '7. Quy tắc vẽ Fibonacci đúng',
+        body: 'Quy tắc 5 bước để tránh sai lệch:',
+        bullets: [
+          '1. Xác định xu hướng chính trên D1 (EMA 200 dốc lên/xuống)',
+          '2. Chọn swing impulse RÕ RÀNG nhất (≥ 3 nến cùng chiều, không có chồng lấp lớn)',
+          '3. Vẽ từ đầu sóng đến đỉnh sóng — dùng giá đóng cửa, không dùng râu nến (trừ khi râu rất ngắn)',
+          '4. Trong xu hướng tăng: vẽ từ low → high. Trong xu hướng giảm: vẽ từ high → low',
+          '5. Update Fib sau khi swing mới hình thành — đừng giữ Fib cũ "hi vọng"',
+        ],
+      },
     ],
     takeaways: [
       'Vùng 0.5–0.618 (golden pocket) là entry tốt nhất trong xu hướng',
@@ -661,10 +757,45 @@ export const LESSONS: Lesson[] = [
         ],
       },
       {
-        heading: '5. Áp dụng thực chiến',
+        heading: '5. Wave Personality — "Tính cách" của từng sóng',
+        body: 'Mỗi sóng có đặc điểm tâm lý và volume riêng. Nắm được "personality" giúp bạn xác định mình đang ở sóng nào dù chưa kết thúc.',
+        bullets: [
+          'Sóng 1: Volume thấp, tin tức tiêu cực, đa số nghĩ là pullback',
+          'Sóng 2: Sợ hãi tột độ, retail capitulate; volume giảm dần — KHÔNG được vượt đáy sóng 1',
+          'Sóng 3: Volume cao nhất, breakout S/R lớn, tin tức bắt đầu xoay chiều, FOMO',
+          'Sóng 4: Tích luỹ choppy, trader bị stop-loss liên tục — TRÁNH trade',
+          'Sóng 5: Volume thấp hơn sóng 3, divergence RSI/MACD, retail "all in" — chuẩn bị thoát',
+          'Sóng A: Tin xấu nhẹ, đa số nghĩ chỉ là correction',
+          'Sóng B: Bounce yếu, "bull trap" hoàn hảo — không trade',
+          'Sóng C: Capitulation, volume tăng vọt, panic — đáy thật chuẩn bị hình thành',
+        ],
+      },
+      {
+        heading: '6. Mẫu sóng đặc biệt cần thuộc',
+        body: 'Khoảng 30% chu kỳ Elliott không "chuẩn 5-3" mà rơi vào các biến thể sau:',
+        bullets: [
+          'Extension: 1 trong 3 sóng đẩy (thường sóng 3) kéo dài thành 5 sub-wave nhỏ',
+          'Truncated 5th: Sóng 5 không vượt đỉnh sóng 3 — dấu hiệu yếu, đảo chiều mạnh',
+          'Leading Diagonal (sóng 1 hoặc A): 5 sub-wave kiểu chồng lấp trong kênh hội tụ',
+          'Ending Diagonal (sóng 5 hoặc C): wedge cuối xu hướng — báo đảo chiều mạnh',
+          'Double/Triple Three: 2–3 mẫu A-B-C nối nhau bằng sóng X — điều chỉnh phức tạp',
+        ],
+      },
+      {
+        heading: '7. Quy tắc chia khung (Degree) Elliott',
+        body: 'Elliott phân chia sóng theo cấp (degree) từ Grand Supercycle (200+ năm) xuống Subminuette (vài giờ). Quy tắc vàng: phân tích từ HTF xuống LTF, không bao giờ ngược lại.',
+        bullets: [
+          'D1/W1 → đếm sóng cấp Primary/Intermediate cho swing trade',
+          'H4 → cấp Minor cho position 3–10 ngày',
+          'H1/M15 → cấp Minute/Subminuette cho intraday',
+          'Sóng cấp dưới luôn nằm bên trong sóng cấp trên — fractal',
+        ],
+      },
+      {
+        heading: '8. Áp dụng thực chiến',
         body: 'Entry tốt nhất là cuối sóng 2 (vào theo sóng 3 — sóng dài nhất). Tránh trade sóng 4 (choppy). Sóng 5 thường có divergence với RSI/MACD — cảnh báo sắp đảo chiều.',
         example:
-          'Đếm sóng trên D1, xác nhận trên H4. Khi sóng 2 hoàn tất tại Fib 0.618 + RSI oversold → entry BUY, TP tại 1.618 × sóng 1.',
+          'BTC W1 từ đáy 15.500 → đếm sóng cấp Primary. Trên D1: sóng 2 hoàn tất tại Fib 0.618 (19.500), RSI oversold + Bullish Engulfing → entry BUY, TP 1.618 × sóng 1 = ~35.000.',
       },
     ],
     takeaways: [
@@ -735,7 +866,49 @@ export const LESSONS: Lesson[] = [
         ],
       },
       {
-        heading: '4. Hệ thống RSI + MACD',
+        heading: '4. MACD Histogram — Tín hiệu sớm hơn cross',
+        body: 'Histogram là khoảng cách giữa MACD và Signal. Nó chuyển dấu TRƯỚC khi cross xảy ra → cho tín hiệu sớm 1–3 nến.',
+        bullets: [
+          'Histogram thu hẹp 3 nến liên tiếp ở vùng dương → cảnh báo top sắp đến',
+          'Histogram mở rộng từ âm sang dương → động lượng tăng đang quay lại',
+          '"Squeeze" — histogram nhỏ dần về 0 = trước biến động lớn (kết hợp BB)',
+        ],
+      },
+      {
+        heading: '5. Hidden Divergence — "Vũ khí bí mật" tiếp diễn',
+        body: 'Khác với regular divergence (đảo chiều), hidden divergence là tín hiệu tiếp diễn xu hướng — entry lý tưởng để vào theo trend sau pullback.',
+        bullets: [
+          'Hidden Bullish: Giá tạo đáy CAO HƠN, RSI tạo đáy THẤP HƠN → tiếp tục TĂNG',
+          'Hidden Bearish: Giá tạo đỉnh THẤP HƠN, RSI tạo đỉnh CAO HƠN → tiếp tục GIẢM',
+          'Win-rate cao hơn regular divergence vì trade thuận xu hướng',
+        ],
+        example:
+          'BTC H4 02/2024 trong uptrend: pullback tạo đáy 51.500 (cao hơn đáy trước 50.800), RSI lại xuống 38 (thấp hơn 42 trước đó) → Hidden Bullish, entry BUY hoàn hảo, giá lên 56.000 sau 3 ngày.',
+      },
+      {
+        heading: '6. Divergence Cheat Sheet — Bảng tra nhanh',
+        body: 'Phân loại 4 dạng divergence theo chiều giá và RSI:',
+        bullets: [
+          'Class A (mạnh nhất): Giá đỉnh cao hơn nhiều, RSI đỉnh THẤP HƠN nhiều → reversal mạnh',
+          'Class B: Giá tạo double top/bottom, RSI tạo đỉnh/đáy lệch nhau → reversal trung bình',
+          'Class C (yếu nhất): Giá đỉnh cao hơn, RSI đỉnh ngang → cảnh báo nhẹ, không entry độc lập',
+          'Hidden: Tín hiệu tiếp diễn — chỉ trade khi xu hướng chính rõ ràng',
+        ],
+        pitfall:
+          'Divergence cần CONFIRMATION. Đừng vào lệnh ngay khi thấy divergence — chờ giá break trendline ngắn hạn hoặc xuất hiện mẫu nến đảo chiều.',
+      },
+      {
+        heading: '7. Settings tối ưu theo timeframe',
+        body: 'RSI mặc định 14 phù hợp đa số. MACD mặc định 12-26-9 chuẩn cho swing. Tuy nhiên có thể tinh chỉnh:',
+        bullets: [
+          'Scalping (M1–M5): RSI 7–9, MACD 5-13-5 (nhạy, nhanh)',
+          'Day trading (M15–H1): RSI 14, MACD 12-26-9 (chuẩn)',
+          'Swing trading (H4–D1): RSI 14–21, MACD 19-39-9 (mượt hơn, ít noise)',
+          'Position trading (D1–W1): RSI 21, MACD 50-100-9 (lọc cực mạnh)',
+        ],
+      },
+      {
+        heading: '8. Hệ thống RSI + MACD thực chiến',
         body: 'Chỉ vào lệnh khi 2 chỉ báo cùng tín hiệu. VD entry BUY: RSI thoát vùng oversold + MACD cross bullish trên đường 0. Winrate hệ thống này thường 60–70% trên H4.',
         example:
           'ETH H4 ngày 10/01/2024: RSI từ 28 lên 35 (thoát oversold) + MACD histogram chuyển dương + cross trên signal → BUY tại 2.250, TP 2.500 (R:R 1:2.5).',
@@ -820,6 +993,46 @@ export const LESSONS: Lesson[] = [
           'Ghi nhật ký: cảm xúc lúc vào lệnh, kết quả, bài học',
         ],
       },
+      {
+        heading: '6. 7 Cognitive Bias chính của trader',
+        body: 'Hiểu các bias để nhận diện chúng đang ảnh hưởng quyết định của bạn:',
+        bullets: [
+          'Confirmation Bias: Chỉ tìm thông tin xác nhận quan điểm sẵn có → bỏ qua tín hiệu ngược chiều',
+          'Anchoring Bias: Bám vào giá mua đầu tiên → từ chối cắt lỗ vì "giá sẽ về"',
+          'Recency Bias: Coi trọng sự kiện gần đây quá mức → over-react sau 1 đêm crash',
+          'Hindsight Bias: "Tôi đã biết trước rồi" → tự tin sai lầm cho lệnh sau',
+          'Sunk Cost Fallacy: Đã thua nhiều rồi nên gồng tiếp → hố sâu hơn',
+          'Gambler\u2019s Fallacy: "Đã thua 5 lệnh rồi nên lệnh sau chắc thắng" → mỗi lệnh độc lập với nhau',
+          'Bandwagon Effect: Theo đám đông Twitter/Telegram → bị xả hàng cho',
+        ],
+      },
+      {
+        heading: '7. Pre-Mortem — Tự tưởng tượng thất bại trước',
+        body: 'Kỹ thuật của Gary Klein: TRƯỚC khi vào lệnh, dành 60 giây tưởng tượng "lệnh này thua thảm vì sao?". Liệt kê 3 kịch bản thất bại lớn nhất.',
+        bullets: [
+          'Buộc não chuyển từ FOMO sang phân tích rủi ro',
+          'Phát hiện scenarios bạn chưa lập kế hoạch (gap, tin bất ngờ, slippage)',
+          'Khi đã "chấp nhận" thất bại trước → ít panic khi giá ngược chiều',
+        ],
+        example:
+          'Trước khi BUY BTC tại 64.000: pre-mortem 3 kịch bản → (1) FED hawkish bất ngờ → -8%, (2) ETF outflow lớn → -5%, (3) Mt.Gox refund → flash crash. Giải pháp: SL chặt 2%, position size nhỏ hơn 30%.',
+      },
+      {
+        heading: '8. Mental Capital — Vốn tinh thần',
+        body: 'Như tài khoản tiền, bạn có "tài khoản tinh thần" cũng cạn dần qua mỗi lệnh thua, mỗi giờ stress. Hết Mental Capital → không thể trade tốt dù còn tiền.',
+        bullets: [
+          'Daily reset: thiền 10 phút trước phiên, walk 20 phút sau phiên',
+          'Weekly reset: 1 ngày OFF hoàn toàn — không xem chart, không news',
+          'Monthly reset: 2–3 ngày OFF nếu drawdown > 5%',
+          'Sleep: 7–8 giờ là KHÔNG THƯƠNG LƯỢNG. Thiếu ngủ = trade kém như say rượu',
+        ],
+      },
+      {
+        heading: '9. Trading Journal — Vũ khí #1 chống bias',
+        body: 'Mỗi lệnh ghi chép 8 trường: (1) Setup name, (2) Entry/SL/TP, (3) Lý do entry, (4) Cảm xúc lúc vào, (5) Cảm xúc trong khi giữ, (6) Lý do exit, (7) Kết quả, (8) Bài học. Review 1 lần/tuần.',
+        pitfall:
+          'Đa số trader chỉ ghi entry/exit + P&L → vô dụng. Phải ghi CẢM XÚC và LÝ DO mới phát hiện bias lặp lại.',
+      },
     ],
     takeaways: [
       'Tâm lý ổn định = lợi nhuận bền vững',
@@ -902,7 +1115,46 @@ export const LESSONS: Lesson[] = [
       },
       {
         heading: '5. Kumo Twist & Kumo Breakout',
-        body: 'Kumo Twist: Senkou A và B đổi chỗ → cảnh báo đảo chiều xu hướng dài hạn. Kumo Breakout: giá phá Mây sau giai đoạn tích lũy → tín hiệu vào lệnh mạnh, R:R cao.',
+        body: 'Kumo Twist: Senkou A và B đổi chỗ trong tương lai → cảnh báo đảo chiều xu hướng dài hạn 26 phiên trước khi xảy ra (đặc tính dịch tiến của Senkou). Kumo Breakout: giá phá Mây sau giai đoạn tích lũy → tín hiệu vào lệnh mạnh, R:R cao.',
+        bullets: [
+          'Twist trong Kumo tương lai = "lá cờ cảnh báo" sớm nhất của Ichimoku',
+          'Breakout: chờ 1 nến xác nhận đóng cửa hoàn toàn ngoài Mây',
+          'Volume tại nến breakout phải ≥ 1.5× SMA20 volume',
+        ],
+        example:
+          'BTC D1 10/2023: Kumo Twist xanh xuất hiện trong tương lai khi giá còn dưới Mây ở 28k. Sau 18 ngày, giá phá Mây tại 31k → entry BUY chuẩn, đạt 44k trong 5 tuần.',
+      },
+      {
+        heading: '6. Chikou Span — "Quá khứ" xác nhận hiện tại',
+        body: 'Chikou Span là giá đóng cửa hôm nay dịch lùi 26 phiên. Quy tắc: Chikou phải ở khoảng "trống" — không bị nến quá khứ cản → xác nhận xu hướng "trong sạch".',
+        bullets: [
+          'Chikou trên giá quá khứ + tách rời rõ → bullish strong',
+          'Chikou dưới giá quá khứ + tách rời → bearish strong',
+          'Chikou bị "kẹt" vào nến quá khứ → tín hiệu yếu, hoãn entry',
+        ],
+        pitfall:
+          '90% trader bỏ qua Chikou — đây chính là "lá chắn" lọc fake breakout. Bộ Hosoda thiết kế Chikou để "double confirm" mọi setup.',
+      },
+      {
+        heading: '7. TK Cross — Phân loại 3 cấp độ',
+        body: 'Không phải mọi TK Cross đều giá trị như nhau. Phân loại theo vị trí so với Mây:',
+        bullets: [
+          'Strong Cross (cấp 1): Cross XẢY RA TRÊN Mây (cho BUY) — winrate ~75%',
+          'Neutral Cross (cấp 2): Cross XẢY RA TRONG Mây — winrate ~55%, chờ confirm',
+          'Weak Cross (cấp 3): Cross XẢY RA DƯỚI Mây — winrate ~35%, chỉ trade nếu có context khác mạnh',
+        ],
+      },
+      {
+        heading: '8. Hệ thống "Ichimoku Pure" — không cần chỉ báo khác',
+        body: 'Quy trình 6 bước trade chuẩn Ichimoku Pure:',
+        bullets: [
+          '1. Xác định xu hướng D1 qua vị trí giá vs Mây',
+          '2. Chuyển xuống H4: chờ TK Cross cùng chiều xu hướng D1',
+          '3. Đếm 5/5 điều kiện (TK cross + trên/dưới Mây + Chikou + Mây tương lai)',
+          '4. Entry tại nến đóng cửa xác nhận, SL dưới/trên Kijun-sen',
+          '5. TP1 tại Mây tiếp theo, TP2 tại extension 1.618 swing trước',
+          '6. Trail SL theo Kijun-sen: thoát khi giá đóng cửa qua Kijun',
+        ],
       },
     ],
     takeaways: [
