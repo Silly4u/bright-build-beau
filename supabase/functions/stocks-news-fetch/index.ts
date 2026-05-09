@@ -95,12 +95,25 @@ serve(async (req) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // 1) Fetch company news for each ticker (parallel, up to 5 articles each)
+    // Helpers
+    const isPlaceholderImage = (u?: string) => {
+      if (!u) return true;
+      const s = u.toLowerCase();
+      return (
+        s.includes("yahoo_finance_en-us_h_p_finance") ||
+        s.includes("yimg.com/rz/stage") ||
+        s.endsWith("/placeholder.svg") ||
+        s.includes("default_news") ||
+        s.length < 12
+      );
+    };
+
+    // 1) Fetch company news for each ticker (parallel, up to 8 articles each)
     const all: { ticker: string; n: FinnhubNews }[] = [];
     const results = await Promise.all(TICKERS.map(t => fetchCompanyNews(t, FINNHUB_API_KEY)));
     results.forEach((arr, i) => {
       const ticker = TICKERS[i];
-      arr.slice(0, 5).forEach(n => all.push({ ticker, n }));
+      arr.slice(0, 8).forEach(n => all.push({ ticker, n }));
     });
 
     if (all.length === 0) {
@@ -109,22 +122,49 @@ serve(async (req) => {
       });
     }
 
-    // 2) Dedup against existing external_ids
-    const externalIds = all.map(x => `${x.ticker}:${x.n.id}`);
+    // 2) Dedup WITHIN BATCH by external_id (Finnhub returns same article for many tickers).
+    //    Keep first occurrence; that ticker becomes the "primary" symbol for the news.
+    const seenIds = new Set<string>();
+    const uniqueAll = all.filter(x => {
+      const key = String(x.n.id);
+      if (seenIds.has(key)) return false;
+      seenIds.add(key);
+      return true;
+    });
+
+    // 3) Dedup against existing external_ids in DB (any symbol)
+    const externalIds = uniqueAll.map(x => String(x.n.id));
     const { data: existing } = await sb
       .from("stock_news")
-      .select("symbol, external_id")
+      .select("external_id")
       .in("external_id", externalIds);
-    const existSet = new Set((existing || []).map((r: any) => `${r.symbol}:${r.external_id}`));
+    const existSet = new Set((existing || []).map((r: any) => r.external_id));
 
-    const fresh = all.filter(x => !existSet.has(`${x.ticker}:${x.n.id}`));
+    // Also dedup by normalized title within last 72h (catches articles without external_id collisions)
+    const since = new Date(Date.now() - 72 * 3600 * 1000).toISOString();
+    const { data: recentTitles } = await sb
+      .from("stock_news")
+      .select("title, original_title")
+      .gte("published_at", since);
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 80);
+    const titleSet = new Set(
+      (recentTitles || []).flatMap((r: any) => [norm(r.title || ""), norm(r.original_title || "")]).filter(Boolean)
+    );
+
+    const fresh = uniqueAll.filter(x => {
+      if (existSet.has(String(x.n.id))) return false;
+      if (titleSet.has(norm(x.n.headline))) return false;
+      titleSet.add(norm(x.n.headline)); // also dedup within current batch by title
+      return true;
+    });
+
     if (fresh.length === 0) {
       return new Response(JSON.stringify({ inserted: 0, message: "All news already exist" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // 3) Pick top 10 most recent for AI translation, rest stay English
+    // 4) Pick top 10 most recent for AI translation, rest stay English
     fresh.sort((a, b) => b.n.datetime - a.n.datetime);
     const top10 = fresh.slice(0, 10);
     const rest = fresh.slice(10);
@@ -135,7 +175,7 @@ serve(async (req) => {
       summary: x.n.summary,
     })));
 
-    // 4) Build rows
+    // 5) Build rows — strip placeholder images so frontend can use ticker-based fallback
     const rows = [
       ...top10.map((x, i) => ({
         symbol: x.ticker,
@@ -145,7 +185,7 @@ serve(async (req) => {
         full_content: x.n.summary,
         source: x.n.source || "Finnhub",
         url: x.n.url,
-        image_url: x.n.image || null,
+        image_url: isPlaceholderImage(x.n.image) ? null : x.n.image,
         published_at: new Date(x.n.datetime * 1000).toISOString(),
         ai_translated: true,
         external_id: String(x.n.id),
@@ -158,7 +198,7 @@ serve(async (req) => {
         full_content: x.n.summary,
         source: x.n.source || "Finnhub",
         url: x.n.url,
-        image_url: x.n.image || null,
+        image_url: isPlaceholderImage(x.n.image) ? null : x.n.image,
         published_at: new Date(x.n.datetime * 1000).toISOString(),
         ai_translated: false,
         external_id: String(x.n.id),
