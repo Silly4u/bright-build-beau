@@ -74,7 +74,7 @@ ${JSON.stringify(items, null, 2)}`;
     });
     if (!res.ok) {
       console.error("AI translate failed:", res.status, await res.text());
-      return items.map(i => ({ title: i.title, summary: i.summary }));
+      return items.map(i => ({ title: i.title, summary: i.summary, ok: false }));
     }
     const json = await res.json();
     const content = json.choices?.[0]?.message?.content || "{}";
