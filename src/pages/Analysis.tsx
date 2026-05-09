@@ -609,7 +609,7 @@ const Analysis: React.FC = () => {
               {/* Filter chips */}
               <div className="px-2 py-2 border-b border-foreground/5 space-y-1.5">
                 <div className="flex gap-1 overflow-x-auto scrollbar-thin">
-                  {(['ALL', 'BTC', 'GOLD', 'ETH'] as const).map(s => (
+                  {(['ALL', 'BTC', 'GOLD'] as const).map(s => (
                     <button
                       key={s}
                       onClick={() => setSignalSymbolFilter(s)}
