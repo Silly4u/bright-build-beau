@@ -1,12 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-
-const STATS = [
-  { label: 'Tỉ lệ thắng', value: 78, prefix: '', suffix: '%', decimals: 0 },
-  { label: 'Thành viên cộng đồng', value: 2.4, prefix: '', suffix: 'K+', decimals: 1 },
-  { label: 'Signals đã gửi', value: 400, prefix: '', suffix: '+', decimals: 0 },
-  { label: 'Năm kinh nghiệm', value: 7, prefix: '', suffix: '+', decimals: 0 },
-];
+import { useTranslation } from 'react-i18next';
 
 const Counter: React.FC<{ to: number; decimals?: number; prefix?: string; suffix?: string }> = ({ to, decimals = 0, prefix = '', suffix = '' }) => {
   const [val, setVal] = useState(0);
@@ -36,24 +30,31 @@ const Counter: React.FC<{ to: number; decimals?: number; prefix?: string; suffix
 };
 
 const VertexStats: React.FC = () => {
+  const { t } = useTranslation();
+  const STATS = [
+    { key: 'winrate', value: 78, suffix: '%', decimals: 0 },
+    { key: 'members', value: 2.4, suffix: 'K+', decimals: 1 },
+    { key: 'signals', value: 400, suffix: '+', decimals: 0 },
+    { key: 'years', value: 7, suffix: '+', decimals: 0 },
+  ];
   return (
     <section className="relative py-20 md:py-28 z-10">
       <div className="max-w-7xl mx-auto px-6 md:px-10">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 items-end">
           <div className="md:col-span-5">
-            <p className="font-mono uppercase tracking-[0.3em] text-xs text-white/50">Bằng số liệu</p>
+            <p className="font-mono uppercase tracking-[0.3em] text-xs text-white/50">{t('stats.eyebrow')}</p>
             <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl mt-3 font-bold leading-[1]">
-              Xây như <span className="text-accent-gradient">hạ tầng</span>.
+              {t('stats.title1')} <span className="text-accent-gradient">{t('stats.title2')}</span>.
             </h2>
             <p className="mt-5 text-white/55 max-w-md">
-              Số liệu công khai, signal có lịch sử rõ ràng, kết quả minh bạch — kiểm tra mọi lúc trên dashboard.
+              {t('stats.desc')}
             </p>
           </div>
 
           <div className="md:col-span-7 grid grid-cols-2 gap-4 md:gap-6">
             {STATS.map((s, i) => (
               <motion.div
-                key={s.label}
+                key={s.key}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-80px' }}
@@ -62,10 +63,10 @@ const VertexStats: React.FC = () => {
               >
                 <div className="text-5xl md:text-6xl font-bold leading-none">
                   <span className="text-accent-gradient">
-                    <Counter to={s.value} prefix={s.prefix} suffix={s.suffix} decimals={s.decimals} />
+                    <Counter to={s.value} suffix={s.suffix} decimals={s.decimals} />
                   </span>
                 </div>
-                <div className="mt-3 text-sm text-white/60 font-mono uppercase tracking-wider">{s.label}</div>
+                <div className="mt-3 text-sm text-white/60 font-mono uppercase tracking-wider">{t(`stats.items.${s.key}`)}</div>
               </motion.div>
             ))}
           </div>

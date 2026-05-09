@@ -2,10 +2,12 @@ import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowUpRight, MessageCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { CONTACT_INFO } from '@/lib/contact';
 import sphereLogo from '@/assets/vertex-sphere.png';
 
 const VertexCTA: React.FC = () => {
+  const { t } = useTranslation();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
   const y = useTransform(scrollYProgress, [0, 1], [80, -80]);
@@ -31,17 +33,17 @@ const VertexCTA: React.FC = () => {
           </motion.div>
 
           <div className="relative max-w-2xl">
-            <p className="font-mono uppercase tracking-[0.3em] text-xs text-white/50">Sẵn sàng?</p>
+            <p className="font-mono uppercase tracking-[0.3em] text-xs text-white/50">{t('cta.eyebrow')}</p>
             <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl mt-3 font-bold leading-[1]">
-              Tham gia <span className="text-accent-gradient">UncleTrader</span> hôm nay.
+              {t('cta.title1')} <span className="text-accent-gradient">UncleTrader</span> {t('cta.title2')}
             </h2>
             <p className="mt-5 text-white/65 text-base md:text-lg max-w-xl">
-              Đăng ký miễn phí, kết nối Telegram VIP, và bắt đầu trade theo hệ thống đã được kiểm chứng cùng cộng đồng trader Việt.
+              {t('cta.desc')}
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link to="/auth" className="btn-primary inline-flex items-center gap-2 px-6 py-3.5 rounded-full text-sm md:text-base">
-                Bắt đầu miễn phí <ArrowUpRight size={18} />
+                {t('cta.primary')} <ArrowUpRight size={18} />
               </Link>
               <a
                 href={CONTACT_INFO.telegramUrl}
@@ -50,7 +52,7 @@ const VertexCTA: React.FC = () => {
                 className="btn-ghost inline-flex items-center gap-2 px-6 py-3.5 rounded-full text-sm md:text-base"
               >
                 <MessageCircle size={16} />
-                Liên hệ Telegram
+                {t('cta.telegram')}
               </a>
             </div>
           </div>

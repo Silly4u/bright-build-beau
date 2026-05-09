@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { fetchBinanceTickers } from '@/lib/binance';
 
 const COINS = [
@@ -24,6 +25,7 @@ const fmt = (n: number) => {
 };
 
 const VertexLivePrices: React.FC = () => {
+  const { t } = useTranslation();
   const [rows, setRows] = useState<Row[]>(COINS.map((c) => ({ symbol: c.symbol, color: c.color, price: 0, change: 0 })));
 
   useEffect(() => {
@@ -48,21 +50,20 @@ const VertexLivePrices: React.FC = () => {
     return () => { mounted = false; clearInterval(id); };
   }, []);
 
-  // Duplicate rows for seamless marquee
   const track = [...rows, ...rows];
 
   return (
     <section className="relative py-12 md:py-16 z-10">
       <div className="max-w-7xl mx-auto px-6 md:px-10 mb-6 flex items-end justify-between gap-4">
         <div>
-          <p className="font-mono uppercase tracking-[0.3em] text-xs text-white/50">Live markets</p>
+          <p className="font-mono uppercase tracking-[0.3em] text-xs text-white/50">{t('livePrices.eyebrow')}</p>
           <h3 className="font-display text-2xl md:text-3xl mt-2">
-            Thị trường <span className="text-accent-gradient">thời gian thực</span>
+            {t('livePrices.title1')} <span className="text-accent-gradient">{t('livePrices.title2')}</span>
           </h3>
         </div>
         <div className="hidden md:flex items-center gap-2 text-xs font-mono text-white/50">
           <span className="w-2 h-2 rounded-full bg-[#00D2D3] animate-pulse" />
-          streaming · Binance
+          {t('livePrices.streaming')}
         </div>
       </div>
 
