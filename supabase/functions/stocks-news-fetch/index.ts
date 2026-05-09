@@ -178,12 +178,12 @@ serve(async (req) => {
       });
     }
 
-    // 4) Pick top 10 most recent for AI translation, rest stay English
+    // 4) Pick top 20 most recent for AI translation, rest stay English
     fresh.sort((a, b) => b.n.datetime - a.n.datetime);
-    const top10 = fresh.slice(0, 10);
-    const rest = fresh.slice(10);
+    const top = fresh.slice(0, 20);
+    const rest = fresh.slice(20);
 
-    const translated = await aiTranslate(top10.map(x => ({
+    const translated = await aiTranslate(top.map(x => ({
       ticker: x.ticker,
       title: x.n.headline,
       summary: x.n.summary,
@@ -191,7 +191,7 @@ serve(async (req) => {
 
     // 5) Build rows — strip placeholder images so frontend can use ticker-based fallback
     const rows = [
-      ...top10.map((x, i) => ({
+      ...top.map((x, i) => ({
         symbol: x.ticker,
         title: translated[i].title,
         original_title: x.n.headline,
@@ -201,7 +201,7 @@ serve(async (req) => {
         url: x.n.url,
         image_url: isPlaceholderImage(x.n.image) ? null : x.n.image,
         published_at: new Date(x.n.datetime * 1000).toISOString(),
-        ai_translated: true,
+        ai_translated: translated[i].ok === true,
         external_id: String(x.n.id),
       })),
       ...rest.map(x => ({
@@ -222,10 +222,11 @@ serve(async (req) => {
     const { error } = await sb.from("stock_news").insert(rows);
     if (error) throw error;
 
+    const okCount = translated.filter(t => t.ok).length;
     return new Response(JSON.stringify({
       inserted: rows.length,
-      ai_translated: top10.length,
-      english_only: rest.length,
+      ai_translated: okCount,
+      english_only: rows.length - okCount,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
