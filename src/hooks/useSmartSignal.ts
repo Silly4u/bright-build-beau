@@ -74,8 +74,14 @@ function detectAt(
   if (resistanceZones.some(z => prev.close < z.top && curr.close > z.top)) {
     conditions.push({ key: 'breakout', msg: `${sym} breakout khỏi vùng kháng cự — momentum tăng mạnh` });
   }
+  if (supportZones.some(z => prev.close > z.bottom && curr.close < z.bottom)) {
+    conditions.push({ key: 'breakdown', msg: `${sym} phá thủng vùng hỗ trợ — áp lực bán mạnh` });
+  }
   if (supportZones.some(z => Math.abs(curr.close - (z.top + z.bottom) / 2) / curr.close < 0.005)) {
     conditions.push({ key: 'support_touch', msg: `${sym} chạm vùng hỗ trợ AI — theo dõi phản ứng giá` });
+  }
+  if (resistanceZones.some(z => Math.abs(curr.close - (z.top + z.bottom) / 2) / curr.close < 0.005)) {
+    conditions.push({ key: 'resistance_touch', msg: `${sym} chạm vùng kháng cự AI — theo dõi phản ứng giá` });
   }
   if (bbWidth && prevBbWidth && bbWidth < prevBbWidth * 0.92) {
     conditions.push({ key: 'bb_squeeze', msg: `BB Squeeze trên ${sym} — BB width giảm ${((1 - bbWidth / prevBbWidth) * 100).toFixed(1)}%` });
@@ -83,23 +89,34 @@ function detectAt(
   if (bbUpper && curr.close > bbUpper) {
     conditions.push({ key: 'bb_breakout', msg: `${sym} phá vỡ BB Upper — tín hiệu breakout mạnh` });
   }
+  if (bbLower && curr.close < bbLower && prev.close >= (indicators.bb.lower[n - 1] || bbLower)) {
+    conditions.push({ key: 'bb_breakdown', msg: `${sym} thủng BB Lower — tín hiệu giảm mạnh` });
+  }
   if (bbLower && curr.close <= bbLower && supportZones.some(z => curr.close >= z.bottom && curr.close <= z.top)) {
     conditions.push({ key: 'bb_oversold', msg: `🔥 VIP: ${sym} chạm BB Lower + vùng hỗ trợ AI — cơ hội mua cực tốt` });
+  }
+  if (bbUpper && curr.close >= bbUpper && resistanceZones.some(z => curr.close >= z.bottom && curr.close <= z.top)) {
+    conditions.push({ key: 'bb_overbought', msg: `🔻 VIP: ${sym} chạm BB Upper + vùng kháng cự AI — cơ hội short cực tốt` });
   }
   const twoBack = candles[n - 2];
   if (twoBack) {
     const pct = ((curr.close - twoBack.close) / twoBack.close) * 100;
     const threshold = sym === 'XAU' || sym === 'GOLD' ? 0.8 : 1.5;
-    if (Math.abs(pct) > threshold) {
-      conditions.push({ key: 'momentum', msg: `${sym} ${pct > 0 ? 'tăng' : 'giảm'} ${Math.abs(pct).toFixed(2)}% trong 2 nến — momentum ${pct > 0 ? 'mạnh' : 'yếu'}` });
+    if (pct > threshold) {
+      conditions.push({ key: 'momentum', msg: `${sym} tăng ${pct.toFixed(2)}% trong 2 nến — momentum mạnh` });
+    } else if (pct < -threshold) {
+      conditions.push({ key: 'momentum_down', msg: `${sym} giảm ${Math.abs(pct).toFixed(2)}% trong 2 nến — momentum giảm mạnh` });
     }
   }
   if (volRatio > 1.5 && Math.abs(curr.close - curr.open) / curr.open > 0.002) {
     const dir = curr.close > curr.open ? 'tăng' : 'giảm';
     conditions.push({ key: 'volume_spike', msg: `Volume spike ${sym} (${(volRatio * 100).toFixed(0)}%) + nến ${dir} — xác nhận xu hướng` });
   }
+  if (volRatio > 1.8 && curr.close < curr.open && (curr.open - curr.close) / curr.open > 0.004) {
+    conditions.push({ key: 'dump', msg: `${sym} xả mạnh — volume ${(volRatio * 100).toFixed(0)}% + nến giảm sâu` });
+  }
   if (rsiVal && rsiVal > 60 && curr.close > prev.close && rsiVal < (indicators.rsi[n - 1] || 50)) {
-    conditions.push({ key: 'rsi_divergence', msg: `RSI divergence bearish trên ${sym} — giá tăng nhưng RSI giảm` });
+    conditions.push({ key: 'rsi_div_bear', msg: `RSI divergence bearish trên ${sym} — giá tăng nhưng RSI giảm` });
   }
   if (rsiVal && rsiVal < 40 && curr.close < prev.close && rsiVal > (indicators.rsi[n - 1] || 50)) {
     conditions.push({ key: 'rsi_divergence', msg: `RSI divergence bullish trên ${sym} — giá giảm nhưng RSI tăng` });
@@ -107,6 +124,10 @@ function detectAt(
   if (supportZones.some(z => prev.low >= z.bottom * 0.998 && prev.low <= z.top * 1.002) &&
       curr.close > prev.close && curr.close > curr.open) {
     conditions.push({ key: 'support_bounce', msg: `${sym} bounce từ hỗ trợ AI — nến đảo chiều tăng` });
+  }
+  if (resistanceZones.some(z => prev.high >= z.bottom * 0.998 && prev.high <= z.top * 1.002) &&
+      curr.close < prev.close && curr.close < curr.open) {
+    conditions.push({ key: 'resistance_reject', msg: `${sym} bị từ chối tại kháng cự — nến đảo chiều giảm` });
   }
   return conditions;
 }
