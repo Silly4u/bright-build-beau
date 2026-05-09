@@ -15,6 +15,7 @@ import Dictionary from "./pages/Dictionary.tsx";
 import DictionaryDetail from "./pages/DictionaryDetail.tsx";
 import NewsDetail from "./pages/NewsDetail.tsx";
 import Stocks from "./pages/Stocks.tsx";
+import StockNewsDetail from "./pages/StockNewsDetail.tsx";
 import AnalysisDetail from "./pages/AnalysisDetail.tsx";
 import Auth from "./pages/Auth.tsx";
 import AdminPanel from "./pages/AdminPanel.tsx";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/tin-tuc" element={<News />} />
             <Route path="/tin-tuc/:id" element={<NewsDetail />} />
             <Route path="/co-phieu" element={<Stocks />} />
+            <Route path="/co-phieu/tin/:id" element={<StockNewsDetail />} />
             <Route path="/stocks" element={<Stocks />} />
             <Route path="/phan-tich" element={<Analysis />} />
             <Route path="/phan-tich/:symbol" element={<AnalysisDetail />} />
