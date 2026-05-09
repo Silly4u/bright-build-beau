@@ -133,21 +133,38 @@ function detectAt(
   return conditions;
 }
 
+// Priority cao hơn = ưu tiên chọn khi nhiều condition cùng fire trên 1 nến
+const KEY_PRIORITY: Record<string, number> = {
+  bb_oversold: 100, bb_overbought: 100,        // VIP
+  dump: 90, breakdown: 85, breakout: 85,
+  bb_breakdown: 80, bb_breakout: 80,
+  resistance_reject: 75, support_bounce: 75,
+  rsi_div_bear: 70, rsi_divergence: 70,
+  momentum_down: 60, momentum: 60,
+  volume_anomaly: 50, volume_spike: 45,
+  bb_squeeze: 40, support_touch: 30, resistance_touch: 30,
+};
+
 function buildSignal(
   candles: Candle[],
   indicators: Indicators | null,
   zones: Zone[],
   symbol: string,
   n: number,
-  pickStrategy: 'random' | 'first' = 'random',
+  pickStrategy: 'random' | 'first' | 'priority' = 'random',
   isNew = false,
 ): SmartSignal | null {
   const conditions = detectAt(candles, indicators, zones, symbol.replace('/USDT', '').replace('/', ''), n);
   if (conditions.length === 0) return null;
   const sym = symbol.replace('/USDT', '').replace('/', '');
-  const picked = pickStrategy === 'first'
-    ? conditions[0]
-    : conditions[Math.floor(Math.random() * conditions.length)];
+  let picked: PickedCondition;
+  if (pickStrategy === 'first') {
+    picked = conditions[0];
+  } else if (pickStrategy === 'priority') {
+    picked = [...conditions].sort((a, b) => (KEY_PRIORITY[b.key] ?? 0) - (KEY_PRIORITY[a.key] ?? 0))[0];
+  } else {
+    picked = conditions[Math.floor(Math.random() * conditions.length)];
+  }
   const meta = SIGNAL_MESSAGES[picked.key] || { badge: 'ALERT', type: 'alert' as const };
   const curr = candles[n];
   const closes = candles.slice(Math.max(0, n - 19), n + 1).map(c => c.close);
@@ -167,6 +184,12 @@ function buildSignal(
   };
 }
 
+// Trích xuất key (suffix) từ id để dedup chính xác
+function extractKey(id: string): string {
+  const parts = id.split('-');
+  return parts[parts.length - 1];
+}
+
 export function useSmartSignals(
   candles: Candle[],
   indicators: Indicators | null,
@@ -178,7 +201,7 @@ export function useSmartSignals(
   const seededRef = useRef(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Seed once: scan back over recent candles to surface real, recent signals
+  // Seed once: priority-based pick + dedup theo key
   useEffect(() => {
     if (seededRef.current) return;
     if (loading || !candles.length || !indicators) return;
@@ -186,29 +209,27 @@ export function useSmartSignals(
     const collected: SmartSignal[] = [];
     let lastKey = '';
     for (let n = scanFrom; n < candles.length; n++) {
-      const sig = buildSignal(candles, indicators, zones, symbol, n, 'first', false);
+      const sig = buildSignal(candles, indicators, zones, symbol, n, 'priority', false);
       if (!sig) continue;
-      // Avoid back-to-back identical types
-      if (sig.type === lastKey) continue;
-      lastKey = sig.type;
+      const key = extractKey(sig.id);
+      // Tránh back-to-back cùng key (không phải cùng type)
+      if (key === lastKey) continue;
+      lastKey = key;
       collected.push(sig);
     }
-    // Keep last 8 (most recent)
     const seeded = collected.slice(-8).reverse();
-    if (seeded.length > 0) {
-      setSignals(seeded);
-    }
+    if (seeded.length > 0) setSignals(seeded);
     seededRef.current = true;
   }, [loading, candles, indicators, zones, symbol]);
 
   const generate = useCallback(() => {
     if (loading || !candles.length) return;
     const n = candles.length - 1;
-    const signal = buildSignal(candles, indicators, zones, symbol, n, 'random', true);
+    const signal = buildSignal(candles, indicators, zones, symbol, n, 'priority', true);
     if (!signal) return;
     setSignals(prev => {
-      // Skip if same id already present
-      if (prev.some(s => s.id === signal.id)) return prev;
+      // Dedup theo (symbol + candle.time) — tránh nhiều signal cho cùng 1 nến
+      if (prev.some(s => s.symbol === signal.symbol && s.createdAt === signal.createdAt)) return prev;
       return [signal, ...prev.map(s => ({ ...s, isNew: false }))].slice(0, 20);
     });
     setTimeout(() => {
