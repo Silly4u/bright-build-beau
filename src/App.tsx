@@ -49,10 +49,11 @@ const App = () => (
             <Route path="/co-phieu" element={<Stocks />} />
             <Route path="/co-phieu/tin/:id" element={<StockNewsDetail />} />
             <Route path="/stocks" element={<Stocks />} />
-            <Route path="/phan-tich" element={<Analysis />} />
+            <Route path="/workspace" element={<Workspace />} />
+            <Route path="/phan-tich" element={<RedirectToWorkspace defaultTab="overview" />} />
             <Route path="/phan-tich/:symbol" element={<AnalysisDetail />} />
-            <Route path="/indicators" element={<Indicators />} />
-            <Route path="/chi-bao" element={<Indicators />} />
+            <Route path="/indicators" element={<RedirectToWorkspace defaultTab="chart" />} />
+            <Route path="/chi-bao" element={<RedirectToWorkspace defaultTab="chart" />} />
             <Route path="/lich-kinh-te" element={<EconomicCalendar />} />
             <Route path="/tu-dien" element={<Dictionary />} />
             <Route path="/tu-dien/:slug" element={<DictionaryDetail />} />
