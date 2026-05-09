@@ -38,7 +38,7 @@ const StockNewsFeed: React.FC<Props> = ({ ticker, limit = 30 }) => {
     let cancelled = false;
     const load = async () => {
       setLoading(true);
-      let q = supabase.from('stock_news').select('*').order('published_at', { ascending: false }).limit(limit);
+      let q = supabase.from('stock_news').select('*').eq('ai_translated', true).order('published_at', { ascending: false }).limit(limit);
       if (ticker) q = q.eq('symbol', ticker);
       const { data, error } = await q;
       if (!cancelled) {
