@@ -19,6 +19,7 @@ import Watchlist from '@/components/analysis/Watchlist';
 import PositionCalculator from '@/components/analysis/PositionCalculator';
 import TradeJournal from '@/components/analysis/TradeJournal';
 import PriceAlerts from '@/components/analysis/PriceAlerts';
+import SignalCard from '@/components/analysis/SignalCard';
 
 const TIMEFRAMES = ['M5', 'M15', 'M30', 'H1', 'H4', 'D1', 'W1'];
 
@@ -73,9 +74,26 @@ const Analysis: React.FC = () => {
   const dxy = useDXY();
 
   // Merge signals for sidebar
-  const allSignals = [...btcSignals, ...goldSignals]
-    .sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0))
-    .slice(0, 20);
+  const mergedSignals = [...btcSignals, ...goldSignals]
+    .sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0) || (b.createdAt ?? 0) - (a.createdAt ?? 0))
+    .slice(0, 30);
+
+  // Filter state for signal feed
+  const [signalSymbolFilter, setSignalSymbolFilter] = useState<'ALL' | 'BTC' | 'GOLD' | 'ETH'>('ALL');
+  const [signalTypeFilter, setSignalTypeFilter] = useState<'ALL' | 'breakout' | 'support_touch' | 'volume_anomaly' | 'buy' | 'alert'>('ALL');
+
+  const allSignals = mergedSignals.filter(s => {
+    if (signalSymbolFilter !== 'ALL' && s.symbol !== signalSymbolFilter) return false;
+    if (signalTypeFilter !== 'ALL' && s.type !== signalTypeFilter) return false;
+    return true;
+  });
+
+  // Tick "now" mỗi 30s để relative time tự cập nhật
+  const [nowTs, setNowTs] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowTs(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   // Live prices
   const btcPrice = btcData.candles[btcData.candles.length - 1]?.close ?? 0;
@@ -685,32 +703,81 @@ const Analysis: React.FC = () => {
             <div className="glass-card rounded-xl border border-foreground/5 overflow-hidden">
               <div className="px-3 py-2 border-b border-foreground/5 flex items-center justify-between">
                 <span className="text-[10px] font-bold text-foreground tracking-wider font-mono">📡 TÍN HIỆU REALTIME</span>
-                <span className="text-[9px] text-muted-foreground/50 font-mono">{allSignals.length} tín hiệu</span>
+                <span className="text-[9px] text-muted-foreground/50 font-mono">{allSignals.length} / {mergedSignals.length}</span>
               </div>
-              <div className="max-h-[480px] overflow-y-auto">
+
+              {/* Filter chips */}
+              <div className="px-2 py-2 border-b border-foreground/5 space-y-1.5">
+                <div className="flex gap-1 overflow-x-auto scrollbar-thin">
+                  {(['ALL', 'BTC', 'GOLD', 'ETH'] as const).map(s => (
+                    <button
+                      key={s}
+                      onClick={() => setSignalSymbolFilter(s)}
+                      className={`shrink-0 text-[9px] font-mono font-bold px-2 py-1 rounded-md border transition-colors ${
+                        signalSymbolFilter === s
+                          ? 'bg-primary/15 border-primary/40 text-primary'
+                          : 'bg-foreground/[0.02] border-foreground/10 text-muted-foreground/60 hover:text-foreground'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-1 overflow-x-auto scrollbar-thin">
+                  {([
+                    { v: 'ALL' as const, l: 'Tất cả' },
+                    { v: 'breakout' as const, l: 'Breakout' },
+                    { v: 'support_touch' as const, l: 'Hỗ trợ' },
+                    { v: 'volume_anomaly' as const, l: 'Volume' },
+                    { v: 'buy' as const, l: 'Mua' },
+                    { v: 'alert' as const, l: 'Cảnh báo' },
+                  ]).map(t => (
+                    <button
+                      key={t.v}
+                      onClick={() => setSignalTypeFilter(t.v)}
+                      className={`shrink-0 text-[9px] font-mono px-2 py-1 rounded-md border transition-colors ${
+                        signalTypeFilter === t.v
+                          ? 'bg-cyan-brand/15 border-cyan-brand/40 text-cyan-brand'
+                          : 'bg-foreground/[0.02] border-foreground/10 text-muted-foreground/60 hover:text-foreground'
+                      }`}
+                    >
+                      {t.l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="max-h-[520px] overflow-y-auto">
                 {allSignals.length === 0 ? (
                   <div className="p-4 text-center text-[10px] text-muted-foreground/40">
-                    Đang quét tín hiệu...
+                    Không có tín hiệu khớp bộ lọc
                   </div>
                 ) : (
                   <div className="divide-y divide-foreground/5">
-                    {allSignals.map((sig, i) => {
+                    {allSignals.map(sig => {
                       const style = SIGNAL_COLORS[sig.type] || SIGNAL_COLORS.info;
+                      const currentPrice =
+                        sig.symbol === 'BTC' ? btcPrice :
+                        sig.symbol === 'GOLD' || sig.symbol === 'XAU' ? goldPrice :
+                        undefined;
+                      const handleClick = () => {
+                        if (sig.symbol === 'BTC') {
+                          setActiveAsset('BTC');
+                          requestAnimationFrame(() => btcChartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+                        } else if (sig.symbol === 'GOLD' || sig.symbol === 'XAU') {
+                          setActiveAsset('XAU');
+                          requestAnimationFrame(() => goldChartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+                        }
+                      };
                       return (
-                        <div key={i} className={`px-3 py-2.5 ${sig.isNew ? 'bg-primary/5' : ''} hover:bg-foreground/[0.02] transition-colors`}>
-                          <div className="flex items-center gap-2 mb-1">
-                            <div className={`w-1.5 h-1.5 rounded-full ${style.dot} ${sig.isNew ? 'animate-pulse' : ''}`} />
-                            <span className={`text-[9px] font-bold font-mono px-1.5 py-0.5 rounded ${style.bg} ${style.border} border ${style.text}`}>
-                              {style.label}
-                            </span>
-                            <span className="text-[9px] text-muted-foreground/40 font-mono ml-auto">
-                              {sig.symbol?.replace('/USDT', '').replace('/', '')}
-                            </span>
-                          </div>
-                          <p className="text-[10px] text-muted-foreground/70 leading-relaxed pl-3.5">
-                            {sig.message}
-                          </p>
-                        </div>
+                        <SignalCard
+                          key={sig.id}
+                          signal={sig}
+                          style={style}
+                          currentPrice={currentPrice}
+                          now={nowTs}
+                          onClick={handleClick}
+                        />
                       );
                     })}
                   </div>
