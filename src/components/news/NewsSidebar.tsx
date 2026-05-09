@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useEconomicEvents } from '@/hooks/useEconomicEvents';
 import { CONTACT_INFO } from '@/lib/contact';
+import MiniPoll from './MiniPoll';
+import StreakCard from './StreakCard';
 
 function fmtCountdown(target: Date): { text: string; soon: boolean; live: boolean; past: boolean } {
   const diff = target.getTime() - Date.now();
@@ -38,6 +40,9 @@ const NewsSidebar: React.FC = () => {
 
   return (
     <aside className="space-y-4 sticky top-24">
+      <StreakCard />
+      <MiniPoll />
+
       {/* Lịch kinh tế 2-3 sao */}
       <div className="bg-[#0d1526] border border-white/5 rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
