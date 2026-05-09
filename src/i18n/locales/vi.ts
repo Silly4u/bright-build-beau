@@ -5,6 +5,7 @@ export const vi = {
     stocks: 'Cổ Phiếu',
     analysis: 'Phân Tích',
     indicators: 'Indicators',
+    workspace: 'Workspace',
     calendar: 'Lịch Kinh Tế',
     services: 'Dịch Vụ',
     academy: 'Học Viện',

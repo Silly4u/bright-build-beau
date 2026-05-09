@@ -33,7 +33,8 @@ const SIGNAL_COLORS: Record<string, { bg: string; border: string; text: string; 
 
 const ENABLED_INDICATORS = ['bb_squeeze', 'breakout', 'breakdown', 'confluence', 'momentum', 'vol_spike', 'rsi_div', 'sup_bounce', 'macd_cross', 'prev_week_fib'];
 
-const Analysis: React.FC = () => {
+interface AnalysisProps { embedded?: boolean }
+const Analysis: React.FC<AnalysisProps> = ({ embedded = false }) => {
   const navigate = useNavigate();
   // Read ?asset=BTC|XAU from URL so screenshot service / deep-links open the right tab.
   const initialAsset = ((): 'BTC' | 'XAU' => {
@@ -425,11 +426,11 @@ const Analysis: React.FC = () => {
   };
 
   return (
-    <main className="min-h-screen bg-background">
-      <Header />
+    <main className={embedded ? '' : 'min-h-screen bg-background'}>
+      {!embedded && <Header />}
 
       {/* ── TOP BAR ── */}
-      <div className="pt-24 px-2 lg:px-4">
+      <div className={`${embedded ? 'pt-2' : 'pt-24'} px-2 lg:px-4`}>
         <div className="glass-card rounded-lg px-4 py-2.5 flex flex-wrap items-center gap-3 text-xs">
           {/* Pair badges */}
           <div className="flex items-center gap-2">
@@ -840,7 +841,7 @@ const Analysis: React.FC = () => {
         </section>
       </div>
 
-      <Footer />
+      {!embedded && <Footer />}
     </main>
   );
 };

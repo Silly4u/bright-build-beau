@@ -5,6 +5,7 @@ export const en = {
     stocks: 'Stocks',
     analysis: 'Analysis',
     indicators: 'Indicators',
+    workspace: 'Workspace',
     calendar: 'Economic Calendar',
     services: 'Services',
     academy: 'Academy',
