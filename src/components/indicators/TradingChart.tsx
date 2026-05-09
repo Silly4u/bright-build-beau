@@ -1586,15 +1586,26 @@ const TradingChart: React.FC<TradingChartProps> = ({
       const weekStart = (t: number) =>
         Math.floor((t - MONDAY_EPOCH_MS) / WEEK_MS) * WEEK_MS + MONDAY_EPOCH_MS;
 
-      const weeks = new Map<number, { high: number; low: number; start: number; end: number; firstOpen: number; lastClose: number }>();
+      // Theo dõi thêm thời điểm tạo High/Low để xác định hướng Fib theo "cái nào đến trước"
+      const weeks = new Map<number, {
+        high: number; low: number;
+        highTime: number; lowTime: number;
+        start: number; end: number;
+        firstOpen: number; lastClose: number;
+      }>();
       for (const c of candles) {
         const ws = weekStart(c.time);
         const w = weeks.get(ws);
         if (!w) {
-          weeks.set(ws, { high: c.high, low: c.low, start: ws, end: ws + WEEK_MS, firstOpen: c.open, lastClose: c.close });
+          weeks.set(ws, {
+            high: c.high, low: c.low,
+            highTime: c.time, lowTime: c.time,
+            start: ws, end: ws + WEEK_MS,
+            firstOpen: c.open, lastClose: c.close,
+          });
         } else {
-          if (c.high > w.high) w.high = c.high;
-          if (c.low < w.low) w.low = c.low;
+          if (c.high > w.high) { w.high = c.high; w.highTime = c.time; }
+          if (c.low < w.low)   { w.low = c.low;   w.lowTime = c.time; }
           w.lastClose = c.close;
         }
       }
@@ -1609,7 +1620,11 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
       if (prevWeek && prevWeek.high > prevWeek.low) {
         const range = prevWeek.high - prevWeek.low;
-        const isUpTrend = prevWeek.lastClose >= prevWeek.firstOpen;
+        // Hướng Fib theo thứ tự xuất hiện: Low đến trước High → uptrend (0=Low, 1=High).
+        // Nếu cùng nến (highTime === lowTime) → fallback theo Open vs Close.
+        const isUpTrend = prevWeek.lowTime !== prevWeek.highTime
+          ? prevWeek.lowTime < prevWeek.highTime
+          : prevWeek.lastClose >= prevWeek.firstOpen;
 
         const fibLevels: { ratio: number; color: string; width: 1 | 2; style: 0 | 1 | 2 }[] = [
           { ratio: 0,     color: 'rgba(255,213,79,0.85)', width: 2, style: 0 },
