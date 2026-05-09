@@ -4,10 +4,13 @@ import type { Candle, Indicators, Zone } from '@/hooks/useMarketData';
 export interface SmartSignal {
   id: string;
   time: string;
+  createdAt: number; // ms epoch — for relative time
   message: string;
   type: 'buy' | 'sell' | 'alert' | 'info' | 'breakout' | 'support_touch' | 'volume_anomaly';
   symbol: string;
   badge: string;
+  price: number;          // giá lúc tín hiệu xuất hiện
+  sparkline: number[];    // 20 close gần nhất
   isNew?: boolean;
 }
 
