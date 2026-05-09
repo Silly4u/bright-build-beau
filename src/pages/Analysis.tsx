@@ -732,7 +732,7 @@ const Analysis: React.FC = () => {
                         disabled={currentPage >= totalPages}
                         className="text-[9px] font-mono font-bold px-2 py-1 rounded-md border border-foreground/10 bg-foreground/[0.02] text-muted-foreground/70 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                       >
-                        Sau →
+                        <kbd className="mr-1 px-1 py-0.5 rounded bg-foreground/[0.06] border border-foreground/10 text-[8px] text-muted-foreground/70">→</kbd> Sau →
                       </button>
                     </div>
                   </>
