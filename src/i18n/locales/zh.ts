@@ -5,6 +5,7 @@ export const zh = {
     stocks: '股票',
     analysis: '分析',
     indicators: '指标',
+    workspace: '工作台',
     calendar: '经济日历',
     services: '服务',
     academy: '学院',
