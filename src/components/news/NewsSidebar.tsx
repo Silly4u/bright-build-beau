@@ -40,6 +40,9 @@ const NewsSidebar: React.FC = () => {
 
   return (
     <aside className="space-y-4 sticky top-24">
+      <StreakCard />
+      <MiniPoll />
+
       {/* Lịch kinh tế 2-3 sao */}
       <div className="bg-[#0d1526] border border-white/5 rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
