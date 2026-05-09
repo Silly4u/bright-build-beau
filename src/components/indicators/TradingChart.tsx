@@ -1586,15 +1586,26 @@ const TradingChart: React.FC<TradingChartProps> = ({
       const weekStart = (t: number) =>
         Math.floor((t - MONDAY_EPOCH_MS) / WEEK_MS) * WEEK_MS + MONDAY_EPOCH_MS;
 
-      const weeks = new Map<number, { high: number; low: number; start: number; end: number; firstOpen: number; lastClose: number }>();
+      // Theo dõi thêm thời điểm tạo High/Low để xác định hướng Fib theo "cái nào đến trước"
+      const weeks = new Map<number, {
+        high: number; low: number;
+        highTime: number; lowTime: number;
+        start: number; end: number;
+        firstOpen: number; lastClose: number;
+      }>();
       for (const c of candles) {
         const ws = weekStart(c.time);
         const w = weeks.get(ws);
         if (!w) {
-          weeks.set(ws, { high: c.high, low: c.low, start: ws, end: ws + WEEK_MS, firstOpen: c.open, lastClose: c.close });
+          weeks.set(ws, {
+            high: c.high, low: c.low,
+            highTime: c.time, lowTime: c.time,
+            start: ws, end: ws + WEEK_MS,
+            firstOpen: c.open, lastClose: c.close,
+          });
         } else {
-          if (c.high > w.high) w.high = c.high;
-          if (c.low < w.low) w.low = c.low;
+          if (c.high > w.high) { w.high = c.high; w.highTime = c.time; }
+          if (c.low < w.low)   { w.low = c.low;   w.lowTime = c.time; }
           w.lastClose = c.close;
         }
       }
