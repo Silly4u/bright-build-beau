@@ -342,34 +342,100 @@ export const LESSONS: Lesson[] = [
     category: 'Phân Tích Cấu Trúc',
     title: 'Phương Pháp Wyckoff — Đọc Vị Tay To',
     excerpt:
-      '4 pha thị trường: Tích lũy, Tăng giá, Phân phối, Giảm giá. Spring và Upthrust là tín hiệu vàng.',
-    duration: '30 phút',
+      '4 pha thị trường: Tích lũy, Tăng giá, Phân phối, Giảm giá. Spring và Upthrust là tín hiệu vàng — kèm 9 quy luật và VSA.',
+    duration: '50 phút',
     level: 'Nâng cao',
     cover: coverWyckoff,
     intro:
-      'Richard Wyckoff phát triển phương pháp này từ đầu thế kỷ 20, dựa trên quan sát hành vi của "Composite Man" (đại diện cho dòng tiền lớn). Đến nay vẫn là một trong những framework mạnh nhất để hiểu chu kỳ thị trường.',
+      'Richard Demille Wyckoff (1873–1934) là một trong "5 huyền thoại" của Wall Street cùng J.P. Morgan, Jesse Livermore. Phương pháp ông phát triển dựa trên quan sát hành vi của "Composite Man" — nhân vật giả định đại diện cho dòng tiền tổ chức. Đến nay Wyckoff vẫn là một trong những framework mạnh nhất để hiểu chu kỳ thị trường, được giảng dạy chính thức tại Wyckoff Analytics và là nền tảng của SMC, VSA hiện đại.',
+    history:
+      'Wyckoff sáng lập "Magazine of Wall Street" năm 1907, sau đó mở Wyckoff Course đào tạo trader chuyên nghiệp. Phương pháp được Hank Pruden hệ thống hoá lại trong cuốn "The Three Skills of Top Trading" (2007) và hiện được Wyckoff Analytics (Roman Bogomazov) duy trì giảng dạy.',
     sections: [
       {
-        heading: '4 Pha của Chu Kỳ Wyckoff',
-        body: 'Accumulation (tích lũy) → Markup (tăng giá) → Distribution (phân phối) → Markdown (giảm giá). Chu kỳ này lặp lại trên mọi tài sản và mọi timeframe.',
+        heading: '1. Composite Man — Triết lý nền tảng',
+        body: 'Wyckoff đề xuất hãy hình dung toàn bộ thị trường được điều khiển bởi MỘT cá nhân siêu giàu — Composite Man. CM thực hiện 4 việc lặp lại: tích lũy âm thầm, đẩy giá lên, phân phối âm thầm, đẩy giá xuống. Mọi hành động giá đều có chủ đích — nhiệm vụ trader là đọc ý đồ đó qua Price + Volume + Time.',
+        image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&q=80',
       },
       {
-        heading: 'Pha Tích Lũy (Accumulation)',
-        body: 'Sau downtrend dài, giá đi sideway trong range. Smart money âm thầm gom hàng. Các sự kiện chính: PS (Preliminary Support) → SC (Selling Climax) → AR (Automatic Rally) → ST (Secondary Test) → Spring → SOS (Sign of Strength).',
+        heading: '2. 4 Pha của Chu Kỳ Wyckoff',
+        body: 'Accumulation (tích lũy) → Markup (tăng giá) → Distribution (phân phối) → Markdown (giảm giá). Chu kỳ này lặp lại trên mọi tài sản và mọi timeframe — từ M5 BTCUSDT đến biểu đồ tháng SPX. Hiểu mình đang ở pha nào quan trọng hơn việc đoán giá đi đâu.',
+        bullets: [
+          'Accumulation: range sau downtrend, volume giảm dần',
+          'Markup: bứt phá mạnh kèm volume, các pullback nông',
+          'Distribution: range sau uptrend, volume cao bất thường ở các đỉnh giả',
+          'Markdown: phá đáy range, panic selling, volume bùng nổ',
+        ],
       },
       {
-        heading: 'Spring — Tín hiệu mua mạnh nhất',
-        body: 'Giá phá đáy range trong giây lát rồi đóng cửa quay lại trên — quét stop-loss của bear. Đây là điểm vào lệnh BUY có R:R tốt nhất trong toàn bộ chu kỳ Wyckoff.',
+        heading: '3. Pha Tích Lũy (Accumulation) — 5 sự kiện then chốt',
+        body: 'Sau downtrend dài, giá đi sideway trong range. Smart money âm thầm gom hàng. Các sự kiện chính theo thứ tự: PS (Preliminary Support — đáy đầu tiên có volume cao) → SC (Selling Climax — panic dump tạo đáy range) → AR (Automatic Rally — bật mạnh tạo đỉnh range) → ST (Secondary Test — test lại SC với volume thấp hơn) → Spring (giả phá đáy) → Test (test Spring với volume thấp) → SOS (Sign of Strength — bứt phá mạnh ra khỏi range) → LPS (Last Point of Support — pullback cuối cùng vào OB).',
+        example: 'BTCUSDT D1 từ 11/2022 đến 01/2023 hình thành Accumulation Schematic #1 hoàn chỉnh: SC tại $15,500 → Spring tại $16,000 → SOS qua $21,000, mở rally lên $73,000.',
       },
       {
-        heading: 'Pha Phân Phối (Distribution)',
-        body: 'Sau uptrend dài, smart money xả hàng cho retail. UTAD (Upthrust After Distribution) là tín hiệu SELL mạnh nhất.',
+        heading: '4. Spring — Tín hiệu mua mạnh nhất',
+        body: 'Giá phá đáy range trong giây lát rồi đóng cửa quay lại trên — quét stop-loss của bear. Theo thống kê của Wyckoff Analytics, Spring có winrate ~75% khi đi kèm volume bùng nổ và test sau đó với volume thấp. Đây là điểm vào lệnh BUY có R:R tốt nhất trong toàn bộ chu kỳ Wyckoff (thường 1:5 đến 1:10).',
+        bullets: [
+          'Spring #1: phá nông, không có follow-through (mạnh nhất)',
+          'Spring #2: phá sâu hơn, có nến hồi mạnh',
+          'Spring #3: phá rất sâu, cần xác nhận bằng nhiều nến',
+          'Entry: tại Test sau Spring, không phải Spring',
+        ],
+        pitfall: 'Đừng vào lệnh tại Spring — nhiều khi đó là phá đáy thật. Luôn chờ Test với volume giảm.',
+      },
+      {
+        heading: '5. Pha Phân Phối (Distribution) & UTAD',
+        body: 'Sau uptrend dài, smart money xả hàng cho retail FOMO. Cấu trúc gương ngược của Accumulation: PSY → BC (Buying Climax) → AR → ST → UTAD (Upthrust After Distribution — giả phá đỉnh) → SOW (Sign of Weakness) → LPSY (Last Point of Supply). UTAD là tín hiệu SELL có winrate cao tương tự Spring nhưng ngược chiều.',
+      },
+      {
+        heading: '6. 9 Quy luật Wyckoff (Wyckoff Laws)',
+        body: 'Wyckoff đúc kết 3 luật cơ bản và 9 quy luật phụ. 3 luật chính: (1) Law of Supply & Demand — giá thay đổi theo tương quan cung cầu; (2) Law of Cause & Effect — độ rộng range tích lũy quyết định độ dài move sau đó (đếm bằng Point & Figure); (3) Law of Effort vs Result — volume (effort) phải tương xứng với biên độ giá (result), không tương xứng = cảnh báo đảo chiều.',
+        bullets: [
+          'Volume tăng + giá tăng = healthy uptrend',
+          'Volume tăng nhưng giá đi ngang = phân phối bí mật',
+          'Volume giảm trong pullback = pullback lành mạnh',
+          'Volume cao tại đỉnh + nến nhỏ = đảo chiều sắp tới',
+        ],
+      },
+      {
+        heading: '7. Volume Spread Analysis (VSA) — Mở rộng của Wyckoff',
+        body: 'VSA do Tom Williams (cựu syndicate trader) phát triển từ 1990s, mở rộng khái niệm Effort vs Result của Wyckoff. Phân tích mỗi nến qua 3 yếu tố: Spread (biên độ), Volume, Close position trong nến. Các tín hiệu kinh điển: No Demand (nến tăng nhỏ + volume thấp), Stopping Volume (nến giảm có bóng dưới dài + volume cực cao = bottom), Climactic Action (volume bùng nổ tại đỉnh/đáy).',
+      },
+      {
+        heading: '8. Point & Figure — Đo "Cause" để dự báo "Effect"',
+        body: 'Wyckoff dùng biểu đồ P&F (chỉ vẽ X cho tăng, O cho giảm, không có thời gian) để đếm số ô trong pha tích lũy → quy đổi thành mục tiêu giá sau breakout. Công thức: Price Target = Số ô tích lũy × Box Size × Reversal. P&F lọc nhiễu cực tốt, hiện vẫn được institutional dùng cho swing/position trading.',
+      },
+      {
+        heading: '9. Quy trình Wyckoff trade chuẩn — 5 bước',
+        body: 'Bước 1: Xác định xu hướng HTF (D1/W1) — tìm range tích lũy/phân phối. Bước 2: Đánh dấu các sự kiện (PS, SC, AR, ST, Spring/UTAD). Bước 3: Đợi Spring/UTAD + Test với volume giảm. Bước 4: Vào lệnh tại LPS/LPSY, SL sau Spring/UTAD. Bước 5: TP1 = mép trên/dưới range, TP2 = mục tiêu P&F.',
       },
     ],
     takeaways: [
       'Wyckoff dạy bạn THỜI ĐIỂM (when), không chỉ HƯỚNG (where)',
-      'Spring/UTAD là 2 entry có winrate cao nhất',
-      'Kết hợp Volume Spread Analysis (VSA) để xác nhận pha',
+      'Spring/UTAD là 2 entry có winrate cao nhất (~75%)',
+      'Volume là chìa khoá — luôn đọc Effort vs Result',
+      'Composite Man chỉ làm 4 việc: gom, đẩy lên, xả, đẩy xuống — lặp mãi',
+      'Kết hợp VSA để xác nhận pha và Point & Figure để đặt mục tiêu',
+    ],
+    checklist: [
+      'Đã xác định range tích lũy/phân phối trên HTF chưa?',
+      'Đã đánh dấu đủ PS, SC, AR, ST chưa?',
+      'Có Spring/UTAD và Test sau đó với volume giảm chưa?',
+      'Volume tại điểm vào có hợp lý theo luật Effort vs Result?',
+      'Mục tiêu P&F có cho R:R ≥ 1:3 không?',
+    ],
+    faqs: [
+      {
+        question: 'Wyckoff khác gì SMC?',
+        answer: 'Wyckoff là gốc — tập trung vào pha thị trường, volume và cấu trúc range. SMC là phiên bản hiện đại tập trung vào Order Block, FVG, Liquidity sweep. Bản chất giống nhau (đọc dấu chân smart money), chỉ khác cách diễn đạt và công cụ.',
+      },
+      {
+        question: 'Phương pháp này có dùng cho intraday được không?',
+        answer: 'Được, nhưng cần kinh nghiệm cao. Khung phù hợp nhất là H4/D1 cho swing. Trên M15/M30 cấu trúc Wyckoff vẫn xuất hiện nhưng nhiễu nhiều, dễ nhận diện sai pha.',
+      },
+      {
+        question: 'Sách nào nên đọc?',
+        answer: '"The Three Skills of Top Trading" (Hank Pruden), "Trades About to Happen" (David Weis), "Wyckoff 2.0" (Rubén Villahermosa). Tránh các nguồn YouTube tóm tắt vì thường thiếu phần Cause & Effect và P&F.',
+      },
     ],
   },
   {
@@ -377,34 +443,94 @@ export const LESSONS: Lesson[] = [
     category: 'Quản Lý Vốn',
     title: 'Quản Lý Vốn — Yếu Tố Sống Còn',
     excerpt:
-      'Position sizing, R:R ratio, drawdown control. 90% trader thua không phải vì sai chiến lược mà vì sai quản lý vốn.',
-    duration: '15 phút',
+      'Position sizing, R:R ratio, drawdown control, Kelly đơn giản, expectancy. 90% trader thua không phải vì sai chiến lược mà vì sai quản lý vốn.',
+    duration: '30 phút',
     level: 'Cơ bản',
     cover: coverRisk,
     intro:
-      'Bạn có thể đúng 70% tín hiệu nhưng vẫn cháy tài khoản nếu quản lý vốn sai. Bài học này là nền tảng bắt buộc cho mọi trader.',
+      'Bạn có thể đúng 70% tín hiệu nhưng vẫn cháy tài khoản nếu quản lý vốn sai. Theo nghiên cứu của Brett Steenbarger và dữ liệu công khai từ FTMO/MyForexFunds (2020–2023), 87–93% trader retail mất tiền — và lý do số một KHÔNG phải là chiến lược tệ, mà là quản lý vốn sai. Bài học này là nền tảng bắt buộc trước khi học bất kỳ chiến lược entry nào.',
+    history:
+      'Khái niệm position sizing hiện đại bắt nguồn từ Ralph Vince ("Portfolio Management Formulas", 1990) và Van K. Tharp ("Trade Your Way to Financial Freedom", 1998). Tharp là người đầu tiên phổ biến khái niệm "R-multiple" — đo lợi nhuận theo bội số rủi ro thay vì theo tiền tuyệt đối.',
     sections: [
       {
-        heading: 'Quy tắc 1-2% mỗi lệnh',
-        body: 'Không bao giờ đặt rủi ro quá 2% tài khoản cho 1 lệnh. Với 1%, bạn cần thua 100 lệnh liên tiếp mới cháy — điều gần như không thể.',
+        heading: '1. Quy tắc 1–2% mỗi lệnh',
+        body: 'Không bao giờ đặt rủi ro quá 2% tài khoản cho 1 lệnh. Với mức risk 1%/lệnh, ngay cả khi thua 20 lệnh liên tiếp (xác suất ~0.0001% với hệ thống winrate 50%), bạn chỉ mất 18.2% — vẫn còn vốn để phục hồi. Mức 2% là trần tuyệt đối cho người mới.',
+        bullets: [
+          'Tài khoản $1,000 → rủi ro tối đa $10–20/lệnh',
+          'Tài khoản $10,000 → $100–200/lệnh',
+          'Trader prop firm thường giới hạn 0.5–1% do max drawdown 5–10%',
+        ],
+        example: 'Tài khoản $5,000, risk 1% = $50/lệnh. Vào BTCUSDT tại $65,000 với SL $64,000 (cách 1.54%). Position size = $50 ÷ $1,000 = 0.05 BTC = $3,250 notional. Nếu hit SL chỉ mất đúng $50.',
+        pitfall: 'Nhiều trader risk theo "cảm giác" thay vì tính toán — đó là lý do số 1 dẫn đến cháy tài khoản.',
       },
       {
-        heading: 'Risk : Reward tối thiểu 1:2',
-        body: 'Nếu winrate 50% với R:R 1:2, bạn vẫn lời. Đừng vào lệnh nếu TP không gấp ít nhất 2 lần SL.',
+        heading: '2. Risk : Reward tối thiểu 1:2',
+        body: 'Nếu winrate 50% với R:R 1:2, bạn lời 0.5×2R − 0.5×1R = 0.5R/lệnh. Nếu winrate 40% với R:R 1:3, bạn vẫn lời 0.4×3R − 0.6×1R = 0.6R/lệnh. Đừng vào lệnh nếu TP không gấp ít nhất 2 lần SL — toán học không cho phép bạn lời dài hạn.',
+        image: 'https://images.unsplash.com/photo-1591696205602-2f950c417cb9?w=800&q=80',
       },
       {
-        heading: 'Position Sizing đúng',
-        body: 'Khối lượng lệnh = (Vốn × %Risk) ÷ Khoảng cách SL (pip/giá). Luôn tính TRƯỚC khi vào lệnh.',
+        heading: '3. Expectancy — Công thức "lời/lệnh trung bình"',
+        body: 'Expectancy = (Win% × Avg Win) − (Loss% × Avg Loss). Hệ thống có expectancy dương mới đáng giao dịch. Ví dụ: Win 45%, Avg Win = 2R, Loss 55%, Avg Loss = 1R → Expectancy = 0.45×2 − 0.55×1 = 0.35R/lệnh. Trade 100 lệnh kỳ vọng lời 35R. Với risk 1%/lệnh = +35% account.',
+        bullets: [
+          'Expectancy < 0 → dừng giao dịch ngay',
+          'Expectancy 0.1–0.3R → hệ thống ổn',
+          'Expectancy > 0.5R → hệ thống xuất sắc',
+        ],
       },
       {
-        heading: 'Drawdown Control',
-        body: 'Khi tài khoản drawdown 10%, giảm size xuống 50%. Khi drawdown 20%, dừng giao dịch và review chiến lược.',
+        heading: '4. Position Sizing đúng — Công thức chuẩn',
+        body: 'Khối lượng lệnh = (Vốn × %Risk) ÷ Khoảng cách SL. Forex: Lot = (Equity × Risk%) ÷ (SL pips × Pip value). Crypto: Coin amount = (Equity × Risk%) ÷ (Entry − SL). Stocks: Shares = (Equity × Risk%) ÷ (Entry − SL). Luôn tính TRƯỚC khi vào lệnh — không bao giờ "ước lượng".',
+        example: 'EURUSD: $10,000 × 1% = $100 risk. SL 25 pips. Pip value với 1 lot = $10 → Lot size = $100 ÷ (25 × $10) = 0.4 lot.',
+      },
+      {
+        heading: '5. Kelly Criterion (đơn giản hoá) — Tính % tối ưu',
+        body: 'Công thức Kelly: f* = (W × R − (1−W)) ÷ R, trong đó W = winrate, R = avg win/avg loss. Ví dụ W=0.55, R=2 → f* = (0.55×2 − 0.45)/2 = 32.5%. Tuy nhiên trong thực tế, dùng Half-Kelly (16.25%) hoặc Quarter-Kelly (8%) để tránh drawdown khủng. Người mới: bỏ Kelly, dùng cố định 1%.',
+      },
+      {
+        heading: '6. Drawdown Control & Circuit Breaker',
+        body: 'Drawdown = % giảm từ đỉnh equity. Áp dụng quy tắc bậc thang: DD 5% — review từng lệnh. DD 10% — giảm size xuống 50%. DD 15% — giảm xuống 25%. DD 20% — DỪNG giao dịch, nghỉ ít nhất 1 tuần, viết lại playbook. Không bao giờ "gồng" để gỡ — đây là cách nhanh nhất cháy tài khoản.',
+        bullets: [
+          'Daily loss limit: -3% account → tắt máy ngay',
+          'Weekly loss limit: -6% → nghỉ trade tuần đó',
+          'Max consecutive losses: 5 lệnh → giảm size 50%',
+        ],
+      },
+      {
+        heading: '7. Portfolio Heat & Tương quan',
+        body: 'Portfolio Heat = tổng risk của các lệnh đang mở. Giới hạn ở 4–6% tổng tài khoản. Quan trọng: các cặp tương quan cao (EURUSD+GBPUSD, BTC+ETH+SOL) tính như MỘT lệnh vì nếu sai sẽ cùng SL. Đừng tự lừa mình rằng đa dạng hoá khi tất cả đều cùng chiều.',
+      },
+      {
+        heading: '8. Tâm lý + Quản lý vốn — Cặp đôi không thể tách',
+        body: 'Quản lý vốn tốt giúp tâm lý ổn định: bạn không sợ thua khi chỉ mất 1% vốn. Tâm lý ổn định giúp quản lý vốn tốt: bạn không revenge trade, không tăng size sau thắng. Hai yếu tố này tự củng cố lẫn nhau — đây là vòng lặp tích cực của trader chuyên nghiệp.',
       },
     ],
     takeaways: [
       'Bảo toàn vốn quan trọng hơn kiếm lợi nhuận',
-      'Không bao giờ thay đổi SL theo cảm xúc',
+      'Không bao giờ thay đổi SL theo cảm xúc — chỉ dời theo quy tắc trailing đã định trước',
       'Tâm lý ổn định = quản lý vốn tốt = giàu bền vững',
+      'Expectancy dương + risk 1%/lệnh + 100+ lệnh = lợi nhuận tất yếu theo xác suất',
+      'Drawdown 50% cần lời 100% để hoà vốn — ưu tiên phòng thủ hơn tấn công',
+    ],
+    checklist: [
+      'Đã tính position size theo công thức chuẩn TRƯỚC khi vào lệnh chưa?',
+      'Risk lệnh này có vượt 2% tài khoản không?',
+      'R:R có ≥ 1:2 không?',
+      'Tổng portfolio heat (gồm lệnh đang mở) có vượt 6% không?',
+      'Hôm nay đã hit daily loss limit -3% chưa? Nếu có → dừng.',
+    ],
+    faqs: [
+      {
+        question: 'Risk 1% có quá thận trọng không, tôi muốn lời nhanh hơn?',
+        answer: 'Risk cao = drawdown cao theo cấp số. Risk 5%/lệnh + thua 10 lệnh = mất 40% (cần lời 67% để hoà). Risk 1% + thua 10 lệnh = mất 9.6% (cần lời 10.6%). Toán học không cho phép bạn "lời nhanh" mà không gánh rủi ro huỷ diệt.',
+      },
+      {
+        question: 'Khi nào nên tăng risk lên 2–3%?',
+        answer: 'Sau ít nhất 100 lệnh thực tế có expectancy dương ổn định, max DD < 10%, và bạn vượt qua được tâm lý FOMO/revenge. Hầu hết trader chuyên không bao giờ vượt 2%.',
+      },
+      {
+        question: 'Có nên dùng Kelly Criterion không?',
+        answer: 'Kelly giả định bạn biết chính xác winrate và payoff — gần như không thể với trading. Dùng Half/Quarter-Kelly nếu có dữ liệu 200+ lệnh. Người mới: bỏ Kelly, cố định 1%/lệnh.',
+      },
     ],
   },
   {
