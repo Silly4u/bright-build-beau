@@ -35,6 +35,8 @@ const Workspace: React.FC = () => {
     const next = new URLSearchParams(params);
     next.set('tab', t);
     setParams(next, { replace: false });
+    // Scroll lên top khi đổi tab vì 2 tab giữ mounted có chiều cao khác nhau
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
   };
   const setPair = (p: string) => {
     const next = new URLSearchParams(params);
