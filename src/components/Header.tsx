@@ -95,6 +95,7 @@ const Header: React.FC = () => {
                 Admin
               </Link>
             )}
+            <LanguageSwitcher />
             {user ? (
               <button
                 onClick={async () => { await signOut(); navigate('/'); }}
