@@ -16,8 +16,6 @@ import MorningBriefBanner from '@/components/analysis/MorningBriefBanner';
 import StreakBadge from '@/components/analysis/StreakBadge';
 import EventReminders from '@/components/analysis/EventReminders';
 
-import PositionCalculator from '@/components/analysis/PositionCalculator';
-import TradeJournal from '@/components/analysis/TradeJournal';
 import PriceAlerts from '@/components/analysis/PriceAlerts';
 import SignalCard from '@/components/analysis/SignalCard';
 
@@ -594,11 +592,6 @@ const Analysis: React.FC = () => {
             </div>
 
 
-            {/* ── POSITION CALC + TRADE JOURNAL ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-              <PositionCalculator />
-              <TradeJournal />
-            </div>
           </div>
 
           {/* ── RIGHT SIDEBAR: Watchlist + Events + Alerts + Signal Feed ── */}
