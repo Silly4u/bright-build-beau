@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TradingChart from '@/components/indicators/TradingChart';
@@ -36,11 +36,19 @@ const ENABLED_INDICATORS = ['bb_squeeze', 'breakout', 'breakdown', 'confluence',
 interface AnalysisProps { embedded?: boolean }
 const Analysis: React.FC<AnalysisProps> = ({ embedded = false }) => {
   const navigate = useNavigate();
-  // Read ?asset=BTC|XAU from URL so screenshot service / deep-links open the right tab.
+  const [searchParams] = useSearchParams();
+  // Map ?pair=BTC/USDT|XAU/USDT|XAU/USD → asset BTC|XAU. Hỗ trợ cả ?asset=
+  const pairToAsset = (pair?: string | null): 'BTC' | 'XAU' | null => {
+    if (!pair) return null;
+    const up = pair.toUpperCase();
+    if (up.startsWith('BTC')) return 'BTC';
+    if (up.startsWith('XAU') || up.startsWith('GOLD')) return 'XAU';
+    return null;
+  };
   const initialAsset = ((): 'BTC' | 'XAU' => {
     if (typeof window === 'undefined') return 'BTC';
-    const p = new URLSearchParams(window.location.search).get('asset')?.toUpperCase();
-    return p === 'XAU' ? 'XAU' : 'BTC';
+    const sp = new URLSearchParams(window.location.search);
+    return pairToAsset(sp.get('pair')) ?? (sp.get('asset')?.toUpperCase() === 'XAU' ? 'XAU' : 'BTC');
   })();
   const [activeAsset, setActiveAsset] = useState<'BTC' | 'XAU'>(initialAsset);
   const [btcTimeframe, setBtcTimeframe] = useState('H4');
