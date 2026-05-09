@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TradingChart from '@/components/indicators/TradingChart';
@@ -36,15 +36,36 @@ const ENABLED_INDICATORS = ['bb_squeeze', 'breakout', 'breakdown', 'confluence',
 interface AnalysisProps { embedded?: boolean }
 const Analysis: React.FC<AnalysisProps> = ({ embedded = false }) => {
   const navigate = useNavigate();
-  // Read ?asset=BTC|XAU from URL so screenshot service / deep-links open the right tab.
+  const [searchParams] = useSearchParams();
+  // Map ?pair=BTC/USDT|XAU/USDT|XAU/USD → asset BTC|XAU. Hỗ trợ cả ?asset=
+  const pairToAsset = (pair?: string | null): 'BTC' | 'XAU' | null => {
+    if (!pair) return null;
+    const up = pair.toUpperCase();
+    if (up.startsWith('BTC')) return 'BTC';
+    if (up.startsWith('XAU') || up.startsWith('GOLD')) return 'XAU';
+    return null;
+  };
   const initialAsset = ((): 'BTC' | 'XAU' => {
     if (typeof window === 'undefined') return 'BTC';
-    const p = new URLSearchParams(window.location.search).get('asset')?.toUpperCase();
-    return p === 'XAU' ? 'XAU' : 'BTC';
+    const sp = new URLSearchParams(window.location.search);
+    return pairToAsset(sp.get('pair')) ?? (sp.get('asset')?.toUpperCase() === 'XAU' ? 'XAU' : 'BTC');
   })();
   const [activeAsset, setActiveAsset] = useState<'BTC' | 'XAU'>(initialAsset);
   const [btcTimeframe, setBtcTimeframe] = useState('H4');
   const [goldTimeframe, setGoldTimeframe] = useState('H4');
+
+  // Sync TỪ URL (Workspace top-bar) → state
+  useEffect(() => {
+    const urlPair = searchParams.get('pair');
+    const mapped = pairToAsset(urlPair);
+    if (mapped && mapped !== activeAsset) setActiveAsset(mapped);
+    const urlTf = searchParams.get('tf');
+    if (urlTf && ['M15', 'H1', 'H4', 'D1'].includes(urlTf)) {
+      if (mapped === 'BTC' || (!mapped && activeAsset === 'BTC')) setBtcTimeframe(urlTf);
+      if (mapped === 'XAU' || (!mapped && activeAsset === 'XAU')) setGoldTimeframe(urlTf);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
   const [logs, setLogs] = useState<string[]>([]);
   const [scanning, setScanning] = useState(false);
   const [scanLabel, setScanLabel] = useState('');
@@ -810,7 +831,8 @@ const Analysis: React.FC<AnalysisProps> = ({ embedded = false }) => {
 
         </div>
 
-        {/* ── DISCLAIMER ── */}
+        {/* ── DISCLAIMER (ẩn khi embedded để workspace hiển thị 1 lần duy nhất) ── */}
+        {!embedded && (
         <section
           aria-label="Cảnh báo rủi ro"
           className="mt-4 rounded-xl border border-red-500/30 bg-gradient-to-r from-red-950/40 via-red-900/20 to-red-950/40 overflow-hidden"
@@ -839,6 +861,7 @@ const Analysis: React.FC<AnalysisProps> = ({ embedded = false }) => {
             </p>
           </div>
         </section>
+        )}
       </div>
 
       {!embedded && <Footer />}

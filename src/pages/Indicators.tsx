@@ -46,7 +46,7 @@ import {
   PanelLeft, PanelRight, ChevronDown, Sparkles, Pin, BookMarked,
 } from 'lucide-react';
 
-const PAIRS = [
+export const PAIRS = [
   { symbol: 'BTC/USDT', label: 'BTC', color: '#F7931A' },
   { symbol: 'ETH/USDT', label: 'ETH', color: '#627EEA' },
   { symbol: 'XAU/USDT', label: 'XAU', color: '#FFD700' },
@@ -64,7 +64,7 @@ const PAIRS = [
   { symbol: 'LINK/USDT', label: 'LINK', color: '#2A5ADA' },
 ];
 
-const TIMEFRAMES = ['M15', 'H1', 'H4', 'D1'];
+export const TIMEFRAMES = ['M15', 'H1', 'H4', 'D1'];
 
 const DEFAULT_INDICATORS: IndicatorConfig[] = [
   { id: 'bb_squeeze', label: 'Bollinger Bands', enabled: true, color: '#26A69A', category: 'Volatility', note: 'BB(20,2) — dải trên/dưới + đường giữa SMA20.' },
@@ -188,6 +188,19 @@ const Indicators: React.FC<IndicatorsProps> = ({ embedded = false }) => {
     setSearchParams(params, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePair, activeTimeframe, enabledIds.join(',')]);
+
+  // Sync TỪ URL về state (khi Workspace top-bar đổi pair/tf)
+  useEffect(() => {
+    const urlPair = searchParams.get('pair');
+    const urlTf = searchParams.get('tf');
+    if (urlPair && urlPair !== activePair && PAIRS.find(p => p.symbol === urlPair)) {
+      setActivePair(urlPair);
+    }
+    if (urlTf && urlTf !== activeTimeframe && TIMEFRAMES.includes(urlTf)) {
+      setActiveTimeframe(urlTf);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const handleLoadPreset = (preset: { pair: string; timeframe: string; enabled_indicators: string[] }) => {
     setActivePair(preset.pair);
