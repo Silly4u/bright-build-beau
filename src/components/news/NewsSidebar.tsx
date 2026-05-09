@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useEconomicEvents } from '@/hooks/useEconomicEvents';
 import { CONTACT_INFO } from '@/lib/contact';
+import MiniPoll from './MiniPoll';
+import StreakCard from './StreakCard';
 
 function fmtCountdown(target: Date): { text: string; soon: boolean; live: boolean; past: boolean } {
   const diff = target.getTime() - Date.now();
