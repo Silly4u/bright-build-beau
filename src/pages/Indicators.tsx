@@ -594,7 +594,7 @@ const Indicators: React.FC = () => {
             </div>
           </div>
 
-          {/* ── RIGHT: Strength Meter + AI Confluence + Triggers + Signals ── */}
+          {/* ── RIGHT: Strength + AI + Top Movers + Triggers + Signals ── */}
           <div className="bg-[#161a1e] p-3 flex flex-col min-h-0 space-y-3 overflow-y-auto max-h-[calc(100vh-180px)]">
             <IndicatorStrengthMeter votes={votes} />
             <AIConfluenceCard
@@ -604,6 +604,9 @@ const Indicators: React.FC = () => {
               votes={votes}
               strengthScore={strengthScore}
             />
+            <TopMoversPanel onSelect={(p) => {
+              if (PAIRS.find(x => x.symbol === p)) setActivePair(p);
+            }} />
             <TriggerAlertsPanel watched={watchedTriggers} onChange={setWatchedTriggers} />
 
             <div>
@@ -617,6 +620,17 @@ const Indicators: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ═══ AUTO TRADE SETUPS ═══ */}
+      <div className="px-1.5 lg:px-3 pb-1">
+        <TradeSetupCards
+          pair={activePair}
+          livePrice={livePrice}
+          candles={marketData.candles}
+          votes={votes}
+          strengthScore={strengthScore}
+        />
       </div>
 
       {/* ═══ SYSTEM LOG ═══ */}
