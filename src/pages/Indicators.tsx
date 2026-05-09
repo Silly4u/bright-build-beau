@@ -32,6 +32,9 @@ import PinnedMiniCharts from '@/components/indicators/PinnedMiniCharts';
 import TimeframeSelector from '@/components/indicators/TimeframeSelector';
 import PairSelector from '@/components/indicators/PairSelector';
 import MultiChartGrid from '@/components/indicators/MultiChartGrid';
+import MarketOverviewBar from '@/components/indicators/MarketOverviewBar';
+import TopMoversPanel from '@/components/indicators/TopMoversPanel';
+import TradeSetupCards from '@/components/indicators/TradeSetupCards';
 import { computeIndicatorVotes, aggregateStrength } from '@/lib/indicatorVotes';
 import { useIndicatorTriggers, type TriggerType } from '@/hooks/useIndicatorTriggers';
 
@@ -197,8 +200,10 @@ const Indicators: React.FC = () => {
     <main className="min-h-screen bg-[#0b0e11]">
       <Header />
 
-      {/* ═══ TRADINGVIEW-STYLE TOP BAR ═══ */}
+      {/* ═══ BLOOMBERG-STYLE MARKET OVERVIEW BAR ═══ */}
       <div className="pt-24 px-1.5 lg:px-3">
+        <MarketOverviewBar />
+
         {/* Row 1: Big price + bid/ask */}
         <div className="bg-[#0b0e11] border-x border-t border-[#2b3139] rounded-t-md px-4 py-2.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
@@ -589,7 +594,7 @@ const Indicators: React.FC = () => {
             </div>
           </div>
 
-          {/* ── RIGHT: Strength Meter + AI Confluence + Triggers + Signals ── */}
+          {/* ── RIGHT: Strength + AI + Top Movers + Triggers + Signals ── */}
           <div className="bg-[#161a1e] p-3 flex flex-col min-h-0 space-y-3 overflow-y-auto max-h-[calc(100vh-180px)]">
             <IndicatorStrengthMeter votes={votes} />
             <AIConfluenceCard
@@ -599,6 +604,9 @@ const Indicators: React.FC = () => {
               votes={votes}
               strengthScore={strengthScore}
             />
+            <TopMoversPanel onSelect={(p) => {
+              if (PAIRS.find(x => x.symbol === p)) setActivePair(p);
+            }} />
             <TriggerAlertsPanel watched={watchedTriggers} onChange={setWatchedTriggers} />
 
             <div>
@@ -612,6 +620,17 @@ const Indicators: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ═══ AUTO TRADE SETUPS ═══ */}
+      <div className="px-1.5 lg:px-3 pb-1">
+        <TradeSetupCards
+          pair={activePair}
+          livePrice={livePrice}
+          candles={marketData.candles}
+          votes={votes}
+          strengthScore={strengthScore}
+        />
       </div>
 
       {/* ═══ SYSTEM LOG ═══ */}
