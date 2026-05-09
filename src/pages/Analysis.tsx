@@ -114,6 +114,24 @@ const Analysis: React.FC = () => {
   // Reset về trang 1 khi đổi bộ lọc
   useEffect(() => { setSignalPage(1); }, [signalSymbolFilter, signalTypeFilter]);
 
+  // Keyboard nav: ← / → để chuyển trang (bỏ qua khi đang gõ trong input/textarea)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      const t = e.target as HTMLElement | null;
+      const tag = t?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || t?.isContentEditable) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === 'ArrowLeft') {
+        setSignalPage(p => Math.max(1, p - 1));
+      } else {
+        setSignalPage(p => Math.min(totalPages, p + 1));
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [totalPages]);
+
   // Tick "now" mỗi 30s để relative time tự cập nhật
   const [nowTs, setNowTs] = useState(() => Date.now());
   useEffect(() => {
