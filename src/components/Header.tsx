@@ -2,21 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Menu, X, LogIn, LogOut, Shield, ArrowUpRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIndicatorPermissions } from '@/hooks/useIndicatorPermissions';
 import sphereLogo from '@/assets/uncletrader-logo.png';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 
-const navLinks = [
-  { href: '/', label: 'Trang Chủ' },
-  { href: '/tin-tuc', label: 'Tin Tức' },
-  { href: '/co-phieu', label: 'Cổ Phiếu' },
-  { href: '/phan-tich', label: 'Phân Tích' },
-  { href: '/indicators', label: 'Indicators' },
-  { href: '/lich-kinh-te', label: 'Lịch Kinh Tế' },
-  { href: '/services', label: 'Dịch Vụ' },
-  { href: '/hoc-vien', label: 'Học Viện' },
-  { href: '/contact', label: 'Liên Hệ' },
+const NAV_ITEMS: { href: string; key: string }[] = [
+  { href: '/', key: 'home' },
+  { href: '/tin-tuc', key: 'news' },
+  { href: '/co-phieu', key: 'stocks' },
+  { href: '/phan-tich', key: 'analysis' },
+  { href: '/indicators', key: 'indicators' },
+  { href: '/lich-kinh-te', key: 'calendar' },
+  { href: '/services', key: 'services' },
+  { href: '/hoc-vien', key: 'academy' },
+  { href: '/contact', key: 'contact' },
 ];
 
 const Header: React.FC = () => {
@@ -26,6 +27,7 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { isSuperAdmin } = useIndicatorPermissions();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -66,7 +68,7 @@ const Header: React.FC = () => {
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center justify-center gap-0.5 min-w-0 overflow-hidden">
-            {navLinks.map((link) => {
+            {NAV_ITEMS.map((link) => {
               const isActive = location.pathname === link.href;
               return (
                 <Link
@@ -78,7 +80,7 @@ const Header: React.FC = () => {
                       : 'text-white/65 hover:text-foreground hover:bg-white/5'
                   }`}
                 >
-                  {link.label}
+                  {t(`nav.${link.key}`)}
                 </Link>
               );
             })}
@@ -92,7 +94,7 @@ const Header: React.FC = () => {
                 className="hidden xl:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold text-amber-300 bg-amber-400/10 border border-amber-400/30 hover:bg-amber-400/20 transition-all"
               >
                 <Shield className="w-3 h-3" />
-                Admin
+                {t('nav.admin')}
               </Link>
             )}
             <LanguageSwitcher />
@@ -102,7 +104,7 @@ const Header: React.FC = () => {
                 className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-semibold text-white/80 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all whitespace-nowrap"
               >
                 <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">Đăng Xuất</span>
+                <span className="hidden xl:inline">{t('nav.logout')}</span>
               </button>
             ) : (
               <Link
@@ -110,7 +112,7 @@ const Header: React.FC = () => {
                 className="hidden md:inline-flex btn-primary items-center gap-1.5 px-2.5 xl:px-3 py-1.5 rounded-full text-[11px] xl:text-[11.5px] whitespace-nowrap"
               >
                 <LogIn className="w-3.5 h-3.5" />
-                Đăng Nhập
+                {t('nav.login')}
                 <ArrowUpRight className="w-3.5 h-3.5 hidden xl:inline" />
               </Link>
             )}
@@ -131,7 +133,7 @@ const Header: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="lg:hidden px-3 pb-3 pt-1 flex flex-col gap-1"
           >
-            {navLinks.map((link) => {
+            {NAV_ITEMS.map((link) => {
               const isActive = location.pathname === link.href;
               return (
                 <Link
@@ -142,7 +144,7 @@ const Header: React.FC = () => {
                     isActive ? 'text-foreground bg-white/10' : 'text-white/75 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  {link.label}
+                  {t(`nav.${link.key}`)}
                 </Link>
               );
             })}
@@ -151,7 +153,7 @@ const Header: React.FC = () => {
                 onClick={async () => { await signOut(); navigate('/'); setOpen(false); }}
                 className="mt-2 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold bg-white/5 border border-white/10"
               >
-                <LogOut className="w-4 h-4" /> Đăng Xuất
+                <LogOut className="w-4 h-4" /> {t('nav.logout')}
               </button>
             ) : (
               <Link
@@ -159,7 +161,7 @@ const Header: React.FC = () => {
                 onClick={() => setOpen(false)}
                 className="btn-primary mt-2 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-sm"
               >
-                <LogIn className="w-4 h-4" /> Đăng Nhập / Đăng Ký
+                <LogIn className="w-4 h-4" /> {t('nav.loginRegister')}
               </Link>
             )}
           </motion.div>

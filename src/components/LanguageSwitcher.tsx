@@ -1,26 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Globe, Check, ChevronDown } from 'lucide-react';
 
 type Lang = 'vi' | 'en' | 'zh';
 
-const LANGS: { code: Lang; label: string; short: string; flag: string }[] = [
-  { code: 'vi', label: 'Tiếng Việt', short: 'VI', flag: '🇻🇳' },
-  { code: 'en', label: 'English',     short: 'EN', flag: '🇬🇧' },
-  { code: 'zh', label: '中文',         short: 'ZH', flag: '🇨🇳' },
+const LANGS: { code: Lang; short: string; flag: string }[] = [
+  { code: 'vi', short: 'VI', flag: '🇻🇳' },
+  { code: 'en', short: 'EN', flag: '🇬🇧' },
+  { code: 'zh', short: 'ZH', flag: '🇨🇳' },
 ];
 
-const STORAGE_KEY = 'ut_lang';
-
 const LanguageSwitcher: React.FC = () => {
+  const { i18n, t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [lang, setLang] = useState<Lang>('vi');
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const saved = (localStorage.getItem(STORAGE_KEY) as Lang) || 'vi';
-    setLang(saved);
-    document.documentElement.lang = saved;
-  }, []);
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -31,21 +24,19 @@ const LanguageSwitcher: React.FC = () => {
   }, []);
 
   const choose = (code: Lang) => {
-    setLang(code);
-    localStorage.setItem(STORAGE_KEY, code);
-    document.documentElement.lang = code;
+    i18n.changeLanguage(code);
     setOpen(false);
-    window.dispatchEvent(new CustomEvent('langchange', { detail: code }));
   };
 
-  const current = LANGS.find(l => l.code === lang)!;
+  const currentCode = (i18n.language?.split('-')[0] as Lang) || 'vi';
+  const current = LANGS.find(l => l.code === currentCode) ?? LANGS[0];
 
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(v => !v)}
         className="inline-flex items-center gap-1 px-2 py-1.5 rounded-full text-[11px] font-semibold text-white/80 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all whitespace-nowrap"
-        aria-label="Change language"
+        aria-label={t('lang.label')}
       >
         <Globe className="w-3.5 h-3.5" />
         <span className="hidden sm:inline">{current.short}</span>
@@ -59,14 +50,14 @@ const LanguageSwitcher: React.FC = () => {
               key={l.code}
               onClick={() => choose(l.code)}
               className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-[12px] font-medium transition-colors ${
-                lang === l.code ? 'bg-white/10 text-white' : 'text-white/75 hover:bg-white/5 hover:text-white'
+                currentCode === l.code ? 'bg-white/10 text-white' : 'text-white/75 hover:bg-white/5 hover:text-white'
               }`}
             >
               <span className="flex items-center gap-2">
                 <span className="text-base leading-none">{l.flag}</span>
-                <span>{l.label}</span>
+                <span>{t(`lang.${l.code}`)}</span>
               </span>
-              {lang === l.code && <Check className="w-3.5 h-3.5 text-amber-300" />}
+              {currentCode === l.code && <Check className="w-3.5 h-3.5 text-amber-300" />}
             </button>
           ))}
         </div>

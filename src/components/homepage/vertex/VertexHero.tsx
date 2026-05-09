@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
 import { ArrowUpRight, Sparkles, MessageCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { CONTACT_INFO } from '@/lib/contact';
 import { fetchBinanceTickers } from '@/lib/binance';
 import sphereLogo from '@/assets/vertex-btc-sphere.png';
@@ -9,6 +10,7 @@ import heroCoin from '@/assets/vertex-eth-coin.png';
 import heroShape from '@/assets/hero-chart.png';
 
 const VertexHero: React.FC = () => {
+  const { t } = useTranslation();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
   const scale = useTransform(scrollYProgress, [0, 1], [1, 0.85]);
@@ -78,7 +80,7 @@ const VertexHero: React.FC = () => {
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs md:text-sm text-white/80"
           >
             <Sparkles size={14} className="text-[#00D2D3]" />
-            <span className="font-mono uppercase tracking-widest">v3 · LIVE SIGNALS ĐANG HOẠT ĐỘNG</span>
+            <span className="font-mono uppercase tracking-widest">{t('hero.badge')}</span>
           </motion.div>
 
           <motion.h1
@@ -87,11 +89,11 @@ const VertexHero: React.FC = () => {
             transition={{ delay: 0.3, duration: 0.9, ease: [0.2, 0.8, 0.2, 1] }}
             className="font-display mt-5 text-5xl sm:text-6xl lg:text-7xl xl:text-[5.2rem] leading-[0.95] font-bold"
           >
-            Giao dịch{' '}
-            <span className="text-accent-gradient">có chiến lược</span>
+            {t('hero.title1')}{' '}
+            <span className="text-accent-gradient">{t('hero.title2')}</span>
             <br />
-            <span className="text-white/85">Cho </span>
-            <em className="not-italic font-display">trader Việt</em>
+            <span className="text-white/85">{t('hero.title3')}</span>
+            <em className="not-italic font-display">{t('hero.title4')}</em>
           </motion.h1>
 
           <motion.p
@@ -100,8 +102,7 @@ const VertexHero: React.FC = () => {
             transition={{ delay: 0.55, duration: 0.7 }}
             className="mt-6 text-base md:text-lg text-white/60 max-w-xl leading-relaxed"
           >
-            Tín hiệu giao dịch crypto chính xác, phân tích Smart Money thời gian thực và cộng đồng trader chuyên nghiệp.
-            Tham gia ngay cùng hơn 2,400 trader tại Việt Nam.
+            {t('hero.desc')}
           </motion.p>
 
           <motion.div
@@ -114,7 +115,7 @@ const VertexHero: React.FC = () => {
               to="/auth"
               className="btn-primary inline-flex items-center gap-2 px-6 py-3.5 rounded-full text-sm md:text-base"
             >
-              Bắt đầu ngay
+              {t('hero.ctaPrimary')}
               <ArrowUpRight size={18} />
             </Link>
             <a
@@ -124,13 +125,13 @@ const VertexHero: React.FC = () => {
               className="btn-ghost inline-flex items-center gap-2 px-6 py-3.5 rounded-full text-sm md:text-base"
             >
               <MessageCircle size={16} />
-              Telegram VIP
+              {t('hero.ctaTelegram')}
             </a>
             <Link
               to="/services"
               className="text-white/60 hover:text-white font-mono text-sm uppercase tracking-widest underline underline-offset-4 px-2 py-3 transition-colors"
             >
-              Xem dịch vụ →
+              {t('hero.ctaServices')}
             </Link>
           </motion.div>
 
@@ -140,11 +141,11 @@ const VertexHero: React.FC = () => {
             transition={{ delay: 1, duration: 0.8 }}
             className="mt-10 flex items-center gap-6 text-xs md:text-sm text-white/45 font-mono uppercase tracking-widest"
           >
-            <span>Win Rate 78%</span>
+            <span>{t('hero.statWinrate')}</span>
             <span className="w-1 h-1 rounded-full bg-white/30" />
-            <span>2,400+ Members</span>
+            <span>{t('hero.statMembers')}</span>
             <span className="w-1 h-1 rounded-full bg-white/30" />
-            <span>400+ Signals</span>
+            <span>{t('hero.statSignals')}</span>
           </motion.div>
         </div>
 
@@ -191,9 +192,9 @@ const VertexHero: React.FC = () => {
               transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
               className="glass rounded-3xl p-3 w-44 shadow-2xl"
             >
-              <div className="text-[10px] uppercase tracking-widest text-white/50 font-mono">Win Rate</div>
+              <div className="text-[10px] uppercase tracking-widest text-white/50 font-mono">{t('hero.winRate')}</div>
               <div className="mt-1 font-display text-2xl font-semibold">78.4%</div>
-              <div className="text-xs text-[#00D2D3] mt-0.5">+2.1% tuần này</div>
+              <div className="text-xs text-[#00D2D3] mt-0.5">{t('hero.weekDelta')}</div>
               <div className="mt-3 h-10 flex items-end gap-1">
                 {[8, 14, 10, 18, 22, 16, 26, 30, 24, 36].map((h, i) => (
                   <span key={i} style={{ height: `${h}px` }} className="w-1.5 rounded-full bg-gradient-to-t from-[#FF5B22] to-[#D926A9]" />
@@ -271,7 +272,7 @@ const VertexHero: React.FC = () => {
         style={{ opacity }}
         className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/40 text-[10px] font-mono uppercase tracking-[0.3em] flex flex-col items-center gap-2 pointer-events-none"
       >
-        <span>Cuộn xuống</span>
+        <span>{t('hero.scrollHint')}</span>
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 1.6, repeat: Infinity }}

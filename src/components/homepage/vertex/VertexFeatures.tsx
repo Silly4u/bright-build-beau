@@ -1,51 +1,34 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import featureWallet from '@/assets/feature-wallet.jpg';
 import featureTrading from '@/assets/feature-trading.jpg';
 import featureYield from '@/assets/feature-yield.jpg';
 
-const FEATURES = [
-  {
-    title: 'Tín Hiệu VIP',
-    tagline: 'Smart Money, Liquidity Hunter.',
-    desc: 'Tín hiệu chất lượng cao theo phương pháp Smart Money Concept. Entry, SL, TP rõ ràng, gửi trực tiếp về Telegram VIP của bạn.',
-    image: featureTrading,
-    accent: '#FF5B22',
-  },
-  {
-    title: 'Phân Tích AI',
-    tagline: 'Confluence engine real-time.',
-    desc: 'Hệ thống AlphaNet kết hợp Wyckoff, EMA Pro, S/R, Oscillator Matrix — mọi indicator chuyên nghiệp trên một biểu đồ.',
-    image: featureWallet,
-    accent: '#00D2D3',
-  },
-  {
-    title: 'Cộng Đồng',
-    tagline: 'Trader Việt chuyên nghiệp.',
-    desc: 'Khoá học, livestream, room discussion. Học hỏi từ cộng đồng 2,400+ trader đã có kinh nghiệm thực chiến trên thị trường.',
-    image: featureYield,
-    accent: '#D926A9',
-  },
-];
-
 const VertexFeatures: React.FC = () => {
+  const { t } = useTranslation();
+  const FEATURES = [
+    { key: 'vip', image: featureTrading, accent: '#FF5B22' },
+    { key: 'ai', image: featureWallet, accent: '#00D2D3' },
+    { key: 'community', image: featureYield, accent: '#D926A9' },
+  ];
   return (
     <section className="relative py-20 md:py-28 z-10">
       <div className="max-w-7xl mx-auto px-6 md:px-10">
         <div className="max-w-2xl">
-          <p className="font-mono uppercase tracking-[0.3em] text-xs text-white/50">Vì sao UncleTrader</p>
+          <p className="font-mono uppercase tracking-[0.3em] text-xs text-white/50">{t('features.eyebrow')}</p>
           <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl mt-3 leading-[1] font-bold">
-            Ba mặt trận. <span className="text-accent-gradient">Một hệ thống.</span>
+            {t('features.title1')} <span className="text-accent-gradient">{t('features.title2')}</span>
           </h2>
           <p className="mt-5 text-white/55 text-base md:text-lg max-w-xl">
-            Signal, công cụ phân tích chuyên sâu và cộng đồng — được thiết kế như một sản phẩm liền mạch dành riêng cho trader Việt.
+            {t('features.desc')}
           </p>
         </div>
 
         <div className="mt-14 grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {FEATURES.map((f, i) => (
             <motion.div
-              key={f.title}
+              key={f.key}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-80px' }}
@@ -55,7 +38,7 @@ const VertexFeatures: React.FC = () => {
               <div className="relative h-56 overflow-hidden">
                 <img
                   src={f.image}
-                  alt={f.title}
+                  alt={t(`features.items.${f.key}.title`)}
                   loading="lazy"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
@@ -66,10 +49,10 @@ const VertexFeatures: React.FC = () => {
                   className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-mono uppercase tracking-widest"
                   style={{ color: f.accent, background: `${f.accent}1F`, border: `1px solid ${f.accent}66` }}
                 >
-                  {f.tagline}
+                  {t(`features.items.${f.key}.tagline`)}
                 </div>
-                <h3 className="font-display text-2xl mt-4 font-semibold">{f.title}</h3>
-                <p className="text-white/65 mt-3 leading-relaxed">{f.desc}</p>
+                <h3 className="font-display text-2xl mt-4 font-semibold">{t(`features.items.${f.key}.title`)}</h3>
+                <p className="text-white/65 mt-3 leading-relaxed">{t(`features.items.${f.key}.desc`)}</p>
               </div>
             </motion.div>
           ))}
