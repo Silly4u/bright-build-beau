@@ -600,7 +600,7 @@ const Indicators: React.FC = () => {
           </div>
 
           {/* ── RIGHT: Strength + AI + Top Movers + Triggers + Signals ── */}
-          <div className="bg-[#161a1e] p-3 flex flex-col min-h-0 space-y-3 overflow-y-auto max-h-[calc(100vh-180px)]">
+          <div className="bg-[#161a1e] p-3 flex flex-col min-h-0 space-y-3">
             <IndicatorStrengthMeter votes={votes} />
             <AIConfluenceCard
               pair={activePair}
