@@ -89,7 +89,8 @@ function detectAt(
   if (bbUpper && curr.close > bbUpper) {
     conditions.push({ key: 'bb_breakout', msg: `${sym} phá vỡ BB Upper — tín hiệu breakout mạnh` });
   }
-  if (bbLower && curr.close < bbLower && prev.close >= (indicators.bb.lower[n - 1] || bbLower)) {
+  const inSupportZone = supportZones.some(z => curr.close >= z.bottom && curr.close <= z.top);
+  if (bbLower && curr.close < bbLower && prev.close >= (indicators.bb.lower[n - 1] ?? bbLower) && !inSupportZone) {
     conditions.push({ key: 'bb_breakdown', msg: `${sym} thủng BB Lower — tín hiệu giảm mạnh` });
   }
   if (bbLower && curr.close <= bbLower && supportZones.some(z => curr.close >= z.bottom && curr.close <= z.top)) {
