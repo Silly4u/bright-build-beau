@@ -74,9 +74,17 @@ const Analysis: React.FC = () => {
   const dxy = useDXY();
 
   // Merge signals for sidebar
-  const mergedSignals = [...btcSignals, ...goldSignals]
-    .sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0) || (b.createdAt ?? 0) - (a.createdAt ?? 0))
-    .slice(0, 30);
+  const mergedSignals = (() => {
+    const seen = new Set<string>();
+    return [...btcSignals, ...goldSignals]
+      .filter(s => {
+        if (seen.has(s.id)) return false;
+        seen.add(s.id);
+        return true;
+      })
+      .sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0) || (b.createdAt ?? 0) - (a.createdAt ?? 0))
+      .slice(0, 30);
+  })();
 
   // Filter state for signal feed
   const [signalSymbolFilter, setSignalSymbolFilter] = useState<'ALL' | 'BTC' | 'GOLD' | 'ETH'>('ALL');
