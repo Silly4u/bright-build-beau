@@ -91,7 +91,8 @@ const SectionCard: React.FC<{ title: string; icon?: React.ReactNode; right?: Rea
   </div>
 );
 
-const Indicators: React.FC = () => {
+interface IndicatorsProps { embedded?: boolean }
+const Indicators: React.FC<IndicatorsProps> = ({ embedded = false }) => {
   const { user } = useAuth();
   const { hasAccess, loading: permLoading } = useIndicatorPermissions();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -304,11 +305,11 @@ const Indicators: React.FC = () => {
   );
 
   return (
-    <main className="min-h-screen bg-[#0a0d11]">
-      <Header />
+    <main className={embedded ? 'bg-[#0a0d11]' : 'min-h-screen bg-[#0a0d11]'}>
+      {!embedded && <Header />}
 
       {/* Market overview ticker */}
-      <div className="pt-20 px-2 lg:px-3">
+      <div className={`${embedded ? 'pt-2' : 'pt-20'} px-2 lg:px-3`}>
         <MarketOverviewBar />
       </div>
 
@@ -570,7 +571,7 @@ const Indicators: React.FC = () => {
         </div>
       )}
 
-      <Footer />
+      {!embedded && <Footer />}
     </main>
   );
 };
