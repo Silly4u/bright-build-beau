@@ -348,23 +348,48 @@ const News: React.FC = () => {
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
           {/* Article Grid */}
           <div>
+            {/* Daily Digest + Continue Reading - chỉ hiển thị tab tổng/cho bạn */}
+            {!loading && (activeStream === FORYOU_TAB || activeStream === 'hot') && (
+              <>
+                <DailyDigest articles={articles} />
+                <ContinueReading articles={articles} />
+              </>
+            )}
+
+            {/* Banner: Đang ẩn N tin */}
+            {hidden.length > 0 && activeStream !== SAVED_TAB && (
+              <div className="mb-4 flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-4 py-2">
+                <span className="text-[11px] text-muted-foreground">🙈 Bạn đang ẩn {hidden.length} tin</span>
+                <button
+                  onClick={unhideAll}
+                  className="text-[11px] font-bold text-cyan-400 hover:text-cyan-300"
+                >
+                  Hiện lại tất cả
+                </button>
+              </div>
+            )}
+
             {loading ? (
               <div className="grid md:grid-cols-2 gap-5">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-[#0d1526] border border-white/5 rounded-2xl h-80 animate-pulse" />
+                  <div key={i} className="bg-[#0d1526] border border-white/5 rounded-2xl h-96 animate-pulse" />
                 ))}
               </div>
             ) : displayedArticles.length === 0 ? (
               <div className="text-center py-20">
-                <div className="text-5xl mb-4">{activeStream === SAVED_TAB ? '📌' : '📰'}</div>
+                <div className="text-5xl mb-4">{activeStream === SAVED_TAB ? '📌' : activeStream === FORYOU_TAB ? '✨' : '📰'}</div>
                 <h3 className="font-display font-bold text-xl text-foreground mb-2">
                   {activeStream === SAVED_TAB
                     ? 'Chưa có tin nào được lưu'
+                    : activeStream === FORYOU_TAB
+                    ? 'Chưa có gợi ý cho bạn'
                     : searchQuery ? 'Không tìm thấy tin phù hợp' : 'Chưa có tin tức'}
                 </h3>
                 <p className="text-muted-foreground text-sm">
                   {activeStream === SAVED_TAB
                     ? 'Nhấn icon 🔖 trên các bài viết để lưu lại'
+                    : activeStream === FORYOU_TAB
+                    ? 'Hãy theo dõi các chủ đề bằng nút ☆ và đọc vài tin để chúng tôi học sở thích của bạn'
                     : searchQuery ? 'Thử từ khoá khác hoặc bỏ bộ lọc' : 'Đang cập nhật...'}
                 </p>
               </div>
@@ -383,7 +408,17 @@ const News: React.FC = () => {
                       <div className="relative h-40 overflow-hidden">
                         <img src={imgUrl} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#0d1526] to-transparent" />
-                        <div className="absolute top-2 right-2">
+                        <div className="absolute top-2 right-2 flex gap-1.5">
+                          <button
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); hide(article.id); }}
+                            title="Ẩn tin này"
+                            className="w-7 h-7 rounded-full bg-black/40 border border-white/10 flex items-center justify-center text-muted-foreground hover:text-rose-400 hover:border-rose-400/40 transition-all backdrop-blur-sm"
+                          >
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                              <line x1="6" y1="6" x2="18" y2="18" />
+                              <line x1="6" y1="18" x2="18" y2="6" />
+                            </svg>
+                          </button>
                           <BookmarkButton id={article.id} title={article.title} stream={article.stream} />
                         </div>
                         {read && (
@@ -405,19 +440,28 @@ const News: React.FC = () => {
 
                       {/* Content */}
                       <div className="p-4 flex-1 flex flex-col">
-                        <h3 className="text-sm font-semibold text-foreground line-clamp-2 leading-snug mb-1.5">
+                        <h3 className="text-sm font-semibold text-foreground line-clamp-2 leading-snug mb-2">
                           {article.title}
                         </h3>
-                        <span className="text-[10px] text-muted-foreground/60 mb-3">{formatDate(article.published_at)}</span>
+
+                        {article.summary && (
+                          <p className="text-[12px] text-muted-foreground/80 line-clamp-3 mb-3 leading-relaxed">
+                            {article.summary}
+                          </p>
+                        )}
 
                         <div className="mb-3">
-                          <ReactionBar articleId={article.id} compact />
+                          <ArticleStats article={article} compact />
+                        </div>
+
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-[10px] text-muted-foreground/60 font-mono">{formatDate(article.published_at)}</span>
                         </div>
 
                         <div className="space-y-2 mt-auto">
                           <Link to={`/tin-tuc/${article.id}?stream=${article.stream}`}
                             className="w-full block text-center text-[11px] font-bold py-2 px-4 rounded-xl border border-white/10 text-foreground hover:border-cyan-400/40 hover:text-cyan-400 transition-all">
-                            📖 Đọc chi tiết
+                            Đọc chi tiết →
                           </Link>
                         </div>
                       </div>
