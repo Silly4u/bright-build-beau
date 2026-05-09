@@ -32,8 +32,14 @@ const SYMBOL_CONFIG: Record<string, { pair: string; label: string; icon: string;
   xau: { pair: 'XAU/USDT', label: '🥇 XAU/USD (Gold)', icon: '🥇', accentClass: 'text-yellow-400' },
 };
 
-const AnalysisDetail: React.FC = () => {
-  const { symbol } = useParams<{ symbol: string }>();
+interface AnalysisDetailProps {
+  symbolOverride?: string;
+  embedded?: boolean;
+}
+
+const AnalysisDetail: React.FC<AnalysisDetailProps> = ({ symbolOverride, embedded = false }) => {
+  const { symbol: symbolParam } = useParams<{ symbol: string }>();
+  const symbol = symbolOverride ?? symbolParam;
   const navigate = useNavigate();
   const config = SYMBOL_CONFIG[symbol || ''] || SYMBOL_CONFIG.btc;
   const isGold = symbol === 'xau';
@@ -124,17 +130,21 @@ const AnalysisDetail: React.FC = () => {
   }, [symbol, timeframe]);
 
   return (
-    <main className="min-h-screen bg-background">
-      <Header />
+    <main className={embedded ? '' : 'min-h-screen bg-background'}>
+      {!embedded && <Header />}
 
       {/* Top Bar */}
-      <div className="pt-24 px-2 lg:px-6">
+      <div className={`${embedded ? 'pt-2' : 'pt-24'} px-2 lg:px-6`}>
         <div className="glass-card rounded-lg px-4 py-2.5 flex flex-wrap items-center gap-3 text-xs">
-          <Link to="/phan-tich" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
-            <span className="text-[10px] font-medium">Quay lại</span>
-          </Link>
-          <div className="w-px h-5 bg-foreground/10" />
+          {!embedded && (
+            <>
+              <Link to="/phan-tich" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
+                <span className="text-[10px] font-medium">Quay lại</span>
+              </Link>
+              <div className="w-px h-5 bg-foreground/10" />
+            </>
+          )}
           <span className={`px-2.5 py-1 rounded font-mono font-bold ${config.accentClass} bg-foreground/5 border border-foreground/10`}>
             {config.label}
           </span>
@@ -335,7 +345,7 @@ const AnalysisDetail: React.FC = () => {
         </div>
       </div>
 
-      <Footer />
+      {!embedded && <Footer />}
     </main>
   );
 };
