@@ -74,9 +74,26 @@ const Analysis: React.FC = () => {
   const dxy = useDXY();
 
   // Merge signals for sidebar
-  const allSignals = [...btcSignals, ...goldSignals]
-    .sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0))
-    .slice(0, 20);
+  const mergedSignals = [...btcSignals, ...goldSignals]
+    .sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0) || (b.createdAt ?? 0) - (a.createdAt ?? 0))
+    .slice(0, 30);
+
+  // Filter state for signal feed
+  const [signalSymbolFilter, setSignalSymbolFilter] = useState<'ALL' | 'BTC' | 'GOLD' | 'ETH'>('ALL');
+  const [signalTypeFilter, setSignalTypeFilter] = useState<'ALL' | 'breakout' | 'support_touch' | 'volume_anomaly' | 'buy' | 'alert'>('ALL');
+
+  const allSignals = mergedSignals.filter(s => {
+    if (signalSymbolFilter !== 'ALL' && s.symbol !== signalSymbolFilter) return false;
+    if (signalTypeFilter !== 'ALL' && s.type !== signalTypeFilter) return false;
+    return true;
+  });
+
+  // Tick "now" mỗi 30s để relative time tự cập nhật
+  const [nowTs, setNowTs] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowTs(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   // Live prices
   const btcPrice = btcData.candles[btcData.candles.length - 1]?.close ?? 0;
