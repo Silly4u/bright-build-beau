@@ -35,6 +35,8 @@ import MultiChartGrid from '@/components/indicators/MultiChartGrid';
 import MarketOverviewBar from '@/components/indicators/MarketOverviewBar';
 import TopMoversPanel from '@/components/indicators/TopMoversPanel';
 import TradeSetupCards from '@/components/indicators/TradeSetupCards';
+import EconomicEventsWidget from '@/components/indicators/EconomicEventsWidget';
+import LiquidationHeatmap from '@/components/indicators/LiquidationHeatmap';
 import { computeIndicatorVotes, aggregateStrength } from '@/lib/indicatorVotes';
 import { useIndicatorTriggers, type TriggerType } from '@/hooks/useIndicatorTriggers';
 
