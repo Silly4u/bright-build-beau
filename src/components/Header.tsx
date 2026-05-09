@@ -133,7 +133,7 @@ const Header: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="lg:hidden px-3 pb-3 pt-1 flex flex-col gap-1"
           >
-            {navLinks.map((link) => {
+            {NAV_ITEMS.map((link) => {
               const isActive = location.pathname === link.href;
               return (
                 <Link
@@ -144,7 +144,7 @@ const Header: React.FC = () => {
                     isActive ? 'text-foreground bg-white/10' : 'text-white/75 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  {link.label}
+                  {t(`nav.${link.key}`)}
                 </Link>
               );
             })}
@@ -153,7 +153,7 @@ const Header: React.FC = () => {
                 onClick={async () => { await signOut(); navigate('/'); setOpen(false); }}
                 className="mt-2 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold bg-white/5 border border-white/10"
               >
-                <LogOut className="w-4 h-4" /> Đăng Xuất
+                <LogOut className="w-4 h-4" /> {t('nav.logout')}
               </button>
             ) : (
               <Link
@@ -161,7 +161,7 @@ const Header: React.FC = () => {
                 onClick={() => setOpen(false)}
                 className="btn-primary mt-2 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-sm"
               >
-                <LogIn className="w-4 h-4" /> Đăng Nhập / Đăng Ký
+                <LogIn className="w-4 h-4" /> {t('nav.loginRegister')}
               </Link>
             )}
           </motion.div>
