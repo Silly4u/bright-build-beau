@@ -8,6 +8,7 @@ export const vi = {
     calendar: 'Lịch Kinh Tế',
     services: 'Dịch Vụ',
     academy: 'Học Viện',
+    kol: 'KOL',
     contact: 'Liên Hệ',
     admin: 'Admin',
     login: 'Đăng Nhập',

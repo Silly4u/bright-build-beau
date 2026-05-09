@@ -8,6 +8,7 @@ export const zh = {
     calendar: '经济日历',
     services: '服务',
     academy: '学院',
+    kol: 'KOL',
     contact: '联系',
     admin: '管理',
     login: '登录',

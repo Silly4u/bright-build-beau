@@ -224,6 +224,54 @@ export type Database = {
         }
         Relationships: []
       }
+      kol_applications: {
+        Row: {
+          audience_vn_percent: number | null
+          channel_url: string
+          created_at: string
+          email: string
+          experience: string | null
+          followers: number | null
+          full_name: string
+          id: string
+          phone: string | null
+          platform: string
+          reason: string
+          status: string
+          telegram: string | null
+        }
+        Insert: {
+          audience_vn_percent?: number | null
+          channel_url: string
+          created_at?: string
+          email: string
+          experience?: string | null
+          followers?: number | null
+          full_name: string
+          id?: string
+          phone?: string | null
+          platform: string
+          reason: string
+          status?: string
+          telegram?: string | null
+        }
+        Update: {
+          audience_vn_percent?: number | null
+          channel_url?: string
+          created_at?: string
+          email?: string
+          experience?: string | null
+          followers?: number | null
+          full_name?: string
+          id?: string
+          phone?: string | null
+          platform?: string
+          reason?: string
+          status?: string
+          telegram?: string | null
+        }
+        Relationships: []
+      }
       market_commentaries: {
         Row: {
           asset: string

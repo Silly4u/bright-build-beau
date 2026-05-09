@@ -8,6 +8,7 @@ export const en = {
     calendar: 'Economic Calendar',
     services: 'Services',
     academy: 'Academy',
+    kol: 'KOL',
     contact: 'Contact',
     admin: 'Admin',
     login: 'Sign In',

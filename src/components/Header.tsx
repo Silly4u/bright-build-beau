@@ -17,6 +17,7 @@ const NAV_ITEMS: { href: string; key: string }[] = [
   { href: '/lich-kinh-te', key: 'calendar' },
   { href: '/services', key: 'services' },
   { href: '/hoc-vien', key: 'academy' },
+  { href: '/kol', key: 'kol' },
   { href: '/contact', key: 'contact' },
 ];
 
