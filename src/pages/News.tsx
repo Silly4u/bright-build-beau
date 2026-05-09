@@ -221,16 +221,40 @@ const News: React.FC = () => {
       <section className="pb-3 px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <button
+              onClick={() => setActiveStream(FORYOU_TAB)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-300 border ${
+                activeStream === FORYOU_TAB
+                  ? 'bg-gradient-to-r from-cyan-400/15 to-violet-400/15 text-cyan-400 border-cyan-400/40 font-bold'
+                  : 'text-muted-foreground border-transparent hover:bg-white/5'
+              }`}
+            >
+              <span>✨</span>
+              <span>Cho Bạn</span>
+            </button>
             {NEWS_STREAMS.map(stream => (
-              <button key={stream.id} onClick={() => setActiveStream(stream.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-300 border ${
-                  activeStream === stream.id
-                    ? `${stream.bgColor} ${stream.color} ${stream.borderColor} font-bold`
-                    : 'text-muted-foreground border-transparent hover:bg-white/5'
-                }`}>
-                <span>{stream.icon}</span>
-                <span>{stream.label}</span>
-              </button>
+              <div key={stream.id} className="relative group">
+                <button onClick={() => setActiveStream(stream.id)}
+                  className={`flex items-center gap-2 pl-4 pr-9 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-300 border ${
+                    activeStream === stream.id
+                      ? `${stream.bgColor} ${stream.color} ${stream.borderColor} font-bold`
+                      : 'text-muted-foreground border-transparent hover:bg-white/5'
+                  }`}>
+                  <span>{stream.icon}</span>
+                  <span>{stream.label}</span>
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleFollow(stream.id); }}
+                  title={isFollowed(stream.id) ? 'Bỏ theo dõi' : 'Theo dõi chủ đề'}
+                  className={`absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center text-xs transition-all ${
+                    isFollowed(stream.id)
+                      ? 'text-amber-400 hover:text-amber-300'
+                      : 'text-muted-foreground/40 hover:text-foreground'
+                  }`}
+                >
+                  {isFollowed(stream.id) ? '★' : '☆'}
+                </button>
+              </div>
             ))}
             <button
               onClick={() => setActiveStream(SAVED_TAB)}
