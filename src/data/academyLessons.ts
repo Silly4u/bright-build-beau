@@ -640,7 +640,39 @@ export const LESSONS: Lesson[] = [
         example:
           'ETH 2024-Q1: Fib 0.618 trùng với EMA 200 H4 và Order Block bullish. Khi giá chạm vùng này xuất hiện Bullish Engulfing → entry hoàn hảo, R:R 1:4.',
       },
-    ],
+      {
+        heading: '4. Fibonacci Cluster — "Vùng vàng đa khung"',
+        body: 'Vẽ Fib trên 2–3 swing khác nhau (HTF + LTF) trên cùng một chart. Khi nhiều mức Fib từ các swing khác nhau hội tụ trong một vùng giá hẹp (cluster) → đây là vùng phản ứng mạnh nhất, "smart money zone".',
+        bullets: [
+          'Cách vẽ: Fib 1 từ đáy lớn nhất → đỉnh lớn nhất; Fib 2 từ đáy gần nhất → đỉnh gần nhất',
+          'Cluster lý tưởng: 0.618 của Fib lớn trùng 0.786 của Fib nhỏ trong khoảng giá < 0.5% biên độ',
+          'Phù hợp đặc biệt cho swing trader giữ lệnh 3–10 ngày',
+        ],
+        example:
+          'BTC 11/2023: Fib từ đáy 15.500 (FTX) → đỉnh 31.800 cho 0.382 = 25.580. Fib từ đáy 24.700 → đỉnh 31.800 cho 0.618 = 27.450. Cluster 25.500–27.500 → giá chạm và bật mạnh 4 lần liên tiếp.',
+      },
+      {
+        heading: '5. Fibonacci Time Zones',
+        body: 'Vẽ các đường dọc theo dãy Fibonacci (1, 2, 3, 5, 8, 13, 21 nến) từ đỉnh/đáy quan trọng. Các đường này hay trùng với thời điểm đảo chiều ngắn hạn — không chính xác như mức giá nhưng hữu ích để cảnh báo "sắp có biến động".',
+        pitfall:
+          'Time Zones thường gây ảo tưởng "tự thực hiện". Chỉ dùng làm bộ lọc phụ, không bao giờ làm tín hiệu chính.',
+      },
+      {
+        heading: '6. Fibonacci Fans & Arcs (nâng cao)',
+        body: 'Fan: 3 đường chéo từ swing low qua các mức 0.382/0.5/0.618 — hoạt động như trendline động. Arc: vòng cung dựa trên các mức Fib — đo cả thời gian lẫn giá. Phổ biến hơn trong cổ phiếu Mỹ và Forex.',
+      },
+      {
+        heading: '7. Quy tắc vẽ Fibonacci đúng',
+        body: 'Quy tắc 5 bước để tránh sai lệch:',
+        bullets: [
+          '1. Xác định xu hướng chính trên D1 (EMA 200 dốc lên/xuống)',
+          '2. Chọn swing impulse RÕ RÀNG nhất (≥ 3 nến cùng chiều, không có chồng lấp lớn)',
+          '3. Vẽ từ đầu sóng đến đỉnh sóng — dùng giá đóng cửa, không dùng râu nến (trừ khi râu rất ngắn)',
+          '4. Trong xu hướng tăng: vẽ từ low → high. Trong xu hướng giảm: vẽ từ high → low',
+          '5. Update Fib sau khi swing mới hình thành — đừng giữ Fib cũ "hi vọng"',
+        ],
+      },
+
     takeaways: [
       'Vùng 0.5–0.618 (golden pocket) là entry tốt nhất trong xu hướng',
       'TP chuẩn theo Extension 1.618; SL dưới 0.786',
