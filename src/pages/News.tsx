@@ -103,6 +103,26 @@ const News: React.FC = () => {
     if (activeStream === SAVED_TAB) {
       const ids = new Set(bookmarks.map(b => b.id));
       list = articles.filter(a => ids.has(a.id));
+    } else if (activeStream === FORYOU_TAB) {
+      // Personalized: ưu tiên streams đã follow + nguồn từng đọc, exclude đã đọc
+      const readIds = new Set(history.map(h => h.id));
+      const readSources = new Set(history.map(h => articles.find(a => a.id === h.id)?.source).filter(Boolean) as string[]);
+      const score = (a: typeof articles[number]) => {
+        let s = 0;
+        if (followedTopics.includes(a.stream)) s += 5;
+        if (readSources.has(a.source)) s += 2;
+        if (!readIds.has(a.id)) s += 1;
+        // Boost tin mới
+        const ageH = (Date.now() - new Date(a.published_at).getTime()) / 3600_000;
+        if (ageH < 6) s += 2; else if (ageH < 24) s += 1;
+        return s;
+      };
+      list = [...articles].sort((a, b) => score(b) - score(a));
+    }
+
+    // Loại tin đã ẩn (trừ tab Đã lưu)
+    if (activeStream !== SAVED_TAB) {
+      list = list.filter(a => !isHidden(a.id));
     }
 
     if (searchQuery.trim()) {
@@ -128,7 +148,7 @@ const News: React.FC = () => {
     }
 
     return list;
-  }, [articles, activeStream, bookmarks, searchQuery, timeFilter, sourceFilter]);
+  }, [articles, activeStream, bookmarks, history, followedTopics, isHidden, searchQuery, timeFilter, sourceFilter]);
 
   return (
     <main className="min-h-screen bg-[#0b1120] grain-overlay">
