@@ -22,9 +22,18 @@ const SIGNAL_MESSAGES: Record<string, { badge: string; type: SmartSignal['type']
   bb_breakout: { badge: 'BB BREAK', type: 'buy' },
   bb_oversold: { badge: 'VIP SIGNAL', type: 'buy' },
   momentum: { badge: 'MOMENTUM', type: 'alert' },
+  momentum_down: { badge: 'MOMENTUM', type: 'sell' },
   volume_spike: { badge: 'VOL SPIKE', type: 'volume_anomaly' },
   rsi_divergence: { badge: 'RSI DIV', type: 'alert' },
+  rsi_div_bear: { badge: 'RSI DIV', type: 'sell' },
   support_bounce: { badge: 'BOUNCE', type: 'buy' },
+  // SELL-side đối xứng
+  breakdown: { badge: 'BREAKDOWN', type: 'sell' },
+  resistance_touch: { badge: 'KHÁNG CỰ', type: 'alert' },
+  bb_breakdown: { badge: 'BB BREAK', type: 'sell' },
+  bb_overbought: { badge: 'VIP SHORT', type: 'sell' },
+  resistance_reject: { badge: 'REJECT', type: 'sell' },
+  dump: { badge: 'DUMP', type: 'sell' },
 };
 
 interface PickedCondition {
