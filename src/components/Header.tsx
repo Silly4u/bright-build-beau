@@ -2,21 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Menu, X, LogIn, LogOut, Shield, ArrowUpRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIndicatorPermissions } from '@/hooks/useIndicatorPermissions';
 import sphereLogo from '@/assets/uncletrader-logo.png';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 
-const navLinks = [
-  { href: '/', label: 'Trang Chủ' },
-  { href: '/tin-tuc', label: 'Tin Tức' },
-  { href: '/co-phieu', label: 'Cổ Phiếu' },
-  { href: '/phan-tich', label: 'Phân Tích' },
-  { href: '/indicators', label: 'Indicators' },
-  { href: '/lich-kinh-te', label: 'Lịch Kinh Tế' },
-  { href: '/services', label: 'Dịch Vụ' },
-  { href: '/hoc-vien', label: 'Học Viện' },
-  { href: '/contact', label: 'Liên Hệ' },
+const NAV_ITEMS: { href: string; key: string }[] = [
+  { href: '/', key: 'home' },
+  { href: '/tin-tuc', key: 'news' },
+  { href: '/co-phieu', key: 'stocks' },
+  { href: '/phan-tich', key: 'analysis' },
+  { href: '/indicators', key: 'indicators' },
+  { href: '/lich-kinh-te', key: 'calendar' },
+  { href: '/services', key: 'services' },
+  { href: '/hoc-vien', key: 'academy' },
+  { href: '/contact', key: 'contact' },
 ];
 
 const Header: React.FC = () => {
@@ -26,6 +27,7 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { isSuperAdmin } = useIndicatorPermissions();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
