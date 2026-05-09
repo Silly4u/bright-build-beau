@@ -46,8 +46,8 @@ const TradeSetupCards: React.FC<Props> = ({ pair, livePrice, candles, votes, str
     const recentHigh = Math.max(...candles.slice(-50).map(c => c.high));
     const recentLow = Math.min(...candles.slice(-50).map(c => c.low));
 
-    const bullVotes = votes.filter(v => v.direction === 'long').length;
-    const bearVotes = votes.filter(v => v.direction === 'short').length;
+    const bullVotes = votes.filter(v => v.vote === 1).length;
+    const bearVotes = votes.filter(v => v.vote === -1).length;
     const dominantBias: 'LONG' | 'SHORT' = strengthScore >= 0 ? 'LONG' : 'SHORT';
     const oppositeBias: 'LONG' | 'SHORT' = dominantBias === 'LONG' ? 'SHORT' : 'LONG';
 
