@@ -993,6 +993,46 @@ export const LESSONS: Lesson[] = [
           'Ghi nhật ký: cảm xúc lúc vào lệnh, kết quả, bài học',
         ],
       },
+      {
+        heading: '6. 7 Cognitive Bias chính của trader',
+        body: 'Hiểu các bias để nhận diện chúng đang ảnh hưởng quyết định của bạn:',
+        bullets: [
+          'Confirmation Bias: Chỉ tìm thông tin xác nhận quan điểm sẵn có → bỏ qua tín hiệu ngược chiều',
+          'Anchoring Bias: Bám vào giá mua đầu tiên → từ chối cắt lỗ vì "giá sẽ về"',
+          'Recency Bias: Coi trọng sự kiện gần đây quá mức → over-react sau 1 đêm crash',
+          'Hindsight Bias: "Tôi đã biết trước rồi" → tự tin sai lầm cho lệnh sau',
+          'Sunk Cost Fallacy: Đã thua nhiều rồi nên gồng tiếp → hố sâu hơn',
+          'Gambler\u2019s Fallacy: "Đã thua 5 lệnh rồi nên lệnh sau chắc thắng" → mỗi lệnh độc lập với nhau',
+          'Bandwagon Effect: Theo đám đông Twitter/Telegram → bị xả hàng cho',
+        ],
+      },
+      {
+        heading: '7. Pre-Mortem — Tự tưởng tượng thất bại trước',
+        body: 'Kỹ thuật của Gary Klein: TRƯỚC khi vào lệnh, dành 60 giây tưởng tượng "lệnh này thua thảm vì sao?". Liệt kê 3 kịch bản thất bại lớn nhất.',
+        bullets: [
+          'Buộc não chuyển từ FOMO sang phân tích rủi ro',
+          'Phát hiện scenarios bạn chưa lập kế hoạch (gap, tin bất ngờ, slippage)',
+          'Khi đã "chấp nhận" thất bại trước → ít panic khi giá ngược chiều',
+        ],
+        example:
+          'Trước khi BUY BTC tại 64.000: pre-mortem 3 kịch bản → (1) FED hawkish bất ngờ → -8%, (2) ETF outflow lớn → -5%, (3) Mt.Gox refund → flash crash. Giải pháp: SL chặt 2%, position size nhỏ hơn 30%.',
+      },
+      {
+        heading: '8. Mental Capital — Vốn tinh thần',
+        body: 'Như tài khoản tiền, bạn có "tài khoản tinh thần" cũng cạn dần qua mỗi lệnh thua, mỗi giờ stress. Hết Mental Capital → không thể trade tốt dù còn tiền.',
+        bullets: [
+          'Daily reset: thiền 10 phút trước phiên, walk 20 phút sau phiên',
+          'Weekly reset: 1 ngày OFF hoàn toàn — không xem chart, không news',
+          'Monthly reset: 2–3 ngày OFF nếu drawdown > 5%',
+          'Sleep: 7–8 giờ là KHÔNG THƯƠNG LƯỢNG. Thiếu ngủ = trade kém như say rượu',
+        ],
+      },
+      {
+        heading: '9. Trading Journal — Vũ khí #1 chống bias',
+        body: 'Mỗi lệnh ghi chép 8 trường: (1) Setup name, (2) Entry/SL/TP, (3) Lý do entry, (4) Cảm xúc lúc vào, (5) Cảm xúc trong khi giữ, (6) Lý do exit, (7) Kết quả, (8) Bài học. Review 1 lần/tuần.',
+        pitfall:
+          'Đa số trader chỉ ghi entry/exit + P&L → vô dụng. Phải ghi CẢM XÚC và LÝ DO mới phát hiện bias lặp lại.',
+      },
     ],
     takeaways: [
       'Tâm lý ổn định = lợi nhuận bền vững',
