@@ -33,6 +33,7 @@ const NEWS_STREAMS: NewsStream[] = [
 ];
 
 const SAVED_TAB = 'saved';
+const FORYOU_TAB = 'foryou';
 
 const UNSPLASH_POOLS: Record<string, string[]> = {
   hot: ['photo-1518546305927-5a555bb7020d', 'photo-1639762681485-074b7f938ba0', 'photo-1622630998477-20aa696ecb05', 'photo-1605792657660-596af9009e82', 'photo-1642104704074-907c0698cbd9'],
