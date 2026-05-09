@@ -3,10 +3,12 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Link } from 'react-router-dom';
 import { useNewsData } from '@/hooks/useNewsData';
-import { useBookmarks, useReadHistory } from '@/hooks/useNewsLocal';
+import { useBookmarks, useReadHistory, useFollowedTopics, useHiddenArticles, useReadingStreak } from '@/hooks/useNewsLocal';
 import NewsSidebar from '@/components/news/NewsSidebar';
 import BookmarkButton from '@/components/news/BookmarkButton';
-import ReactionBar from '@/components/news/ReactionBar';
+import ArticleStats from '@/components/news/ArticleStats';
+import ContinueReading from '@/components/news/ContinueReading';
+import DailyDigest from '@/components/news/DailyDigest';
 import { CONTACT_INFO } from '@/lib/contact';
 
 interface NewsStream {
