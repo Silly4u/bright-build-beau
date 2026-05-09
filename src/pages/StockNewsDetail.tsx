@@ -81,12 +81,13 @@ const StockNewsDetail: React.FC = () => {
       setArticle(data as StockNews);
       setLoading(false);
 
-      // If not translated, trigger on-demand translation
-      if (!data.ai_translated) {
+      // If not translated OR content too short → expand via AI
+      const wc = (data.full_content || '').trim().split(/\s+/).filter(Boolean).length;
+      if (!data.ai_translated || wc < 1200) {
         setTranslating(true);
         try {
           const { data: res } = await supabase.functions.invoke('stock-news-translate', {
-            body: { id: data.id },
+            body: { id: data.id, force: wc < 1200 },
           });
           if (!cancelled && res?.article) setArticle(res.article as StockNews);
         } catch (e) {
@@ -152,8 +153,22 @@ const StockNewsDetail: React.FC = () => {
     );
   }
 
-  const paragraphs = (article.full_content || article.summary || '')
+  const blocks = (article.full_content || article.summary || '')
     .split(/\n\n+/).map(p => p.trim()).filter(Boolean);
+
+  // Detect markdown image: ![alt](url)
+  const imgRe = /^!\[([^\]]*)\]\(([^)]+)\)$/;
+  // Detect heading: ## title or ### title
+  const hRe = /^(#{2,4})\s+(.*)$/;
+  // Inline bold **text**
+  const renderInline = (text: string) => {
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((p, i) =>
+      /^\*\*[^*]+\*\*$/.test(p)
+        ? <strong key={i} className="text-foreground font-bold">{p.slice(2, -2)}</strong>
+        : <React.Fragment key={i}>{p}</React.Fragment>
+    );
+  };
 
   const isUp = quote ? quote.changePercent >= 0 : true;
 
@@ -285,18 +300,55 @@ const StockNewsDetail: React.FC = () => {
 
             {/* Body */}
             <div className="glass-card rounded-2xl p-5 sm:p-7 mb-5">
-              {paragraphs.length === 0 && translating ? (
+              {blocks.length === 0 && translating ? (
                 <div className="text-center py-10 text-muted-foreground/70 text-[13px]">
                   <Loader2 className="w-5 h-5 animate-spin inline mr-2" />
-                  Đang dịch nội dung sang tiếng Việt…
+                  Đang dịch & mở rộng nội dung sang tiếng Việt…
                 </div>
               ) : (
-                <div className="prose prose-invert max-w-none">
-                  {paragraphs.map((p, i) => (
-                    <p key={i} className="text-[14.5px] sm:text-[15px] leading-[1.8] text-foreground/90 mb-4">
-                      {p}
-                    </p>
-                  ))}
+                <div className="max-w-none">
+                  {blocks.map((b, i) => {
+                    const img = b.match(imgRe);
+                    if (img) {
+                      return (
+                        <figure key={i} className="my-6 -mx-1">
+                          <img
+                            src={img[2]}
+                            alt={img[1] || article.title}
+                            loading="lazy"
+                            className="w-full rounded-xl border border-white/5 object-cover max-h-[460px]"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                          {img[1] && (
+                            <figcaption className="text-[11px] text-muted-foreground/60 italic text-center mt-2">
+                              {img[1]}
+                            </figcaption>
+                          )}
+                        </figure>
+                      );
+                    }
+                    const h = b.match(hRe);
+                    if (h) {
+                      const level = h[1].length;
+                      const cls = level === 2
+                        ? 'text-xl sm:text-2xl font-display font-bold text-foreground mt-7 mb-3'
+                        : 'text-base sm:text-lg font-bold text-foreground/95 mt-5 mb-2';
+                      return level === 2
+                        ? <h2 key={i} className={cls}>{h[2]}</h2>
+                        : <h3 key={i} className={cls}>{h[2]}</h3>;
+                    }
+                    return (
+                      <p key={i} className="text-[14.5px] sm:text-[15px] leading-[1.8] text-foreground/90 mb-4">
+                        {renderInline(b)}
+                      </p>
+                    );
+                  })}
+                  {translating && blocks.length > 0 && (
+                    <div className="mt-3 text-[11px] font-mono text-amber-300 flex items-center gap-2">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Đang mở rộng bài viết…
+                    </div>
+                  )}
                 </div>
               )}
 
