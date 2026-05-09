@@ -32,8 +32,14 @@ const SYMBOL_CONFIG: Record<string, { pair: string; label: string; icon: string;
   xau: { pair: 'XAU/USDT', label: '🥇 XAU/USD (Gold)', icon: '🥇', accentClass: 'text-yellow-400' },
 };
 
-const AnalysisDetail: React.FC = () => {
-  const { symbol } = useParams<{ symbol: string }>();
+interface AnalysisDetailProps {
+  symbolOverride?: string;
+  embedded?: boolean;
+}
+
+const AnalysisDetail: React.FC<AnalysisDetailProps> = ({ symbolOverride, embedded = false }) => {
+  const { symbol: symbolParam } = useParams<{ symbol: string }>();
+  const symbol = symbolOverride ?? symbolParam;
   const navigate = useNavigate();
   const config = SYMBOL_CONFIG[symbol || ''] || SYMBOL_CONFIG.btc;
   const isGold = symbol === 'xau';
