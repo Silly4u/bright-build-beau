@@ -5,6 +5,12 @@ const KEYS = {
   history: 'news:history',
   reactions: 'news:reactions',
   comments: 'news:comments',
+  follows: 'news:follows',
+  hidden: 'news:hidden',
+  views: 'news:views',
+  progress: 'news:progress',
+  poll: 'news:poll',
+  streak: 'news:streak',
 } as const;
 
 function readLS<T>(key: string, fallback: T): T {
