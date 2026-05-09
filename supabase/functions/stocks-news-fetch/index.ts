@@ -76,16 +76,24 @@ ${JSON.stringify(items, null, 2)}`;
       return items.map(i => ({ title: i.title, summary: i.summary }));
     }
     const json = await res.json();
-    const content = json.choices?.[0]?.message?.content || "[]";
+    const content = json.choices?.[0]?.message?.content || "{}";
     const parsed = JSON.parse(content);
-    const arr = Array.isArray(parsed) ? parsed : (parsed.items || parsed.results || parsed.data || []);
-    return items.map((orig, i) => ({
-      title: arr[i]?.title || orig.title,
-      summary: arr[i]?.summary || orig.summary,
-    }));
+    const arr = Array.isArray(parsed)
+      ? parsed
+      : (parsed.items || parsed.results || parsed.data || parsed.translations || []);
+    if (!Array.isArray(arr) || arr.length === 0) {
+      console.error("AI translate: empty/invalid array", JSON.stringify(parsed).slice(0, 300));
+      return items.map(i => ({ title: i.title, summary: i.summary, ok: false }));
+    }
+    return items.map((orig, i) => {
+      const t = arr[i]?.title;
+      const s = arr[i]?.summary;
+      const ok = !!t && t !== orig.title;
+      return { title: t || orig.title, summary: s || orig.summary, ok };
+    });
   } catch (e) {
     console.error("AI translate error:", e);
-    return items.map(i => ({ title: i.title, summary: i.summary }));
+    return items.map(i => ({ title: i.title, summary: i.summary, ok: false }));
   }
 }
 
