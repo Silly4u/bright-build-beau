@@ -1620,7 +1620,11 @@ const TradingChart: React.FC<TradingChartProps> = ({
 
       if (prevWeek && prevWeek.high > prevWeek.low) {
         const range = prevWeek.high - prevWeek.low;
-        const isUpTrend = prevWeek.lastClose >= prevWeek.firstOpen;
+        // Hướng Fib theo thứ tự xuất hiện: Low đến trước High → uptrend (0=Low, 1=High).
+        // Nếu cùng nến (highTime === lowTime) → fallback theo Open vs Close.
+        const isUpTrend = prevWeek.lowTime !== prevWeek.highTime
+          ? prevWeek.lowTime < prevWeek.highTime
+          : prevWeek.lastClose >= prevWeek.firstOpen;
 
         const fibLevels: { ratio: number; color: string; width: 1 | 2; style: 0 | 1 | 2 }[] = [
           { ratio: 0,     color: 'rgba(255,213,79,0.85)', width: 2, style: 0 },
