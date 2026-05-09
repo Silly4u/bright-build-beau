@@ -32,6 +32,10 @@ import {
 export interface AITrendline {
   start: { time: number; price: number };
   end: { time: number; price: number };
+  broken?: boolean;
+  brokenAt?: number;
+  slopePerBar?: number;
+  touches?: number;
 }
 
 const TIMEFRAMES = ['M5', 'M15', 'M30', 'H1', 'H4', 'D1', 'W1'];
