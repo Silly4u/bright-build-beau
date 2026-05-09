@@ -808,6 +808,36 @@ const Analysis: React.FC = () => {
           </div>
 
         </div>
+
+        {/* ── DISCLAIMER ── */}
+        <section
+          aria-label="Cảnh báo rủi ro"
+          className="mt-4 rounded-xl border border-red-500/30 bg-gradient-to-r from-red-950/40 via-red-900/20 to-red-950/40 overflow-hidden"
+        >
+          <div className="px-4 py-2 border-b border-red-500/20 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-[10px] font-bold font-mono tracking-wider text-red-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+              <span>⚠ CẢNH BÁO RỦI RO · DISCLAIMER</span>
+            </div>
+            <span className="text-[9px] font-mono text-red-300/60 tracking-wider">ĐỌC KỸ TRƯỚC KHI GIAO DỊCH</span>
+          </div>
+          <div className="px-4 py-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-[11px] leading-relaxed font-mono text-muted-foreground/80">
+            <p>
+              <span className="text-red-300 font-bold">Lưu ý kỹ:</span> Tất cả chỉ báo &amp; phân tích{' '}
+              <span className="text-red-300 font-bold">KHÔNG PHẢI</span> lời khuyên đầu tư, chỉ tham khảo &amp; học hỏi.
+            </p>
+            <p>
+              Giao dịch <span className="text-amber-300 font-bold">Crypto/Futures</span> đi kèm rủi ro{' '}
+              <span className="text-red-300 font-bold">cực kỳ lớn</span>, có thể{' '}
+              <span className="text-red-300 font-bold">mất toàn bộ vốn</span>.
+            </p>
+            <p>
+              <span className="text-cyan-brand font-bold">🛡 Bạn phải tự chịu trách nhiệm</span> cho mọi quyết định.
+              <br />
+              <span className="text-muted-foreground/50">DYOR · NFA · Trade safe.</span>
+            </p>
+          </div>
+        </section>
       </div>
 
       <Footer />
