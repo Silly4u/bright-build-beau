@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { ExternalLink, Sparkles } from 'lucide-react';
+import { ChevronRight, Sparkles } from 'lucide-react';
 
 interface StockNews {
   id: string;
@@ -37,7 +38,7 @@ const StockNewsFeed: React.FC<Props> = ({ ticker, limit = 30 }) => {
     let cancelled = false;
     const load = async () => {
       setLoading(true);
-      let q = supabase.from('stock_news').select('*').eq('ai_translated', true).order('published_at', { ascending: false }).limit(limit);
+      let q = supabase.from('stock_news').select('*').order('published_at', { ascending: false }).limit(limit);
       if (ticker) q = q.eq('symbol', ticker);
       const { data, error } = await q;
       if (!cancelled) {
@@ -68,11 +69,9 @@ const StockNewsFeed: React.FC<Props> = ({ ticker, limit = 30 }) => {
           </div>
         ) : (
           news.map(n => (
-            <a
+            <Link
               key={n.id}
-              href={n.url || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
+              to={`/co-phieu/tin/${n.id}`}
               className="block px-3 py-2.5 hover:bg-white/[0.03] transition-colors group"
             >
               <div className="flex items-start gap-2.5">
@@ -101,9 +100,9 @@ const StockNewsFeed: React.FC<Props> = ({ ticker, limit = 30 }) => {
                     <div className="text-[10.5px] text-muted-foreground/80 line-clamp-2 mt-1 leading-snug">{n.summary}</div>
                   )}
                 </div>
-                <ExternalLink className="w-3 h-3 text-muted-foreground/40 group-hover:text-cyan-400 flex-shrink-0 mt-1" />
+                <ChevronRight className="w-3 h-3 text-muted-foreground/40 group-hover:text-cyan-400 flex-shrink-0 mt-1" />
               </div>
-            </a>
+            </Link>
           ))
         )}
       </div>
