@@ -114,38 +114,121 @@ export const LESSONS: Lesson[] = [
     category: 'Price Action',
     title: 'Mẫu Nến Đảo Chiều Quan Trọng Nhất',
     excerpt:
-      'Hammer, Shooting Star, Engulfing, Morning/Evening Star — những mẫu nến giúp bạn bắt đỉnh đáy chính xác.',
-    duration: '20 phút',
+      'Hammer, Shooting Star, Engulfing, Morning/Evening Star, Tweezer, Three Inside/Outside — những mẫu nến giúp bạn bắt đỉnh đáy chính xác.',
+    duration: '28 phút',
     level: 'Cơ bản',
     cover: coverReversal,
     intro:
-      'Mẫu nến đảo chiều xuất hiện ở cuối xu hướng và báo hiệu khả năng đảo chiều. Đây là công cụ cốt lõi của Price Action mà mọi trader cần thuộc lòng.',
+      'Mẫu nến đảo chiều (reversal pattern) xuất hiện ở cuối xu hướng và báo hiệu khả năng đảo ngược dòng tiền. Khái niệm này được Steve Nison phổ biến ra phương Tây năm 1991 qua cuốn "Japanese Candlestick Charting Techniques", dù người Nhật đã dùng từ thế kỷ 18 để giao dịch gạo. Bài học bóc tách 10 mẫu mạnh nhất, kèm bối cảnh, ví dụ thực chiến và bẫy thường gặp — tất cả công cụ cốt lõi của Price Action mà mọi trader cần thuộc lòng.',
+    history:
+      'Munehisa Homma (1724–1803), thương gia gạo Nhật Bản, được xem là cha đẻ của biểu đồ nến. Ông dùng nó để dự báo giá gạo tại sàn Dojima. Phương pháp lan sang phương Tây năm 1991 nhờ Steve Nison và đến nay vẫn là ngôn ngữ giao dịch chuẩn mực.',
     sections: [
       {
-        heading: 'Hammer & Hanging Man',
-        body: 'Nến có thân nhỏ, bóng dưới dài gấp 2-3 lần thân. Hammer ở đáy = đảo chiều tăng. Hanging Man ở đỉnh = đảo chiều giảm.',
+        heading: '1. Hammer & Hanging Man',
+        body: 'Nến có thân nhỏ ở phía trên, bóng dưới dài gấp ít nhất 2 lần thân, gần như không có bóng trên. Cùng hình dạng nhưng ý nghĩa phụ thuộc bối cảnh: Hammer ở đáy downtrend = đảo chiều tăng; Hanging Man ở đỉnh uptrend = cảnh báo đảo chiều giảm.',
+        bullets: [
+          'Bóng dưới ≥ 2× thân nến',
+          'Bóng trên không quá 10% tổng độ dài nến',
+          'Phải xuất hiện ở vùng hỗ trợ/kháng cự rõ ràng',
+        ],
+        example: 'BTCUSDT 4H ngày 11/03/2024 hình thành Hammer chuẩn tại $61,200 sau 5 nến giảm liên tiếp; nến xác nhận tăng 3.2% và mở ra nhịp tăng lên $73,000.',
+        pitfall: 'Hammer giữa sideway gần như vô nghĩa — chỉ giao dịch khi có xu hướng rõ trước đó.',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Candlestick_chart_scheme_03-en.svg/640px-Candlestick_chart_scheme_03-en.svg.png',
       },
       {
-        heading: 'Shooting Star & Inverted Hammer',
-        body: 'Bóng trên dài, thân nhỏ. Shooting Star ở đỉnh báo hiệu lực bán mạnh. Inverted Hammer ở đáy báo hiệu áp lực mua đang quay lại.',
+        heading: '2. Shooting Star & Inverted Hammer',
+        body: 'Hình ảnh đối xứng của Hammer: thân nhỏ ở dưới, bóng trên dài. Shooting Star ở đỉnh báo lực bán đè mạnh sau khi phe mua thử phá kháng cự bất thành. Inverted Hammer ở đáy thể hiện phe mua bắt đầu phản công.',
+        bullets: [
+          'Bóng trên ≥ 2× thân, bóng dưới rất ngắn',
+          'Shooting Star tin cậy hơn nếu kèm volume cao',
+          'Inverted Hammer cần nến xác nhận tăng kế tiếp',
+        ],
+        pitfall: 'Đừng nhầm Shooting Star với Inverted Hammer — vị trí trong xu hướng quyết định ý nghĩa.',
       },
       {
-        heading: 'Bullish & Bearish Engulfing',
-        body: 'Nến thứ 2 nhấn chìm hoàn toàn nến thứ 1 và ngược chiều. Mẫu đảo chiều mạnh nhất, đặc biệt khi xuất hiện ở vùng hỗ trợ/kháng cự quan trọng.',
+        heading: '3. Bullish & Bearish Engulfing',
+        body: 'Mẫu 2 nến: nến thứ 2 ngược chiều và thân nhấn chìm hoàn toàn thân nến thứ 1. Engulfing là một trong những mẫu đảo chiều có winrate cao nhất theo nghiên cứu của Thomas Bulkowski ("Encyclopedia of Candlestick Charts"), đặc biệt khi xuất hiện tại vùng S/R kết hợp Fibonacci 0.618.',
+        bullets: [
+          'Thân nến 2 phải lớn hơn thân nến 1 (không cần bao bóng)',
+          'Volume nến 2 nên gấp 1.5–2× volume trung bình',
+          'Vào lệnh ngay khi nến 2 đóng cửa, SL sau bóng dài hơn của 2 nến',
+        ],
+        example: 'EURUSD H4 ngày 02/10/2023 cho Bullish Engulfing tại 1.0450 (vùng demand H1 + Fib 0.618), giá tăng 280 pip trong 4 ngày kế tiếp.',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Candlestick_chart_scheme_02-en.svg/640px-Candlestick_chart_scheme_02-en.svg.png',
       },
       {
-        heading: 'Morning Star & Evening Star',
-        body: '3 nến: nến lớn cùng xu hướng → nến doji nhỏ → nến lớn ngược chiều. Báo hiệu chuyển giao quyền lực giữa bên mua và bên bán.',
+        heading: '4. Morning Star & Evening Star',
+        body: 'Mẫu 3 nến cổ điển: nến 1 lớn cùng xu hướng cũ → nến 2 thân nhỏ (doji/spinning top) thể hiện do dự → nến 3 lớn ngược chiều, đóng cửa ít nhất giữa thân nến 1. Báo hiệu chuyển giao quyền lực rõ ràng giữa bên mua và bên bán.',
+        bullets: [
+          'Nến 2 lý tưởng có gap so với nến 1 và nến 3',
+          'Nến 3 đóng cửa càng sâu vào thân nến 1 càng mạnh',
+          'TP1 = đỉnh/đáy gần nhất, TP2 = mở rộng Fib 1.618',
+        ],
+        pitfall: 'Trên crypto 24/7, gap giữa các nến hiếm — tiêu chí "gap" có thể bỏ qua, nhưng tỉ lệ thân nến vẫn phải đúng.',
       },
       {
-        heading: 'Doji & Spinning Top',
-        body: 'Thân rất nhỏ, thể hiện sự lưỡng lự. Khi xuất hiện ở vùng quá mua/quá bán → cảnh báo sớm cho đảo chiều.',
+        heading: '5. Three Inside Up/Down & Three Outside Up/Down',
+        body: 'Three Inside Up = Bullish Harami + nến xác nhận tăng phá đỉnh nến mẹ. Three Outside Up = Bullish Engulfing + nến xác nhận. Theo Bulkowski, Three Outside có tỉ lệ đảo chiều thành công ~78%, cao nhất trong nhóm 3 nến.',
+      },
+      {
+        heading: '6. Tweezer Top & Tweezer Bottom',
+        body: 'Hai (hoặc nhiều) nến liên tiếp có cùng đỉnh (Tweezer Top) hoặc cùng đáy (Tweezer Bottom). Thị trường thử phá vùng giá 2 lần đều thất bại → vùng đó trở thành kháng cự/hỗ trợ vững chắc.',
+        bullets: [
+          'Càng có nhiều nến chạm cùng đỉnh/đáy càng mạnh',
+          'Hiệu quả nhất ở vùng round number (1.1000, 70,000…)',
+        ],
+      },
+      {
+        heading: '7. Piercing Pattern & Dark Cloud Cover',
+        body: 'Phiên bản "nhẹ" hơn của Engulfing: nến 2 ngược chiều và đóng cửa vượt qua trung điểm thân nến 1 nhưng không nhấn chìm hoàn toàn. Tin cậy ~65–70% khi đi kèm volume tăng và vùng S/R.',
+      },
+      {
+        heading: '8. Doji & Spinning Top — Tín hiệu lưỡng lự',
+        body: 'Thân rất nhỏ (Doji gần như không thân), thể hiện cân bằng cung-cầu. Phân loại: Standard Doji, Long-legged Doji, Dragonfly (đáy), Gravestone (đỉnh). Khi xuất hiện sau xu hướng dài + tại vùng S/R + RSI quá mua/quá bán → cảnh báo đảo chiều sớm.',
+        pitfall: 'Doji giữa range thấp biến động chỉ là noise, đừng giao dịch theo.',
+      },
+      {
+        heading: '9. Three White Soldiers & Three Black Crows',
+        body: 'Ba nến cùng chiều liên tiếp, thân lớn, mỗi nến đóng cửa gần đỉnh/đáy nến đó. Xuất hiện ở cuối downtrend (Three White Soldiers) hoặc uptrend (Three Black Crows) → đảo chiều rất mạnh, thường mở ra một xu hướng mới.',
+      },
+      {
+        heading: '10. Cách lọc tín hiệu đảo chiều — Quy tắc 4 lớp',
+        body: 'Một mẫu nến đẹp chưa đủ. Áp dụng quy tắc 4 lớp xác nhận: (1) Vị trí — phải tại S/R đa khung; (2) Bối cảnh — sau xu hướng dài, không trong sideway; (3) Volume — nến tín hiệu kèm volume bứt phá; (4) Đa chỉ báo — RSI phân kỳ, MACD cắt, hoặc OB/FVG đồng pha.',
+        bullets: [
+          'Lớp 1: Khung HTF có vùng S/R rõ ràng',
+          'Lớp 2: Khung trade có mẫu nến đảo chiều',
+          'Lớp 3: Volume + indicator xác nhận',
+          'Lớp 4: Risk-Reward ≥ 1:2 trước khi vào lệnh',
+        ],
       },
     ],
     takeaways: [
       'Mẫu đảo chiều CHỈ có ý nghĩa khi xuất hiện ở vùng S/R quan trọng',
       'Luôn chờ nến xác nhận sau mẫu đảo chiều rồi mới vào lệnh',
       'Volume tăng đột biến = độ tin cậy cao hơn nhiều lần',
+      'Engulfing và Three Outside có winrate cao nhất theo Bulkowski',
+      'Kết hợp đa khung (HTF context + LTF entry) để giảm tín hiệu giả',
+    ],
+    checklist: [
+      'Xu hướng trước đó có rõ ràng không (≥ 5 nến cùng chiều)?',
+      'Mẫu nến đang ở vùng S/R, Fibonacci hoặc OB/FVG?',
+      'Volume nến tín hiệu có ≥ 1.5× volume trung bình 20 nến?',
+      'Có chỉ báo phụ xác nhận (RSI phân kỳ, MACD cross)?',
+      'R:R ≥ 1:2 với SL hợp lý sau bóng nến tín hiệu?',
+    ],
+    faqs: [
+      {
+        question: 'Mẫu nến đảo chiều có hiệu quả trên khung thời gian thấp như M5/M15 không?',
+        answer: 'Có, nhưng nhiễu cao hơn nhiều. Khuyến nghị dùng từ H1 trở lên cho swing, M15 trở lên cho intraday và luôn xác nhận với khung HTF.',
+      },
+      {
+        question: 'Nên đặt SL ở đâu cho an toàn?',
+        answer: 'Đặt sau bóng dài nhất của mẫu nến tín hiệu, cộng thêm 0.2–0.5× ATR(14) để tránh bị quét bởi spread/biến động bất thường.',
+      },
+      {
+        question: 'Crypto không có gap, Morning Star có còn hiệu lực?',
+        answer: 'Có. Trên crypto 24/7, bỏ qua tiêu chí gap và tập trung vào tỉ lệ thân nến cùng vị trí trong xu hướng. Mẫu vẫn cho tín hiệu tốt.',
+      },
     ],
   },
   {
@@ -153,38 +236,105 @@ export const LESSONS: Lesson[] = [
     category: 'Smart Money Concepts',
     title: 'Smart Money Concepts (SMC) Từ A-Z',
     excerpt:
-      'Order Block, Fair Value Gap, Liquidity, BOS, CHOCH — hiểu cách "cá mập" thực sự giao dịch.',
-    duration: '35 phút',
+      'Order Block, Fair Value Gap, Liquidity, BOS, CHOCH, Mitigation, Premium/Discount — hiểu cách "cá mập" thực sự giao dịch.',
+    duration: '45 phút',
     level: 'Nâng cao',
     cover: coverSmc,
     intro:
-      'Smart Money Concepts (SMC) là phương pháp giao dịch theo dấu chân của tổ chức lớn — những người tạo ra xu hướng. Thay vì đoán theo đám đông, SMC dạy bạn nhận ra nơi smart money đang gom hàng và xả hàng.',
+      'Smart Money Concepts (SMC) là phương pháp giao dịch theo dấu chân của tổ chức lớn — những người tạo ra xu hướng. Thay vì đoán theo đám đông, SMC dạy bạn nhận ra nơi smart money đang gom hàng và xả hàng. Phương pháp được phát triển từ nền tảng Wyckoff và ICT (Inner Circle Trader) của Michael J. Huddleston, hiện là khung phân tích phổ biến nhất trong cộng đồng trader chuyên nghiệp 2020–2025.',
+    history:
+      'SMC bắt nguồn từ Wyckoff (1900s) → phát triển thành ICT bởi Michael Huddleston (2010s) → được rút gọn và phổ biến thành "SMC" trên YouTube/Twitter từ 2019. Hiện chiếm khoảng 60% nội dung phân tích kỹ thuật trong cộng đồng trader trẻ toàn cầu.',
     sections: [
       {
-        heading: 'Order Block (OB)',
-        body: 'Là vùng giá cuối cùng mà tổ chức đặt lệnh trước khi tạo ra một move mạnh. Khi giá quay lại OB, nó thường phản ứng mạnh — đây là vùng vào lệnh có winrate cao.',
+        heading: '1. Market Structure — Cấu trúc thị trường',
+        body: 'Nền tảng của SMC. Một xu hướng tăng (bullish) tạo Higher High (HH) và Higher Low (HL) liên tục. Xu hướng giảm tạo Lower High (LH) và Lower Low (LL). Mọi khái niệm khác trong SMC đều xoay quanh việc đọc đúng cấu trúc này trên nhiều khung.',
+        bullets: [
+          'Xác định cấu trúc trên 3 khung: HTF (D1/H4) → MTF (H1) → LTF (M15)',
+          'Chỉ trade theo hướng cấu trúc HTF',
+          'LTF dùng để tìm entry chính xác',
+        ],
+        image: 'https://images.unsplash.com/photo-1642790551116-18e150f248e3?w=800&q=80',
       },
       {
-        heading: 'Fair Value Gap (FVG)',
-        body: 'Khoảng trống không cân bằng giữa 3 nến — thị trường có xu hướng quay lại "lấp đầy" FVG. Là vùng take-profit hoặc entry pullback rất hiệu quả.',
+        heading: '2. BOS (Break of Structure)',
+        body: 'Phá vỡ cấu trúc CÙNG CHIỀU xu hướng — xác nhận xu hướng còn tiếp diễn. Trong uptrend, BOS xảy ra khi giá phá đỉnh HH gần nhất. Đây là tín hiệu tiếp tục, không phải tín hiệu đảo chiều.',
+        example: 'BTCUSDT H4 sau khi tạo HL tại $58,000 đã BOS qua $65,000 ngày 26/02/2024, mở đường cho rally lên $73,000.',
       },
       {
-        heading: 'Liquidity (Thanh khoản)',
-        body: 'Là vùng tập trung stop-loss của retail trader (trên đỉnh, dưới đáy). Smart money thường đẩy giá quét những vùng này trước khi đi theo hướng thật.',
+        heading: '3. CHOCH (Change of Character)',
+        body: 'Phá vỡ cấu trúc NGƯỢC CHIỀU xu hướng — tín hiệu đầu tiên của đảo chiều. Trong uptrend, CHOCH xảy ra khi giá phá đáy HL gần nhất. Sau CHOCH thường có pullback về OB rồi mới chạy thật sự.',
+        pitfall: 'Nhiều trader nhầm CHOCH với BOS — luôn xác định rõ swing high/low gần nhất TRƯỚC khi gọi tên tín hiệu.',
       },
       {
-        heading: 'BOS (Break of Structure)',
-        body: 'Phá vỡ cấu trúc cùng chiều xu hướng → xác nhận xu hướng còn tiếp diễn.',
+        heading: '4. Order Block (OB)',
+        body: 'Là nến giảm cuối cùng trước một move tăng mạnh (Bullish OB), hoặc nến tăng cuối cùng trước move giảm mạnh (Bearish OB). OB chứa lệnh chưa khớp hết của tổ chức — khi giá quay lại, họ tiếp tục đẩy theo hướng cũ. Đây là vùng entry có winrate cao nhất trong SMC.',
+        bullets: [
+          'OB hợp lệ phải kèm move impulsive (≥ 3 nến cùng chiều bứt phá)',
+          'OB chưa được mitigated (chưa bị quay lại lấp) tin cậy hơn',
+          'Refined OB = chỉ lấy phần thân nến + FVG kế tiếp để vào lệnh chính xác',
+        ],
+        image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80',
       },
       {
-        heading: 'CHOCH (Change of Character)',
-        body: 'Phá vỡ cấu trúc ngược chiều xu hướng → tín hiệu đầu tiên của đảo chiều.',
+        heading: '5. Fair Value Gap (FVG) / Imbalance',
+        body: 'Khoảng trống giá giữa 3 nến: bóng nến 1 và bóng nến 3 không chạm nhau, để lại "khe hở" trong phạm vi nến 2. Thị trường có xu hướng quay lại lấp đầy FVG để cân bằng cung-cầu. FVG vừa là vùng entry pullback vừa là target take-profit hiệu quả.',
+        bullets: [
+          'FVG cùng chiều BOS = vùng entry có R:R cao',
+          'FVG ngược chiều = target TP khi giá đang chạy xa khỏi điểm vào',
+          'FVG trên HTF (H4, D1) tin cậy hơn nhiều so với LTF',
+        ],
+      },
+      {
+        heading: '6. Liquidity (Thanh khoản) & Liquidity Sweep',
+        body: 'Liquidity là vùng tập trung stop-loss của retail trader (trên đỉnh equal highs, dưới đáy equal lows, dưới trendline rõ ràng). Smart money cần thanh khoản để khớp lệnh lớn, nên thường đẩy giá QUÉT (sweep) các vùng này trước khi đi theo hướng thật. Liquidity sweep + CHOCH ngay sau là combo entry kinh điển.',
+        example: 'XAUUSD ngày 13/05/2024 quét đáy đôi tại $2,332 (sweep liquidity bear), tạo CHOCH H1 và bật lên $2,385 trong 18 giờ.',
+        pitfall: 'Đừng vào lệnh ngay khi thấy sweep — chờ CHOCH xác nhận hoặc nến đảo chiều mạnh tại vùng OB/FVG.',
+      },
+      {
+        heading: '7. Premium & Discount Zones',
+        body: 'Chia range giữa swing high và swing low gần nhất theo Fibonacci. Vùng trên 0.5 = Premium (đắt, ưu tiên SELL); vùng dưới 0.5 = Discount (rẻ, ưu tiên BUY); vùng 0.5–0.618 = Equilibrium (cân bằng). SMC chỉ BUY ở Discount và SELL ở Premium — không đu đỉnh, không bắt đáy giữa range.',
+      },
+      {
+        heading: '8. Mitigation Block & Breaker Block',
+        body: 'Mitigation Block là OB ngược chiều bị giá phá qua rồi quay lại test → trở thành kháng cự/hỗ trợ mới. Breaker Block là OB cũ bị BOS phá qua, sau đó được tái sử dụng làm vùng entry theo hướng ngược lại. Hai khái niệm này giúp tận dụng lại các zone đã "vô hiệu" theo cách thông minh.',
+      },
+      {
+        heading: '9. Quy trình Top-Down Analysis chuẩn SMC',
+        body: 'Bước 1: D1 xác định bias (bullish/bearish) qua cấu trúc. Bước 2: H4 tìm POI (Point of Interest = OB/FVG chưa mitigated) trong vùng Discount/Premium. Bước 3: H1 chờ giá tới POI và tạo liquidity sweep. Bước 4: M15 chờ CHOCH + entry tại OB/FVG nhỏ bên trong. Bước 5: SL sau OB, TP1 = liquidity gần nhất, TP2 = OB ngược chiều HTF.',
+        bullets: [
+          'Luôn đi từ HTF xuống LTF, không bao giờ ngược lại',
+          'Mỗi POI chỉ trade tối đa 1–2 lần, không "trả thù"',
+          'Ghi nhật ký: POI nào hoạt động, POI nào fail để tinh chỉnh',
+        ],
       },
     ],
     takeaways: [
       'SMC hiệu quả nhất trên timeframe H1, H4, D1',
       'Luôn phân tích từ HTF (D1) xuống LTF (M15) để đồng pha',
-      'OB + FVG + Liquidity Sweep = combo entry mạnh nhất',
+      'OB + FVG + Liquidity Sweep + CHOCH = combo entry mạnh nhất',
+      'Chỉ BUY ở Discount, SELL ở Premium — tuyệt đối không đu giữa range',
+      'POI chưa mitigated luôn ưu tiên hơn POI đã test nhiều lần',
+    ],
+    checklist: [
+      'Đã xác định bias HTF (D1/H4) chưa?',
+      'POI nằm trong vùng Discount (BUY) hoặc Premium (SELL) chưa?',
+      'Đã có liquidity sweep tại POI chưa?',
+      'CHOCH trên LTF (M15/M5) đã xác nhận chưa?',
+      'SL sau OB và R:R ≥ 1:3 chưa?',
+    ],
+    faqs: [
+      {
+        question: 'SMC có khác gì so với ICT?',
+        answer: 'ICT là bộ khung gốc rất chi tiết (gồm Killzones, Power of 3, OTE…) của Michael Huddleston. SMC là phiên bản rút gọn, dễ tiếp cận hơn, tập trung vào BOS/CHOCH/OB/FVG/Liquidity. Bài "Liquidity & ICT Concepts" trong khoá Pro đào sâu hơn.',
+      },
+      {
+        question: 'SMC có dùng được cho stocks và crypto không?',
+        answer: 'Có. SMC hoạt động tốt trên mọi thị trường có thanh khoản cao: forex, crypto (BTC/ETH/large caps), futures (ES/NQ), gold. Hiệu quả kém trên cổ phiếu small-cap thanh khoản thấp.',
+      },
+      {
+        question: 'Bao lâu mới thành thạo SMC?',
+        answer: 'Hiểu lý thuyết: 2–4 tuần. Áp dụng có lời ổn định: 6–12 tháng backtest + forward test ít nhất 200 lệnh. Đừng vội nạp tiền thật trước khi qua giai đoạn demo.',
+      },
     ],
   },
   {
@@ -192,34 +342,100 @@ export const LESSONS: Lesson[] = [
     category: 'Phân Tích Cấu Trúc',
     title: 'Phương Pháp Wyckoff — Đọc Vị Tay To',
     excerpt:
-      '4 pha thị trường: Tích lũy, Tăng giá, Phân phối, Giảm giá. Spring và Upthrust là tín hiệu vàng.',
-    duration: '30 phút',
+      '4 pha thị trường: Tích lũy, Tăng giá, Phân phối, Giảm giá. Spring và Upthrust là tín hiệu vàng — kèm 9 quy luật và VSA.',
+    duration: '50 phút',
     level: 'Nâng cao',
     cover: coverWyckoff,
     intro:
-      'Richard Wyckoff phát triển phương pháp này từ đầu thế kỷ 20, dựa trên quan sát hành vi của "Composite Man" (đại diện cho dòng tiền lớn). Đến nay vẫn là một trong những framework mạnh nhất để hiểu chu kỳ thị trường.',
+      'Richard Demille Wyckoff (1873–1934) là một trong "5 huyền thoại" của Wall Street cùng J.P. Morgan, Jesse Livermore. Phương pháp ông phát triển dựa trên quan sát hành vi của "Composite Man" — nhân vật giả định đại diện cho dòng tiền tổ chức. Đến nay Wyckoff vẫn là một trong những framework mạnh nhất để hiểu chu kỳ thị trường, được giảng dạy chính thức tại Wyckoff Analytics và là nền tảng của SMC, VSA hiện đại.',
+    history:
+      'Wyckoff sáng lập "Magazine of Wall Street" năm 1907, sau đó mở Wyckoff Course đào tạo trader chuyên nghiệp. Phương pháp được Hank Pruden hệ thống hoá lại trong cuốn "The Three Skills of Top Trading" (2007) và hiện được Wyckoff Analytics (Roman Bogomazov) duy trì giảng dạy.',
     sections: [
       {
-        heading: '4 Pha của Chu Kỳ Wyckoff',
-        body: 'Accumulation (tích lũy) → Markup (tăng giá) → Distribution (phân phối) → Markdown (giảm giá). Chu kỳ này lặp lại trên mọi tài sản và mọi timeframe.',
+        heading: '1. Composite Man — Triết lý nền tảng',
+        body: 'Wyckoff đề xuất hãy hình dung toàn bộ thị trường được điều khiển bởi MỘT cá nhân siêu giàu — Composite Man. CM thực hiện 4 việc lặp lại: tích lũy âm thầm, đẩy giá lên, phân phối âm thầm, đẩy giá xuống. Mọi hành động giá đều có chủ đích — nhiệm vụ trader là đọc ý đồ đó qua Price + Volume + Time.',
+        image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&q=80',
       },
       {
-        heading: 'Pha Tích Lũy (Accumulation)',
-        body: 'Sau downtrend dài, giá đi sideway trong range. Smart money âm thầm gom hàng. Các sự kiện chính: PS (Preliminary Support) → SC (Selling Climax) → AR (Automatic Rally) → ST (Secondary Test) → Spring → SOS (Sign of Strength).',
+        heading: '2. 4 Pha của Chu Kỳ Wyckoff',
+        body: 'Accumulation (tích lũy) → Markup (tăng giá) → Distribution (phân phối) → Markdown (giảm giá). Chu kỳ này lặp lại trên mọi tài sản và mọi timeframe — từ M5 BTCUSDT đến biểu đồ tháng SPX. Hiểu mình đang ở pha nào quan trọng hơn việc đoán giá đi đâu.',
+        bullets: [
+          'Accumulation: range sau downtrend, volume giảm dần',
+          'Markup: bứt phá mạnh kèm volume, các pullback nông',
+          'Distribution: range sau uptrend, volume cao bất thường ở các đỉnh giả',
+          'Markdown: phá đáy range, panic selling, volume bùng nổ',
+        ],
       },
       {
-        heading: 'Spring — Tín hiệu mua mạnh nhất',
-        body: 'Giá phá đáy range trong giây lát rồi đóng cửa quay lại trên — quét stop-loss của bear. Đây là điểm vào lệnh BUY có R:R tốt nhất trong toàn bộ chu kỳ Wyckoff.',
+        heading: '3. Pha Tích Lũy (Accumulation) — 5 sự kiện then chốt',
+        body: 'Sau downtrend dài, giá đi sideway trong range. Smart money âm thầm gom hàng. Các sự kiện chính theo thứ tự: PS (Preliminary Support — đáy đầu tiên có volume cao) → SC (Selling Climax — panic dump tạo đáy range) → AR (Automatic Rally — bật mạnh tạo đỉnh range) → ST (Secondary Test — test lại SC với volume thấp hơn) → Spring (giả phá đáy) → Test (test Spring với volume thấp) → SOS (Sign of Strength — bứt phá mạnh ra khỏi range) → LPS (Last Point of Support — pullback cuối cùng vào OB).',
+        example: 'BTCUSDT D1 từ 11/2022 đến 01/2023 hình thành Accumulation Schematic #1 hoàn chỉnh: SC tại $15,500 → Spring tại $16,000 → SOS qua $21,000, mở rally lên $73,000.',
       },
       {
-        heading: 'Pha Phân Phối (Distribution)',
-        body: 'Sau uptrend dài, smart money xả hàng cho retail. UTAD (Upthrust After Distribution) là tín hiệu SELL mạnh nhất.',
+        heading: '4. Spring — Tín hiệu mua mạnh nhất',
+        body: 'Giá phá đáy range trong giây lát rồi đóng cửa quay lại trên — quét stop-loss của bear. Theo thống kê của Wyckoff Analytics, Spring có winrate ~75% khi đi kèm volume bùng nổ và test sau đó với volume thấp. Đây là điểm vào lệnh BUY có R:R tốt nhất trong toàn bộ chu kỳ Wyckoff (thường 1:5 đến 1:10).',
+        bullets: [
+          'Spring #1: phá nông, không có follow-through (mạnh nhất)',
+          'Spring #2: phá sâu hơn, có nến hồi mạnh',
+          'Spring #3: phá rất sâu, cần xác nhận bằng nhiều nến',
+          'Entry: tại Test sau Spring, không phải Spring',
+        ],
+        pitfall: 'Đừng vào lệnh tại Spring — nhiều khi đó là phá đáy thật. Luôn chờ Test với volume giảm.',
+      },
+      {
+        heading: '5. Pha Phân Phối (Distribution) & UTAD',
+        body: 'Sau uptrend dài, smart money xả hàng cho retail FOMO. Cấu trúc gương ngược của Accumulation: PSY → BC (Buying Climax) → AR → ST → UTAD (Upthrust After Distribution — giả phá đỉnh) → SOW (Sign of Weakness) → LPSY (Last Point of Supply). UTAD là tín hiệu SELL có winrate cao tương tự Spring nhưng ngược chiều.',
+      },
+      {
+        heading: '6. 9 Quy luật Wyckoff (Wyckoff Laws)',
+        body: 'Wyckoff đúc kết 3 luật cơ bản và 9 quy luật phụ. 3 luật chính: (1) Law of Supply & Demand — giá thay đổi theo tương quan cung cầu; (2) Law of Cause & Effect — độ rộng range tích lũy quyết định độ dài move sau đó (đếm bằng Point & Figure); (3) Law of Effort vs Result — volume (effort) phải tương xứng với biên độ giá (result), không tương xứng = cảnh báo đảo chiều.',
+        bullets: [
+          'Volume tăng + giá tăng = healthy uptrend',
+          'Volume tăng nhưng giá đi ngang = phân phối bí mật',
+          'Volume giảm trong pullback = pullback lành mạnh',
+          'Volume cao tại đỉnh + nến nhỏ = đảo chiều sắp tới',
+        ],
+      },
+      {
+        heading: '7. Volume Spread Analysis (VSA) — Mở rộng của Wyckoff',
+        body: 'VSA do Tom Williams (cựu syndicate trader) phát triển từ 1990s, mở rộng khái niệm Effort vs Result của Wyckoff. Phân tích mỗi nến qua 3 yếu tố: Spread (biên độ), Volume, Close position trong nến. Các tín hiệu kinh điển: No Demand (nến tăng nhỏ + volume thấp), Stopping Volume (nến giảm có bóng dưới dài + volume cực cao = bottom), Climactic Action (volume bùng nổ tại đỉnh/đáy).',
+      },
+      {
+        heading: '8. Point & Figure — Đo "Cause" để dự báo "Effect"',
+        body: 'Wyckoff dùng biểu đồ P&F (chỉ vẽ X cho tăng, O cho giảm, không có thời gian) để đếm số ô trong pha tích lũy → quy đổi thành mục tiêu giá sau breakout. Công thức: Price Target = Số ô tích lũy × Box Size × Reversal. P&F lọc nhiễu cực tốt, hiện vẫn được institutional dùng cho swing/position trading.',
+      },
+      {
+        heading: '9. Quy trình Wyckoff trade chuẩn — 5 bước',
+        body: 'Bước 1: Xác định xu hướng HTF (D1/W1) — tìm range tích lũy/phân phối. Bước 2: Đánh dấu các sự kiện (PS, SC, AR, ST, Spring/UTAD). Bước 3: Đợi Spring/UTAD + Test với volume giảm. Bước 4: Vào lệnh tại LPS/LPSY, SL sau Spring/UTAD. Bước 5: TP1 = mép trên/dưới range, TP2 = mục tiêu P&F.',
       },
     ],
     takeaways: [
       'Wyckoff dạy bạn THỜI ĐIỂM (when), không chỉ HƯỚNG (where)',
-      'Spring/UTAD là 2 entry có winrate cao nhất',
-      'Kết hợp Volume Spread Analysis (VSA) để xác nhận pha',
+      'Spring/UTAD là 2 entry có winrate cao nhất (~75%)',
+      'Volume là chìa khoá — luôn đọc Effort vs Result',
+      'Composite Man chỉ làm 4 việc: gom, đẩy lên, xả, đẩy xuống — lặp mãi',
+      'Kết hợp VSA để xác nhận pha và Point & Figure để đặt mục tiêu',
+    ],
+    checklist: [
+      'Đã xác định range tích lũy/phân phối trên HTF chưa?',
+      'Đã đánh dấu đủ PS, SC, AR, ST chưa?',
+      'Có Spring/UTAD và Test sau đó với volume giảm chưa?',
+      'Volume tại điểm vào có hợp lý theo luật Effort vs Result?',
+      'Mục tiêu P&F có cho R:R ≥ 1:3 không?',
+    ],
+    faqs: [
+      {
+        question: 'Wyckoff khác gì SMC?',
+        answer: 'Wyckoff là gốc — tập trung vào pha thị trường, volume và cấu trúc range. SMC là phiên bản hiện đại tập trung vào Order Block, FVG, Liquidity sweep. Bản chất giống nhau (đọc dấu chân smart money), chỉ khác cách diễn đạt và công cụ.',
+      },
+      {
+        question: 'Phương pháp này có dùng cho intraday được không?',
+        answer: 'Được, nhưng cần kinh nghiệm cao. Khung phù hợp nhất là H4/D1 cho swing. Trên M15/M30 cấu trúc Wyckoff vẫn xuất hiện nhưng nhiễu nhiều, dễ nhận diện sai pha.',
+      },
+      {
+        question: 'Sách nào nên đọc?',
+        answer: '"The Three Skills of Top Trading" (Hank Pruden), "Trades About to Happen" (David Weis), "Wyckoff 2.0" (Rubén Villahermosa). Tránh các nguồn YouTube tóm tắt vì thường thiếu phần Cause & Effect và P&F.',
+      },
     ],
   },
   {
@@ -227,34 +443,94 @@ export const LESSONS: Lesson[] = [
     category: 'Quản Lý Vốn',
     title: 'Quản Lý Vốn — Yếu Tố Sống Còn',
     excerpt:
-      'Position sizing, R:R ratio, drawdown control. 90% trader thua không phải vì sai chiến lược mà vì sai quản lý vốn.',
-    duration: '15 phút',
+      'Position sizing, R:R ratio, drawdown control, Kelly đơn giản, expectancy. 90% trader thua không phải vì sai chiến lược mà vì sai quản lý vốn.',
+    duration: '30 phút',
     level: 'Cơ bản',
     cover: coverRisk,
     intro:
-      'Bạn có thể đúng 70% tín hiệu nhưng vẫn cháy tài khoản nếu quản lý vốn sai. Bài học này là nền tảng bắt buộc cho mọi trader.',
+      'Bạn có thể đúng 70% tín hiệu nhưng vẫn cháy tài khoản nếu quản lý vốn sai. Theo nghiên cứu của Brett Steenbarger và dữ liệu công khai từ FTMO/MyForexFunds (2020–2023), 87–93% trader retail mất tiền — và lý do số một KHÔNG phải là chiến lược tệ, mà là quản lý vốn sai. Bài học này là nền tảng bắt buộc trước khi học bất kỳ chiến lược entry nào.',
+    history:
+      'Khái niệm position sizing hiện đại bắt nguồn từ Ralph Vince ("Portfolio Management Formulas", 1990) và Van K. Tharp ("Trade Your Way to Financial Freedom", 1998). Tharp là người đầu tiên phổ biến khái niệm "R-multiple" — đo lợi nhuận theo bội số rủi ro thay vì theo tiền tuyệt đối.',
     sections: [
       {
-        heading: 'Quy tắc 1-2% mỗi lệnh',
-        body: 'Không bao giờ đặt rủi ro quá 2% tài khoản cho 1 lệnh. Với 1%, bạn cần thua 100 lệnh liên tiếp mới cháy — điều gần như không thể.',
+        heading: '1. Quy tắc 1–2% mỗi lệnh',
+        body: 'Không bao giờ đặt rủi ro quá 2% tài khoản cho 1 lệnh. Với mức risk 1%/lệnh, ngay cả khi thua 20 lệnh liên tiếp (xác suất ~0.0001% với hệ thống winrate 50%), bạn chỉ mất 18.2% — vẫn còn vốn để phục hồi. Mức 2% là trần tuyệt đối cho người mới.',
+        bullets: [
+          'Tài khoản $1,000 → rủi ro tối đa $10–20/lệnh',
+          'Tài khoản $10,000 → $100–200/lệnh',
+          'Trader prop firm thường giới hạn 0.5–1% do max drawdown 5–10%',
+        ],
+        example: 'Tài khoản $5,000, risk 1% = $50/lệnh. Vào BTCUSDT tại $65,000 với SL $64,000 (cách 1.54%). Position size = $50 ÷ $1,000 = 0.05 BTC = $3,250 notional. Nếu hit SL chỉ mất đúng $50.',
+        pitfall: 'Nhiều trader risk theo "cảm giác" thay vì tính toán — đó là lý do số 1 dẫn đến cháy tài khoản.',
       },
       {
-        heading: 'Risk : Reward tối thiểu 1:2',
-        body: 'Nếu winrate 50% với R:R 1:2, bạn vẫn lời. Đừng vào lệnh nếu TP không gấp ít nhất 2 lần SL.',
+        heading: '2. Risk : Reward tối thiểu 1:2',
+        body: 'Nếu winrate 50% với R:R 1:2, bạn lời 0.5×2R − 0.5×1R = 0.5R/lệnh. Nếu winrate 40% với R:R 1:3, bạn vẫn lời 0.4×3R − 0.6×1R = 0.6R/lệnh. Đừng vào lệnh nếu TP không gấp ít nhất 2 lần SL — toán học không cho phép bạn lời dài hạn.',
+        image: 'https://images.unsplash.com/photo-1591696205602-2f950c417cb9?w=800&q=80',
       },
       {
-        heading: 'Position Sizing đúng',
-        body: 'Khối lượng lệnh = (Vốn × %Risk) ÷ Khoảng cách SL (pip/giá). Luôn tính TRƯỚC khi vào lệnh.',
+        heading: '3. Expectancy — Công thức "lời/lệnh trung bình"',
+        body: 'Expectancy = (Win% × Avg Win) − (Loss% × Avg Loss). Hệ thống có expectancy dương mới đáng giao dịch. Ví dụ: Win 45%, Avg Win = 2R, Loss 55%, Avg Loss = 1R → Expectancy = 0.45×2 − 0.55×1 = 0.35R/lệnh. Trade 100 lệnh kỳ vọng lời 35R. Với risk 1%/lệnh = +35% account.',
+        bullets: [
+          'Expectancy < 0 → dừng giao dịch ngay',
+          'Expectancy 0.1–0.3R → hệ thống ổn',
+          'Expectancy > 0.5R → hệ thống xuất sắc',
+        ],
       },
       {
-        heading: 'Drawdown Control',
-        body: 'Khi tài khoản drawdown 10%, giảm size xuống 50%. Khi drawdown 20%, dừng giao dịch và review chiến lược.',
+        heading: '4. Position Sizing đúng — Công thức chuẩn',
+        body: 'Khối lượng lệnh = (Vốn × %Risk) ÷ Khoảng cách SL. Forex: Lot = (Equity × Risk%) ÷ (SL pips × Pip value). Crypto: Coin amount = (Equity × Risk%) ÷ (Entry − SL). Stocks: Shares = (Equity × Risk%) ÷ (Entry − SL). Luôn tính TRƯỚC khi vào lệnh — không bao giờ "ước lượng".',
+        example: 'EURUSD: $10,000 × 1% = $100 risk. SL 25 pips. Pip value với 1 lot = $10 → Lot size = $100 ÷ (25 × $10) = 0.4 lot.',
+      },
+      {
+        heading: '5. Kelly Criterion (đơn giản hoá) — Tính % tối ưu',
+        body: 'Công thức Kelly: f* = (W × R − (1−W)) ÷ R, trong đó W = winrate, R = avg win/avg loss. Ví dụ W=0.55, R=2 → f* = (0.55×2 − 0.45)/2 = 32.5%. Tuy nhiên trong thực tế, dùng Half-Kelly (16.25%) hoặc Quarter-Kelly (8%) để tránh drawdown khủng. Người mới: bỏ Kelly, dùng cố định 1%.',
+      },
+      {
+        heading: '6. Drawdown Control & Circuit Breaker',
+        body: 'Drawdown = % giảm từ đỉnh equity. Áp dụng quy tắc bậc thang: DD 5% — review từng lệnh. DD 10% — giảm size xuống 50%. DD 15% — giảm xuống 25%. DD 20% — DỪNG giao dịch, nghỉ ít nhất 1 tuần, viết lại playbook. Không bao giờ "gồng" để gỡ — đây là cách nhanh nhất cháy tài khoản.',
+        bullets: [
+          'Daily loss limit: -3% account → tắt máy ngay',
+          'Weekly loss limit: -6% → nghỉ trade tuần đó',
+          'Max consecutive losses: 5 lệnh → giảm size 50%',
+        ],
+      },
+      {
+        heading: '7. Portfolio Heat & Tương quan',
+        body: 'Portfolio Heat = tổng risk của các lệnh đang mở. Giới hạn ở 4–6% tổng tài khoản. Quan trọng: các cặp tương quan cao (EURUSD+GBPUSD, BTC+ETH+SOL) tính như MỘT lệnh vì nếu sai sẽ cùng SL. Đừng tự lừa mình rằng đa dạng hoá khi tất cả đều cùng chiều.',
+      },
+      {
+        heading: '8. Tâm lý + Quản lý vốn — Cặp đôi không thể tách',
+        body: 'Quản lý vốn tốt giúp tâm lý ổn định: bạn không sợ thua khi chỉ mất 1% vốn. Tâm lý ổn định giúp quản lý vốn tốt: bạn không revenge trade, không tăng size sau thắng. Hai yếu tố này tự củng cố lẫn nhau — đây là vòng lặp tích cực của trader chuyên nghiệp.',
       },
     ],
     takeaways: [
       'Bảo toàn vốn quan trọng hơn kiếm lợi nhuận',
-      'Không bao giờ thay đổi SL theo cảm xúc',
+      'Không bao giờ thay đổi SL theo cảm xúc — chỉ dời theo quy tắc trailing đã định trước',
       'Tâm lý ổn định = quản lý vốn tốt = giàu bền vững',
+      'Expectancy dương + risk 1%/lệnh + 100+ lệnh = lợi nhuận tất yếu theo xác suất',
+      'Drawdown 50% cần lời 100% để hoà vốn — ưu tiên phòng thủ hơn tấn công',
+    ],
+    checklist: [
+      'Đã tính position size theo công thức chuẩn TRƯỚC khi vào lệnh chưa?',
+      'Risk lệnh này có vượt 2% tài khoản không?',
+      'R:R có ≥ 1:2 không?',
+      'Tổng portfolio heat (gồm lệnh đang mở) có vượt 6% không?',
+      'Hôm nay đã hit daily loss limit -3% chưa? Nếu có → dừng.',
+    ],
+    faqs: [
+      {
+        question: 'Risk 1% có quá thận trọng không, tôi muốn lời nhanh hơn?',
+        answer: 'Risk cao = drawdown cao theo cấp số. Risk 5%/lệnh + thua 10 lệnh = mất 40% (cần lời 67% để hoà). Risk 1% + thua 10 lệnh = mất 9.6% (cần lời 10.6%). Toán học không cho phép bạn "lời nhanh" mà không gánh rủi ro huỷ diệt.',
+      },
+      {
+        question: 'Khi nào nên tăng risk lên 2–3%?',
+        answer: 'Sau ít nhất 100 lệnh thực tế có expectancy dương ổn định, max DD < 10%, và bạn vượt qua được tâm lý FOMO/revenge. Hầu hết trader chuyên không bao giờ vượt 2%.',
+      },
+      {
+        question: 'Có nên dùng Kelly Criterion không?',
+        answer: 'Kelly giả định bạn biết chính xác winrate và payoff — gần như không thể với trading. Dùng Half/Quarter-Kelly nếu có dữ liệu 200+ lệnh. Người mới: bỏ Kelly, cố định 1%/lệnh.',
+      },
     ],
   },
   {
