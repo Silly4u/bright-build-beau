@@ -116,20 +116,59 @@ const Workspace: React.FC = () => {
             })}
           </div>
 
-          {/* Quick TF switcher (pair switcher đã gộp xuống thanh chọn cặp trong Biểu đồ) */}
-          <div className="flex items-center gap-0.5 p-0.5 rounded-lg border border-white/10 bg-background/60">
-            {TIMEFRAMES.map((t) => (
-              <button
-                key={t}
-                onClick={() => setTf(t)}
-                className={`px-2 py-1 rounded text-[11px] font-mono transition ${
-                  tf === t ? 'bg-white/10 text-white' : 'text-white/55 hover:text-white'
-                }`}
-                aria-pressed={tf === t}
+          {/* Quick pair switcher */}
+          <div className="flex items-center gap-2">
+            {restrictPair && (
+              <span
+                title="Tab này chỉ hỗ trợ BTC/USDT và XAU/USDT"
+                className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-md bg-amber-400/10 text-amber-300/90 border border-amber-300/20"
               >
-                {t}
-              </button>
-            ))}
+                Chỉ dành cho Biểu đồ
+              </span>
+            )}
+            <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg bg-background/60 border ${
+              isPairUnsupported ? 'border-amber-400/30' : 'border-white/10'
+            }`}>
+              <span
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: activePairInfo.color }}
+                aria-hidden
+              />
+              <select
+                value={pair}
+                onChange={(e) => setPair(e.target.value)}
+                className="bg-transparent text-xs font-mono focus:outline-none cursor-pointer"
+                aria-label="Chọn cặp giao dịch"
+              >
+                {PAIRS.map((p) => {
+                  const supported = !restrictPair || ANALYSIS_PAIRS.has(p.symbol);
+                  return (
+                    <option
+                      key={p.symbol}
+                      value={p.symbol}
+                      disabled={!supported}
+                      className="bg-background"
+                    >
+                      {p.symbol}{!supported ? ' · chỉ Biểu đồ' : ''}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+            <div className="flex items-center gap-0.5 p-0.5 rounded-lg border border-white/10 bg-background/60">
+              {TIMEFRAMES.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTf(t)}
+                  className={`px-2 py-1 rounded text-[11px] font-mono transition ${
+                    tf === t ? 'bg-white/10 text-white' : 'text-white/55 hover:text-white'
+                  }`}
+                  aria-pressed={tf === t}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
