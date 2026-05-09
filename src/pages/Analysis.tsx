@@ -19,6 +19,7 @@ import Watchlist from '@/components/analysis/Watchlist';
 import PositionCalculator from '@/components/analysis/PositionCalculator';
 import TradeJournal from '@/components/analysis/TradeJournal';
 import PriceAlerts from '@/components/analysis/PriceAlerts';
+import SignalCard from '@/components/analysis/SignalCard';
 
 const TIMEFRAMES = ['M5', 'M15', 'M30', 'H1', 'H4', 'D1', 'W1'];
 
