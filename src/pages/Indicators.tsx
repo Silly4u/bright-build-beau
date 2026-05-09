@@ -597,6 +597,29 @@ const Indicators: React.FC = () => {
                 />
               )}
             </div>
+
+            {/* ── RISK DISCLAIMER (fills empty space below chart) ── */}
+            <div className="mt-2 border border-[#f6465d]/40 bg-gradient-to-br from-[#f6465d]/8 via-[#1a0f12] to-[#0b0e11] rounded-md overflow-hidden">
+              <div className="flex items-center gap-1.5 bg-[#f6465d]/15 px-2 py-1 border-b border-[#f6465d]/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#f6465d] animate-pulse" />
+                <span className="text-[9px] font-mono font-bold tracking-[0.2em] text-[#f6465d]">⚠️ CẢNH BÁO RỦI RO · DISCLAIMER</span>
+                <span className="ml-auto text-[8px] font-mono text-[#848e9c] uppercase tracking-wider">Đọc kỹ trước khi giao dịch</span>
+              </div>
+              <div className="p-2.5 space-y-1.5">
+                <p className="text-[10px] font-mono text-[#eaecef] leading-relaxed">
+                  <span className="text-[#fcd535] font-bold">Lưu ý kỹ:</span> Tất cả chỉ báo, tín hiệu và phân tích trên trang này <span className="text-[#f6465d] font-bold">KHÔNG PHẢI lời khuyên đầu tư</span>, chỉ là quan điểm và góc nhìn cá nhân của tác giả nhằm mục đích tham khảo & học hỏi.
+                </p>
+                <p className="text-[10px] font-mono text-[#848e9c] leading-relaxed">
+                  Giao dịch <span className="text-[#fcd535]">Crypto</span>, đặc biệt là <span className="text-[#fcd535]">Futures (phái sinh)</span>, luôn đi kèm với rủi ro biến động <span className="text-[#f6465d] font-bold">cực kỳ lớn</span> và có thể dẫn đến <span className="text-[#f6465d] font-bold">mất toàn bộ số vốn</span>.
+                </p>
+                <div className="flex items-center gap-2 pt-1 border-t border-[#2b3139]/60 mt-1">
+                  <span className="text-[14px]">🛡️</span>
+                  <p className="text-[10px] font-mono text-[#0ecb81] leading-relaxed flex-1">
+                    Bạn <span className="font-bold">phải tự chịu trách nhiệm</span> và tự quản trị rủi ro cho mọi quyết định xuống tiền của chính mình. <span className="text-[#848e9c]">DYOR · NFA · Trade safe.</span>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* ── RIGHT: Strength + AI + Top Movers + Triggers + Signals ── */}
