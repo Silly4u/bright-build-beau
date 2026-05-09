@@ -672,7 +672,7 @@ export const LESSONS: Lesson[] = [
           '5. Update Fib sau khi swing mới hình thành — đừng giữ Fib cũ "hi vọng"',
         ],
       },
-
+    ],
     takeaways: [
       'Vùng 0.5–0.618 (golden pocket) là entry tốt nhất trong xu hướng',
       'TP chuẩn theo Extension 1.618; SL dưới 0.786',
