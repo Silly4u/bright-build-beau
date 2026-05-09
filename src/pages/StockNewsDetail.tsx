@@ -153,8 +153,22 @@ const StockNewsDetail: React.FC = () => {
     );
   }
 
-  const paragraphs = (article.full_content || article.summary || '')
+  const blocks = (article.full_content || article.summary || '')
     .split(/\n\n+/).map(p => p.trim()).filter(Boolean);
+
+  // Detect markdown image: ![alt](url)
+  const imgRe = /^!\[([^\]]*)\]\(([^)]+)\)$/;
+  // Detect heading: ## title or ### title
+  const hRe = /^(#{2,4})\s+(.*)$/;
+  // Inline bold **text**
+  const renderInline = (text: string) => {
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((p, i) =>
+      /^\*\*[^*]+\*\*$/.test(p)
+        ? <strong key={i} className="text-foreground font-bold">{p.slice(2, -2)}</strong>
+        : <React.Fragment key={i}>{p}</React.Fragment>
+    );
+  };
 
   const isUp = quote ? quote.changePercent >= 0 : true;
 
