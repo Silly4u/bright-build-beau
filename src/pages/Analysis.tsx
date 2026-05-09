@@ -690,8 +690,6 @@ const Analysis: React.FC = () => {
 
           {/* ── RIGHT SIDEBAR: Watchlist + Events + Alerts + Signal Feed ── */}
           <div className="space-y-3">
-            {/* Watchlist */}
-            <Watchlist />
 
             {/* Event Reminders */}
             <EventReminders />
