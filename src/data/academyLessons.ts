@@ -53,60 +53,124 @@ export const LESSONS: Lesson[] = [
     category: 'Price Action',
     title: '34 Mẫu Nến Tiếp Diễn Bạn Phải Thuộc',
     excerpt:
-      'Bộ sưu tập đầy đủ các mẫu nến tiếp diễn xu hướng — từ Rising/Falling Three Methods, Tasuki Gap đến Three Line Strike, kèm cách giao dịch thực chiến.',
-    duration: '25 phút',
+      'Bộ sưu tập đầy đủ các mẫu nến tiếp diễn xu hướng — từ Rising/Falling Three Methods, Tasuki Gap đến Three Line Strike, kèm cách giao dịch thực chiến, win-rate thống kê và checklist xác nhận.',
+    duration: '40 phút',
     level: 'Trung cấp',
     cover: coverContinuation,
     intro:
-      'Mẫu nến tiếp diễn (continuation pattern) là tín hiệu cho biết xu hướng hiện tại có khả năng cao tiếp tục sau giai đoạn nghỉ ngắn. Khác với mẫu đảo chiều, các mẫu này xuất hiện GIỮA xu hướng và là cơ hội vào lệnh thuận xu hướng với rủi ro thấp. Bài học tổng hợp 34 mẫu nến tiếp diễn quan trọng nhất, chia theo nhóm để bạn dễ ghi nhớ và áp dụng.',
+      'Mẫu nến tiếp diễn (continuation pattern) là tín hiệu cho biết xu hướng hiện tại có khả năng cao tiếp tục sau giai đoạn nghỉ ngắn. Khác với mẫu đảo chiều, các mẫu này xuất hiện GIỮA xu hướng và là cơ hội vào lệnh thuận xu hướng với rủi ro thấp — đặc biệt phù hợp với chiến lược "buy the dip / sell the rally". Bài học tổng hợp 34 mẫu nến tiếp diễn quan trọng nhất, chia theo 6 nhóm để bạn dễ ghi nhớ và áp dụng.',
+    history:
+      'Mẫu nến Nhật Bản được Munehisa Homma — thương nhân gạo Sakata thế kỷ 18 — phát triển khi quan sát thị trường gạo Dojima. Năm 1991, Steve Nison giới thiệu kỹ thuật này tới phương Tây qua cuốn "Japanese Candlestick Charting Techniques", và Thomas Bulkowski sau đó kiểm chứng tỷ lệ thành công của 100+ mẫu nến trên 38.500 chart, công bố trong "Encyclopedia of Candlestick Charts" (2008) — nguồn dữ liệu thống kê được trích dẫn trong bài này.',
     sections: [
       {
         heading: '1. Rising Three Methods (Tăng Ba Bước)',
-        body: 'Một nến tăng dài, theo sau là 3 nến giảm nhỏ nằm gọn trong thân nến đầu tiên, kết thúc bằng một nến tăng mạnh phá đỉnh nến đầu. Đây là tín hiệu tiếp tục xu hướng tăng cực mạnh.',
+        body: 'Một nến tăng dài, theo sau là 3 nến giảm nhỏ nằm gọn trong thân nến đầu tiên, kết thúc bằng một nến tăng mạnh phá đỉnh nến đầu. Đây là tín hiệu tiếp tục xu hướng tăng cực mạnh — Bulkowski thống kê win-rate 72% trên timeframe Daily.',
         bullets: [
           'Vào lệnh BUY khi nến số 5 đóng cửa trên đỉnh nến số 1',
-          'Stop-loss đặt dưới đáy thấp nhất của 3 nến giảm',
-          'Take-profit theo độ dài nến số 1 nhân 1.5–2',
+          'Stop-loss đặt dưới đáy thấp nhất của 3 nến giảm (vùng "phòng tuyến" của bên mua)',
+          'Take-profit theo độ dài nến số 1 nhân 1.5–2 (measured move)',
+          'Volume nến số 5 phải lớn hơn TB 3 nến giảm để xác nhận lực mua quay lại',
         ],
+        example:
+          'BTC/USDT D1, 14/03/2024: nến tăng dài từ 65.500 → 71.200, sau đó 3 nến giảm về 68.800 (vẫn nằm trong thân nến đầu), nến thứ 5 đóng tại 73.500 phá đỉnh — entry cho mục tiêu 78.500 (đạt sau 4 phiên).',
+        pitfall:
+          'Nếu 1 trong 3 nến giảm có thân vượt khỏi đáy nến đầu → mẫu vô hiệu. Đừng cố ép pattern khi không đúng.',
       },
       {
         heading: '2. Falling Three Methods (Giảm Ba Bước)',
-        body: 'Phiên bản đảo ngược: nến giảm dài, 3 nến tăng nhỏ trong thân, rồi nến giảm mạnh phá đáy. Tiếp diễn xu hướng giảm.',
+        body: 'Phiên bản đảo ngược: nến giảm dài, 3 nến tăng nhỏ trong thân, rồi nến giảm mạnh phá đáy. Tiếp diễn xu hướng giảm — win-rate ~68%.',
         bullets: [
           'SELL khi nến số 5 đóng dưới đáy nến số 1',
           'Stop-loss trên đỉnh cao nhất của 3 nến tăng',
+          'Phù hợp nhất trong downtrend mạnh có EMA 50 dốc xuống',
         ],
       },
       {
         heading: '3. Upside / Downside Tasuki Gap',
         body: 'Mẫu 3 nến có khoảng trống (gap) cùng chiều xu hướng. Nến thứ 3 ngược chiều nhưng KHÔNG lấp đầy gap — báo hiệu xu hướng còn nguyên động lực.',
+        bullets: [
+          'Upside Tasuki: gap up + 1 nến tăng + 1 nến giảm chưa đóng gap → BUY tại close nến 3',
+          'Áp dụng nhiều ở cổ phiếu/forex sau gap mở phiên hơn là crypto 24/7',
+        ],
+        pitfall: 'Nếu nến số 3 lấp đầy gap → mẫu fail, ưu tiên thoát lệnh.',
       },
       {
         heading: '4. Bullish / Bearish Three Line Strike',
-        body: '3 nến cùng chiều xu hướng nối tiếp, sau đó 1 nến ngược chiều "nhấn chìm" cả 3 nến trước. Nghịch lý: đây vẫn là tín hiệu TIẾP DIỄN, vì nến ngược chiều chỉ là cú rũ bỏ trước khi đi tiếp.',
+        body: '3 nến cùng chiều xu hướng nối tiếp, sau đó 1 nến ngược chiều "nhấn chìm" cả 3 nến trước. Nghịch lý: đây vẫn là tín hiệu TIẾP DIỄN, vì nến ngược chiều chỉ là cú rũ bỏ trước khi đi tiếp. Bulkowski xếp đây là mẫu tiếp diễn có win-rate cao nhất — 84% trên Daily.',
+        example:
+          'NQ futures Q1/2024 nhiều lần xuất hiện Bullish Three Line Strike trên H4 — nến strike thường khớp với fake breakdown của EMA 20.',
       },
       {
         heading: '5. Mat Hold Pattern',
-        body: 'Tương tự Rising Three nhưng nến thứ 2 mở cửa với gap tăng — cho thấy lực mua mạnh hơn nhiều. Độ tin cậy cao hơn Rising Three Methods.',
+        body: 'Tương tự Rising Three nhưng nến thứ 2 mở cửa với gap tăng — cho thấy lực mua mạnh hơn nhiều. Độ tin cậy cao hơn Rising Three Methods (~78%).',
       },
       {
         heading: '6. Separating Lines',
         body: 'Hai nến cùng giá mở cửa nhưng ngược chiều. Nến thứ 2 cùng chiều xu hướng → tiếp diễn. Thường xuất hiện sau nhịp pullback nhẹ.',
       },
       {
-        heading: '7. Side-by-Side White Lines (trong xu hướng tăng)',
-        body: 'Hai nến tăng có cùng giá mở cửa và độ dài tương đương, xuất hiện sau gap tăng. Thị trường nghỉ chân ngang trước khi tiếp tục bứt phá.',
+        heading: '7. Side-by-Side White/Black Lines',
+        body: 'Hai nến cùng màu, cùng giá mở cửa và độ dài tương đương, xuất hiện sau gap. Thị trường nghỉ chân ngang trước khi tiếp tục bứt phá.',
+        bullets: [
+          'White Lines (xu hướng tăng): cả 2 nến tăng → xác nhận động lực còn',
+          'Black Lines (xu hướng giảm): cả 2 nến giảm → xác nhận lực bán',
+        ],
       },
       {
-        heading: '8. On-Neck / In-Neck / Thrusting Pattern (trong xu hướng giảm)',
-        body: 'Nhóm 3 mẫu nến có nến tăng nhỏ không thể lấy lại được vùng giảm trước đó → người mua yếu, xu hướng giảm tiếp diễn.',
+        heading: '8. On-Neck / In-Neck / Thrusting Pattern',
+        body: 'Nhóm 3 mẫu nến trong xu hướng giảm: nến tăng nhỏ không thể lấy lại được vùng giảm trước đó → người mua yếu, xu hướng giảm tiếp diễn.',
+        bullets: [
+          'On-Neck: nến tăng đóng cửa = đáy nến giảm trước (yếu nhất)',
+          'In-Neck: đóng cửa hơi cao hơn đáy (vẫn yếu)',
+          'Thrusting: đóng cửa giữa thân nến giảm trước (mạnh hơn nhưng vẫn tiếp diễn giảm nếu nằm dưới EMA 200)',
+        ],
+      },
+      {
+        heading: '9. Bullish/Bearish Flag & Pennant (mẫu nến tổng hợp)',
+        body: 'Sau một "cột cờ" tăng/giảm mạnh, giá tích luỹ trong kênh dốc ngược (flag) hoặc tam giác hội tụ (pennant). Khi giá phá vỡ theo hướng cờ → tiếp diễn với mục tiêu = chiều dài cột cờ.',
+        bullets: [
+          'Cột cờ phải có volume bùng nổ, nhịp tích luỹ volume cạn dần',
+          'Breakout phải kèm volume gấp đôi 20-bar SMA',
+          'Phù hợp đa khung từ M5 đến D1',
+        ],
+        example: 'ETH/USDT H1 27/02/2024: cột cờ +6%, tam giác pennant 8 giờ, breakout +5.8% (gần đúng measured move).',
+      },
+      {
+        heading: '10. Ascending / Descending Triangle (tổng hợp)',
+        body: 'Tam giác tăng (đỉnh ngang + đáy cao dần) thường tiếp diễn xu hướng tăng; tam giác giảm ngược lại. Win-rate 68–73% khi breakout đúng hướng xu hướng chính.',
       },
     ],
     takeaways: [
       'Mẫu tiếp diễn = cơ hội vào lệnh THUẬN xu hướng — luôn an toàn hơn bắt đảo chiều',
-      'Luôn xác nhận với volume: nến phá vỡ phải có volume tăng',
-      'Kết hợp với EMA 50/200 để lọc tín hiệu giả',
-      'Đặt SL kỷ luật, không bao giờ "hy vọng" — mẫu nến cũng có thể fail',
+      'Luôn xác nhận với volume: nến phá vỡ phải có volume tăng ít nhất 1.5x TB 20',
+      'Kết hợp với EMA 50/200 để lọc tín hiệu giả: chỉ trade pattern cùng chiều EMA 200',
+      'Đặt SL kỷ luật, không bao giờ "hy vọng" — Bulkowski chứng minh ngay cả mẫu mạnh nhất cũng fail 16–28%',
+      'Multi-timeframe: pattern trên H4 mạnh hơn 3x pattern trên M15',
+    ],
+    checklist: [
+      '☐ Xu hướng chính (EMA 200 D1) cùng chiều pattern?',
+      '☐ Volume xác nhận trên nến phá vỡ?',
+      '☐ Vùng SL có nằm xa quá 2x ATR không (rủi ro chấp nhận được)?',
+      '☐ R:R mục tiêu ≥ 1:2?',
+      '☐ Không có resistance/support lớn trong vòng 1x ATR phía trước?',
+      '☐ Kiểm tra news lịch kinh tế trong 4h tới?',
+    ],
+    faqs: [
+      {
+        question: 'Mẫu tiếp diễn có hoạt động tốt trên crypto không?',
+        answer:
+          'Có, đặc biệt Flag/Pennant và Three Methods cho kết quả rất tốt trên BTC/ETH H1–H4. Tuy nhiên Tasuki Gap ít xuất hiện do crypto giao dịch 24/7 hiếm có gap đáng kể.',
+      },
+      {
+        question: 'Khung thời gian nào tốt nhất?',
+        answer:
+          'D1 và H4 cho tín hiệu chất lượng nhất. M5–M15 nhiễu nhiều, chỉ phù hợp scalper có kinh nghiệm và đã có context từ khung lớn.',
+      },
+      {
+        question: 'Win-rate thấp dù pattern đẹp, tôi sai gì?',
+        answer:
+          'Kiểm tra 3 lỗi phổ biến: (1) trade ngược xu hướng EMA 200, (2) bỏ qua xác nhận volume, (3) entry quá xa vùng pattern khiến SL rộng → R:R tệ.',
+      },
     ],
   },
   {
