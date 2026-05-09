@@ -1115,7 +1115,46 @@ export const LESSONS: Lesson[] = [
       },
       {
         heading: '5. Kumo Twist & Kumo Breakout',
-        body: 'Kumo Twist: Senkou A và B đổi chỗ → cảnh báo đảo chiều xu hướng dài hạn. Kumo Breakout: giá phá Mây sau giai đoạn tích lũy → tín hiệu vào lệnh mạnh, R:R cao.',
+        body: 'Kumo Twist: Senkou A và B đổi chỗ trong tương lai → cảnh báo đảo chiều xu hướng dài hạn 26 phiên trước khi xảy ra (đặc tính dịch tiến của Senkou). Kumo Breakout: giá phá Mây sau giai đoạn tích lũy → tín hiệu vào lệnh mạnh, R:R cao.',
+        bullets: [
+          'Twist trong Kumo tương lai = "lá cờ cảnh báo" sớm nhất của Ichimoku',
+          'Breakout: chờ 1 nến xác nhận đóng cửa hoàn toàn ngoài Mây',
+          'Volume tại nến breakout phải ≥ 1.5× SMA20 volume',
+        ],
+        example:
+          'BTC D1 10/2023: Kumo Twist xanh xuất hiện trong tương lai khi giá còn dưới Mây ở 28k. Sau 18 ngày, giá phá Mây tại 31k → entry BUY chuẩn, đạt 44k trong 5 tuần.',
+      },
+      {
+        heading: '6. Chikou Span — "Quá khứ" xác nhận hiện tại',
+        body: 'Chikou Span là giá đóng cửa hôm nay dịch lùi 26 phiên. Quy tắc: Chikou phải ở khoảng "trống" — không bị nến quá khứ cản → xác nhận xu hướng "trong sạch".',
+        bullets: [
+          'Chikou trên giá quá khứ + tách rời rõ → bullish strong',
+          'Chikou dưới giá quá khứ + tách rời → bearish strong',
+          'Chikou bị "kẹt" vào nến quá khứ → tín hiệu yếu, hoãn entry',
+        ],
+        pitfall:
+          '90% trader bỏ qua Chikou — đây chính là "lá chắn" lọc fake breakout. Bộ Hosoda thiết kế Chikou để "double confirm" mọi setup.',
+      },
+      {
+        heading: '7. TK Cross — Phân loại 3 cấp độ',
+        body: 'Không phải mọi TK Cross đều giá trị như nhau. Phân loại theo vị trí so với Mây:',
+        bullets: [
+          'Strong Cross (cấp 1): Cross XẢY RA TRÊN Mây (cho BUY) — winrate ~75%',
+          'Neutral Cross (cấp 2): Cross XẢY RA TRONG Mây — winrate ~55%, chờ confirm',
+          'Weak Cross (cấp 3): Cross XẢY RA DƯỚI Mây — winrate ~35%, chỉ trade nếu có context khác mạnh',
+        ],
+      },
+      {
+        heading: '8. Hệ thống "Ichimoku Pure" — không cần chỉ báo khác',
+        body: 'Quy trình 6 bước trade chuẩn Ichimoku Pure:',
+        bullets: [
+          '1. Xác định xu hướng D1 qua vị trí giá vs Mây',
+          '2. Chuyển xuống H4: chờ TK Cross cùng chiều xu hướng D1',
+          '3. Đếm 5/5 điều kiện (TK cross + trên/dưới Mây + Chikou + Mây tương lai)',
+          '4. Entry tại nến đóng cửa xác nhận, SL dưới/trên Kijun-sen',
+          '5. TP1 tại Mây tiếp theo, TP2 tại extension 1.618 swing trước',
+          '6. Trail SL theo Kijun-sen: thoát khi giá đóng cửa qua Kijun',
+        ],
       },
     ],
     takeaways: [
