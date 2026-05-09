@@ -15,7 +15,7 @@ import { Sparkles, RefreshCw, History } from 'lucide-react';
 import MorningBriefBanner from '@/components/analysis/MorningBriefBanner';
 import StreakBadge from '@/components/analysis/StreakBadge';
 import EventReminders from '@/components/analysis/EventReminders';
-import Watchlist from '@/components/analysis/Watchlist';
+
 import PositionCalculator from '@/components/analysis/PositionCalculator';
 import TradeJournal from '@/components/analysis/TradeJournal';
 import PriceAlerts from '@/components/analysis/PriceAlerts';
@@ -690,8 +690,6 @@ const Analysis: React.FC = () => {
 
           {/* ── RIGHT SIDEBAR: Watchlist + Events + Alerts + Signal Feed ── */}
           <div className="space-y-3">
-            {/* Watchlist */}
-            <Watchlist />
 
             {/* Event Reminders */}
             <EventReminders />
