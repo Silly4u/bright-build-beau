@@ -109,7 +109,7 @@ function detectAt(
       conditions.push({ key: 'momentum_down', msg: `${sym} giảm ${Math.abs(pct).toFixed(2)}% trong 2 nến — momentum giảm mạnh` });
     }
   }
-  if (volRatio > 1.5 && Math.abs(curr.close - curr.open) / curr.open > 0.002) {
+  if (volRatio >= 1.5 && volRatio <= 2 && Math.abs(curr.close - curr.open) / curr.open > 0.002) {
     const dir = curr.close > curr.open ? 'tăng' : 'giảm';
     conditions.push({ key: 'volume_spike', msg: `Volume spike ${sym} (${(volRatio * 100).toFixed(0)}%) + nến ${dir} — xác nhận xu hướng` });
   }
